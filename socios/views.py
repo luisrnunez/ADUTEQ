@@ -5,5 +5,5 @@ from django.shortcuts import render
 def login(request):
     return render(request,"index.html")
 
-def about(request):
-    return HttpResponse("QUEMAS")
+def Principal(request):
+    return render(request,"emp_principal.html")

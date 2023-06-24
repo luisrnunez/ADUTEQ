@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ADUTEQ - Principal></title>
+    <link rel="stylesheet" href="{% static 'css/estilo_menu_desplegable.css' %}" />
+   
+</head>
+<body>
+    <div class="sidebar" >
+        <div class="logo">
+            <div class="profile-lg">
+                <a href="/html/emp_principal.html"><img src="{% static 'img/aduteq.png' %} " alt="ADUTEQ Logo" ></a>   
+            </div>
+            
+        </div>
+        <ul>
+            <li><a href="/html/emp_socios.html"><img src="{% static 'img/icon-socios.png' %}"alt="Socios" width="30px">&nbsp<span> Socios</span></a></li>
+            <li><a href="#"><img src="{% static 'img/icon-proveedores.png' %} " alt="Proveedores" width="30px">&nbsp<span> Proveedores</span></a></li>
+            <li><a href="#"><img src=" {% static 'img/icon-actividades.png' %}" alt="Actividades" width="30px">&nbsp<span> Actividades</span></a></li>
+            <li><a href="#"><img src=" {% static 'img/icon-reportes.png' %}" alt="Reportes" width="30px">&nbsp<span> Reportes</span></a></li>
+            <li><a href="#"><img src=" {% static 'img/icon-cuenta.png' %} " alt="Cuenta" width="30px">&nbsp<span> Cuenta</span></a></li>
+        </ul>
+        <div class="profile">
+            <img src="{% static 'img/icon-usuarios.png' %}" alt="Foto de perfil">&nbsp
+            <span>Usuario</span>
+        </div>
+    </div>
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 6.5rem;">
+        <div class="section">
+            <div class="logo">
+                <img src="{% static 'img/icon-aduteq.png' %} "  alt="ADUTEQ Logo">
+            </div>
+
+        </div>
+        <div class="section">
+            <h1>ADUTEQ</h1>      
+        </div>
+        <a href="/html/index.html">
+            <div class="add-socio-btn" style="position: absolute; right: 20px; bottom: 10px;">
+           
+                <span>Salir</span>
+            </div>
+        </a>
+       
+        <!-- Resto del contenido de la página -->
+    </div>
+</body>
+</html>
