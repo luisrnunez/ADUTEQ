@@ -1,0 +1,151 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.sidebar {
+    width: 80px;
+    background-color: #34b234;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: width 0.3s;
+}
+
+.sidebar:hover {
+    width: 200px;
+}
+
+.sidebar .logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar .logo img {
+
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    margin-bottom: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: margin-left 0.3s;
+}
+
+.sidebar:hover li {
+    margin-left: 0;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: #62c562;
+}
+
+.sidebar .profile {
+    position: fixed;
+    bottom: 20px;
+
+    display: flex;
+    align-items: center;
+    transition: width 0.3s;
+}
+
+.sidebar:hover .profile {
+    width: 200px;
+}
+
+.sidebar .profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 20px;
+    transition: width 0.3s, height 0.3s;
+}
+
+.sidebar:hover .profile img {
+    width: 50px;
+    height: 50px;
+}
+
+.sidebar .profile span {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.sidebar:hover .profile-lg img {
+    width: auto;
+    height: 100px;
+}
+
+.sidebar .profile-lg img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+
+    transition: width 0.3s, height 0.3s;
+}
+
+.content-menu {
+    margin-left: 75px;
+    padding: 10px;
+
+}
+
+.section {
+    margin-bottom: 10px;
+    text-align: center;
+
+}
+
+.section h1 {
+    font-size: 70px;
+    font-weight: bold;
+    color: #34b234;
+    margin-bottom: 10px;
+}
+
+.section .logo img {
+    width: 200px;
+    height: auto;
+    align-items: end;
+}
+
+.add-socio-btn {
+    padding: 5px 10px;
+    background-color: #34b234;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add-socio-btn:hover {
+    background-color: #62c562;
+}
+
+.add-socio-btn {
+    margin-bottom: 10px;
+}

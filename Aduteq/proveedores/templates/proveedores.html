@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ADUTEQ - Proveedores</title>
+    
+</head>
+
+<body>
+
+    
+    {% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu">
+
+        <div class="header">
+            <h1>Proveedores</h1>
+        </div>
+
+        <div class="socios-content ">
+            <a href="/aggproveedor"> <button class="add-socio-btn"> Agregar Nuevo Proveedor</button></a>
+            <div class="search-container">
+                <input type="text" id="barbusqueda" placeholder="Buscar">
+                <button type="submit">Buscar</button>
+                <div id="searchResults"></div>
+            </div>
+
+
+
+            <!--barra de busqueda-->
+            <!---
+            <div class="input-group">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <button type="button" class="btn btn-outline-primary">search</button>
+            </div>-->
+
+            <table class="socios-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Telefono</th>
+                        <th>Dirección</th>
+                        <th>RUC</th>
+                        <th>Comisión</th>
+                        <th>Estado</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proveedor in proveedores%}
+                    <tr>
+                        <td>{{proveedor.nombre}}</td>
+                        <td>{{proveedor.telefono}}</td>
+                        <td>{{proveedor.direccion}}</td>
+                        <td>{{proveedor.RUC}}</td>
+                        <td>{{proveedor.comision}}</td>
+                        {% if proveedor.estado == True %}
+                        <td><button class="green-button">
+                                <span class="visto-icon"></span>
+                                Activo
+                            </button></td>
+                        {% else %}
+                        <td><button class="red-button">
+                            <span class="no-visto-icon"></span> Inactivo
+
+                        </button></td>
+                        {% endif %}
+
+                        <!--{% if proveedor.estado == False %}
+                        <td>Desabilitado</td>
+                        {% else %}
+                        <td>Habilitado</td>
+
+                        {% endif %}-->
+                        <td class="actions">
+                            <!--<button class="edit-btn">Editar</button>
+                            <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
+                            <a style="text-decoration: none;" class="edit-btn" href="/editProveedor/{{proveedor.id}}">Editar</a>
+                            <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
+                            <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarProveedor({{proveedor.id}})">Eliminar</a>
+                        </td>
+                        <!--<td>{{proveedor.id}}</td>-->
+                    </tr>
+                    {% endfor %}
+                    <!-- Agrega más filas con información de socios aquí -->
+                </tbody>
+            </table>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    {% endblock %}
+</body>
+
+</html>
