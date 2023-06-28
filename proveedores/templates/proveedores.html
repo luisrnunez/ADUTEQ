@@ -1,13 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'base1.html' %}
 {% load static %}
-
-{% block content %}
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>ADUTEQ - Socios</title>
-
+    <title>ADUTEQ - Proveedores</title>
     <style>
         body {
             margin: 0;
@@ -125,7 +122,7 @@
         .search-form {
             position: absolute;
 
-            display:block;
+            display: block;
             align-items: center;
         }
 
@@ -149,7 +146,7 @@
         .search-form button {
             background-color: #ECB932;
             color: #fff;
-          
+
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
@@ -164,139 +161,97 @@
 
 <body>
 
+
+    {% block content %}
+    <!-- Aquí va el contenido de la página -->
     <div class="content-menu">
 
-        <div class="header">
-            <h1>Socios</h1>
+        <div class="header" style="border-radius: 0;">
+            <h1>Proveedores</h1>
         </div>
-        <div class="socios-content ">
-            <div style="display:flex;">
-                <a href="{% url 'agg_socios' %}" > <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
-                <form method="GET" action="{% url 'buscar_socios' %}">
-                    <div class="search-form">
-                  
-                        <select id="criterio" name="criterio">
-                            <option value="nombres">Nombre</option>
-                            <option value="apellidos">Apellido</option>
-                            <option value="categoria">Categoría</option>
-                            <option value="facultad">Facultad</option>
-                            <option value="cedula">Cédula</option>
-                            <option value="1">Activo</option>
-                            <option value="0">Inactivo</option>
-                        </select>
-                        <input type="text" id="valor" name="valor">
-                        <a href="/buscar_socios"><button type="submit">Buscar</button></a>
-                        
-                    </div>
-    
-    
-                  </form>
-                
-            </div>
 
+        <div class="socios-content ">
+            <div style="display:inline-flex; position: relative;">
+                <a href="/aggproveedor"> <button class="add-socio-btn"> Agregar Nuevo Proveedor</button></a>
+                <div class="search-form" style="margin-left: 6px; margin-block-end:auto;">
+                    <input type="text" id="barbusqueda" placeholder="Buscar" >
+                    <button class="add-socio-btn" type="submit">Buscar</button>
+              
+                </div>
+            </div>
+           
+
+
+
+
+            <!--barra de busqueda-->
+            <!---
+            <div class="input-group">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <button type="button" class="btn btn-outline-primary">search</button>
+            </div>-->
 
             <table class="socios-table">
                 <thead>
                     <tr>
-                        <th>Cedula</th>
-                        <th>Nombres</th>
-                        <th>Apellidos</th>
+                        <th>Nombre</th>
+                        <th>Telefono</th>
                         <th>Dirección</th>
-                        <th>Teléfono</th>
-                        <th>Correo Electrónico</th>
-                        <th>Categoria</th>
+                        <th>RUC</th>
+                        <th>Comisión</th>
                         <th>Estado</th>
                         <th>Editar</th>
                         <th>Eliminar</th>
-
                     </tr>
                 </thead>
                 <tbody>
-                    {% for socio in socios %}
+                    {% for proveedor in proveedores%}
                     <tr>
-                        <td>{{ socio.cedula }}</td>
-                        <td>{{ socio.nombres }}</td>
-                        <td>{{ socio.apellidos }}</td>
-                        <td>{{ socio.direccion_domiciliaria }}</td>
-                        <td>{{ socio.numero_telefonico }}</td>
-                        <td>{{ socio.correo_electronico }}</td>
-                        <td>{{ socio.categoria }}</td>
+                        <td>{{proveedor.nombre}}</td>
+                        <td>{{proveedor.telefono}}</td>
+                        <td>{{proveedor.direccion}}</td>
+                        <td>{{proveedor.RUC}}</td>
+                        <td>{{proveedor.comision}}</td>
                         <td>
-                            {% if socio.activo %}
+                            {% if proveedor.estado %}
                             <button class="green-button">
                                 <span class="visto-icon"></span>
                                 Activo
                             </button>
                             {% else %}
                             <button class="red-button">
-                                <span class="no-visto-icon"></span> Inactivo
+                                <span class="no-visto-icon"> Inactivo</span>
 
                             </button>
                             {% endif %}
 
                         </td>
-                        <td>
-                            <button class="edit-btn"
-                                onclick="confirmarEdicion('{{ socio.id }}','{{ socio.nombres }}','{{ socio.apellidos }}')">
-                                Editar
-                            </button></a>
+                        <td class="actions">
+                            <!--<button class="edit-btn">Editar</button>
+                            <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
+                            <a style="text-decoration: none;"  href="/editProveedor/{{proveedor.id}}">
+                                <button class="edit-btn">
+                                    Editar
+                                </button></a>
+                            </a>
+                        </td> <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
+                       <td>  <a style="text-decoration: none;"  href="#"
+                        onclick="eliminarProveedor('{{proveedor.id}}')"><button class="delete-btn">
+                            Eliminar
+                        </button></a></td>
+                      
 
-
-                        </td>
-                        <td>
-
-                            <button class="delete-btn"
-                                onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.nombres }}','{{ socio.apellidos }}')">
-                                Eliminar
-                            </button>
-
-
-                        </td>
+                        <!--<td>{{proveedor.id}}</td>-->
                     </tr>
                     {% endfor %}
+                    <!-- Agrega más filas con información de socios aquí -->
                 </tbody>
             </table>
         </div>
         <!-- Resto del contenido de la página -->
     </div>
-
-    <script>
-        function confirmarEdicion(socioId, socioNombre, socioApellido) {
-            swal({
-                title: '¿Estás seguro?',
-                text: 'Deseas editar al soci@ ' + socioNombre + ' ' + socioApellido,
-                icon: 'warning',
-                buttons: { si: true, cancel: "Cancelar" },
-                dangerMode: true,
-            }).then((willDelete) => {
-                if (willDelete) {
-                    // El usuario ha confirmado la edición, redirigir a la página de edición
-                    window.location.href = '/editar_socio/' + socioId + '/';
-                }
-            });
-        }
-    </script>
-
-    <script>
-        function confirmarEliminacion(socioId, socioNombre, socioApellido) {
-            swal({
-                title: '¿Estás seguro?',
-                text: 'Dar de baja de Aduteq al soci@ ' + socioNombre + ' ' + socioApellido,
-                icon: 'warning',
-                buttons: { si: true, cancel: "Cancelar" },
-                dangerMode: true,
-            })
-                .then((willDelete) => {
-                    if (willDelete) {
-                        window.location.href = '/eliminar_socio/' + socioId + '/';
-                    }
-
-                });
-
-
-        }
-    </script>
+    {% endblock %}
 </body>
 
 </html>
-{% endblock %}

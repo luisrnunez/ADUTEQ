@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ADUTEQ - Actividades</title>
+  <link rel="stylesheet" href="{% static 'css/estilo_base.css' %}" />
+  <style>
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      height: 100vh;
+    }
+
+    .row {
+      width: 55%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .boton {
+      flex-basis: 33.33%;
+      height: 33.33vh;
+      background-color: #34b234;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s ease;
+      margin-right: 20px;
+    }
+
+    .boton:hover {
+      transform: scale(1.1);
+    }
+
+    .imagen {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+    }
+    body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="content-menu">
+
+
+    <div class="container" style="align-items: center; justify-content: center;">
+      <div class="row">
+        <button class="boton">
+          <img src="{% static 'img/icon-cuenta.png' %}" alt="Imagen" class="imagen">
+          <h2>PAGOS</h2>
+        </button>
+        <button class="boton">
+          <img src="{% static 'img/img_descuentos.jpg' %}" alt="Imagen" class="imagen">
+          <h2>DESCUENTOS</h2>
+        </button> <button class="boton">
+          <img src="{% static 'img/img_ayudas.jpg' %}" alt="Imagen" class="imagen">
+          <h2>AYUDAS ECONOMICAS</h2>
+
+        </button>
+      </div>
+      <div class="row">
+        </button> <button class="boton">
+          <img src="{% static 'img/img_prestamos.jpeg.png' %}" alt="Imagen" class="imagen">
+          <h2>PRESTAMOS</h2>
+        </button> <button class="boton">
+          <img src="{% static 'img/img_tesoreria.jpg.jpg' %}" alt="Imagen" class="imagen">
+          <h2>TESORERIA</h2>
+        </button> <button class="boton">
+          <img src="{% static 'img/img-ajustes.png' %}" alt="Imagen" class="imagen">
+          <h2>AJUSTES</h2>
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}

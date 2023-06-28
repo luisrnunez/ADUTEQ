@@ -14,8 +14,10 @@ def login_(request):
 
 
 def Principal(request):
-    return render(request, "emp_principal.html")
+    return render(request, "base.html")
 
+def PanelActividades(request):
+    return render(request, "emp_actividades.html")
 
 def Autenticacion_usuarios(request):
     if request.method == 'POST':

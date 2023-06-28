@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.login_),
     path('principal/', views.Principal, name='principal'),
     path('login/', views.Autenticacion_usuarios),
+    path('actividades/', views.PanelActividades,name='actividades'),
     path('recuperacion/', views.Recuperar_cuenta),
     path('socios/', views.ListaSocios, name='listar_socios'),
     path('socios/agg/', views.AggSocio, name='agg_socios'),
