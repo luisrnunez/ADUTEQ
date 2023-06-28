@@ -9,7 +9,7 @@ body {
     background-color: #34b234;
     color: #fff;
     height: 100vh;
-    position: fixed;
+    position: absolute;
     left: 0;
     top: 0;
     padding: 20px;

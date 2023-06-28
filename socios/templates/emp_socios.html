@@ -69,6 +69,7 @@
             color: #fff;
             border: none;
             cursor: pointer;
+            border-radius: 4px;
             transition: background-color 0.3s;
         }
 
@@ -84,11 +85,12 @@
 
         /* Estilos para el botón verde */
         .green-button {
-            background-color: green;
+            background-color: #62c562;
             color: white;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
+            border-radius: 4px;
         }
 
         /* Estilos para el botón rojo */
@@ -99,6 +101,7 @@
             padding: 5px 10px;
             cursor: pointer;
             width: max-content;
+            border-radius: 4px;
         }
 
         /* Estilos para el icono de visto */
@@ -118,6 +121,43 @@
             background-color: white;
             margin-right: 5px;
         }
+
+        .search-form {
+            position: absolute;
+
+            display:block;
+            align-items: center;
+        }
+
+        .search-form label {
+            margin-right: 5px;
+        }
+
+        .search-form select,
+        .search-form input[type="text"],
+        .search-form button {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        .search-form select {
+            margin-right: 5px;
+        }
+
+        .search-form button {
+            background-color: #ECB932;
+            color: #fff;
+          
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-form button:hover {
+            background-color: #62c562;
+        }
     </style>
 
 </head>
@@ -130,7 +170,29 @@
             <h1>Socios</h1>
         </div>
         <div class="socios-content ">
-            <a href="agg"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
+            <div style="display:flex;">
+                <a href="{% url 'agg_socios' %}" > <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
+                <form method="GET" action="{% url 'buscar_socios' %}">
+                    <div class="search-form">
+                  
+                        <select id="criterio" name="criterio">
+                            <option value="nombres">Nombre</option>
+                            <option value="apellidos">Apellido</option>
+                            <option value="categoria">Categoría</option>
+                            <option value="facultad">Facultad</option>
+                            <option value="cedula">Cédula</option>
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                        <input type="text" id="valor" name="valor">
+                        <a href="/buscar_socios"><button type="submit">Buscar</button></a>
+                        
+                    </div>
+    
+    
+                  </form>
+                
+            </div>
 
 
             <table class="socios-table">
