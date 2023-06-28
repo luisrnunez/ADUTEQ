@@ -1,0 +1,5 @@
+{% for resultado in resultados %}
+    <a href="#">{{resultado.nombre}}</a>
+{% empty %}
+    <div>No se encontraron resultados.</div>
+{% endfor %}

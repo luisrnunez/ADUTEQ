@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ADUTEQ - Socios</title>
+
+</head>
+
+<body>
+
+{% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu">
+
+        <div class="header">
+            <h1>Editar Proveedor</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form id="editarproveedor" action="/editarPro/" method="POST">{% csrf_token %}
+                    <!--utilizada para obtener id-->
+                    <input value="{{proveedor.id}}" type="number" id="id" name="id" required hidden>
+
+                    <label for="nombre">Nombre:</label>
+                    <input oninput="verificarExistenciaNombre(this.value)" value="{{proveedor.nombre}}" type="text" id="nombre" placeholder="Fulanito" name="nombre" maxlength="50" required>
+                        <p style="font-size: 13px; color: #fa3c3c;" id="alerta"></p>
+
+                    <label for="telefono">Télefono:</label>
+                    <input maxlength="10" oninput="validarEspacios(this)" value="{{proveedor.telefono}}" type="text" id="telefono" name="telefono" required>
+
+                    <label for="ruc">RUC:</label>
+                    <input maxlength="13" oninput="validarEspacios(this)" value="{{proveedor.RUC}}" type="number" id="ruc" name="ruc" placeholder="6875645356543"
+                        required>
+
+                    <label for="direccion">Dirección:</label>
+                    <input value="{{proveedor.direccion}}" type="text" maxlength="100" id="direccion" name="direccion"
+                        placeholder="0987654223" required>
+
+                    <label for="foto">Comisión:</label>
+                    <input oninput="validarEspacios(this)" value="{{proveedor.comision}}" type="number" step="any" id="comision" name="comision"
+                        placeholder="25.00" required>
+                    <!--<input type="file" id="foto" name="foto" accept="image/*">-->
+
+                    <label for="foto">Estado:</label>
+                    <select value="{{proveedor.estado}}" name="estado" id="estado" aria-placeholder="seleccione estado">
+                        <option value="0">Desabilitado</option>
+                        <option value="1">Habilitado</option>
+                    </select>
+
+
+                    <input type="submit" value="Guardar cambios">
+                    <input type="submit" id="cancel" value="Cancelar">
+                </form>
+            </div>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    {% endblock %}
+</body>
+
+</html>
