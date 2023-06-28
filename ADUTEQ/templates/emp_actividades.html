@@ -48,13 +48,13 @@
     h2 {
       margin: 0;
     }
-    body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-}
 
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 
@@ -64,28 +64,43 @@
 
     <div class="container" style="align-items: center; justify-content: center;">
       <div class="row">
+
         <button class="boton">
-          <img src="{% static 'img/icon-cuenta.png' %}" alt="Imagen" class="imagen">
+          <a href="/listar_pagos">
+            <img src="{% static 'img/icon-cuenta.png' %}" alt="Imagen" class="imagen">
+
+          </a>
           <h2>PAGOS</h2>
         </button>
-        <button class="boton">
-          <img src="{% static 'img/img_descuentos.jpg' %}" alt="Imagen" class="imagen">
-          <h2>DESCUENTOS</h2>
-        </button> <button class="boton">
-          <img src="{% static 'img/img_ayudas.jpg' %}" alt="Imagen" class="imagen">
-          <h2>AYUDAS ECONOMICAS</h2>
 
+
+        <button class="boton">
+          <a href="/categorias">
+            <img src="{% static 'img/icon-proveedores.png' %}" alt="Imagen" class="imagen">
+
+          </a>
+          <h2>CATEGORIAS</h2>
+        </button>
+
+
+
+        <button class="boton">
+          <a href="/motivos">
+            <img src="{% static 'img/icon-socios.png' %}" alt="Imagen" class="imagen">
+
+          </a>
+          <h2>AYUDAS ECONOMICAS</h2>
         </button>
       </div>
       <div class="row">
         </button> <button class="boton">
-          <img src="{% static 'img/img_prestamos.jpeg.png' %}" alt="Imagen" class="imagen">
+          <img src="{% static 'img/icon-reportes.png' %}" alt="Imagen" class="imagen">
           <h2>PRESTAMOS</h2>
         </button> <button class="boton">
-          <img src="{% static 'img/img_tesoreria.jpg.jpg' %}" alt="Imagen" class="imagen">
+          <img src="{% static 'img/icon-cuenta.png' %}" alt="Imagen" class="imagen">
           <h2>TESORERIA</h2>
         </button> <button class="boton">
-          <img src="{% static 'img/img-ajustes.png' %}" alt="Imagen" class="imagen">
+          <img src="{% static 'img/icon-cuenta.png' %}" alt="Imagen" class="imagen">
           <h2>AJUSTES</h2>
       </div>
     </div>
