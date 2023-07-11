@@ -15,7 +15,7 @@ urlpatterns = [
     path('eliminarmotivo/<int:codigo>', views.deleteMotivo),
 
 
-    path('verayudas/', views.viewayudas),
+    path('verayudas/', views.viewayudas,name='lista_ayudas'),
     path('formAggAyuda/', views.formRegistroAyuda),
     path('aggAyuda/', views.aggAyuda),
 

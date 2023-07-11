@@ -43,7 +43,14 @@ INSTALLED_APPS = [
     'proveedores',
     'Pagos',
     'Categorias',
-    'ayudas_econ'
+    'ayudas_econ',
+    'PagosProveedor',
+    'Empleados',
+    'recuperarcontraseña',
+    'informes',
+    'Prestamos',
+
+
 ]
 
 MIDDLEWARE = [
@@ -83,8 +90,12 @@ WSGI_APPLICATION = 'ADUTEQ.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "dbaduteq",
+        "USER": "postgres",
+        "PASSWORD": "root",
+        "HOST": "127.0.0.1",
+        "PORT":"5432",
     }
 }
  
@@ -129,6 +140,16 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+LOGIN_URL = '/login'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'ADUTEQ/static')
+]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'ADUTEQ/media')
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -137,3 +158,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 MESSAGE_STORAGE= 'django.contrib.messages.storage.cookie.CookieStorage'
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+]
+
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.googlemail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'elenviacorreos28@gmail.com'
+EMAIL_HOST_PASSWORD = 'vyartmmmrtyoxlbs'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

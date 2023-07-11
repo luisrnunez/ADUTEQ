@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <title>Informe de gastos mensuales</title>
+
+    <style>
+      .table-gastos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-gastos th, .table-gastos td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.table-gastos th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.table-gastos tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.table-gastos tr:hover {
+  background-color: #e6e6e6;
+}
+    </style>
+  </head>
+  <body style="background-color: #f7f7f7; font-family: Arial, sans-serif;">
+
+    <table style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 20px;">
+          <h1 style="color: #32CD32; margin-top: 0;">¡Hola!</h1>
+          <p style="font-size: 16px; color: #333333;">¡Gracias por utilizar nuestros servicios! Aquí está el resumen de tus gastos:</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 20px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background-color: #34b234; color: #ffffff;">
+              <tr>
+                <th style="padding: 10px;">Proveedor</th>
+                <th style="padding: 10px;">Monto</th>
+                <th style="padding: 10px;">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for gasto in gastos %}
+              <tr>
+                <td style="padding: 10px;">{{ gasto.proveedor.nombre }}</td>
+                <td style="padding: 10px;">{{ gasto.consumo_total }}</td>
+                <td style="padding: 10px;">{{ gasto.fecha_consumo }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+  </body>
+  
+</html>

@@ -4,13 +4,22 @@ from django.contrib import messages
 from django.db.models import Q
 from django.views import View
 from django.http import JsonResponse
+from django.core.paginator import Paginator, PageNotAnInteger
 
 # Create your views here.
 #metodo para mostrar todos los proveedores
 def proveedor(request):
-    proveedores=Proveedor.objects.all()
+    proveedores=Proveedor.objects.all().order_by('nombre')
+    items_por_pagina = 10
+
+    paginator = Paginator(proveedores, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        proveedores_paginados = paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        proveedores_paginados = paginator.get_page(1)
     return render(request,'proveedores.html', {
-        'proveedores': proveedores
+        'proveedores': proveedores_paginados
     })
 
 def formRegistro(request):
@@ -46,8 +55,14 @@ def aggProveedor(request):
                 'message': 'Ya existe un proveedor registrado con este RUC'
             }
             else:
-                proveedor.save()
-                response = {
+                if(userexistl(request.POST['telefono'])):
+                    response = {
+                    'status': 'error',
+                    'message': 'Ya existe un proveedor registrado con este telefono'
+                }
+                else:
+                    proveedor.save()
+                    response = {
                     'status': 'success',
                     'message': 'Proveedor registrado correctamente.'
                     }
@@ -81,6 +96,13 @@ def userexistr(ruc):
     except Proveedor.DoesNotExist:
         return False   
 
+def userexistl(telefono):
+    try:
+        proveedor = Proveedor.objects.get(telefono=telefono)
+        return True
+    except Proveedor.DoesNotExist:
+        return False  
+
 #metodos editar proveedores
 def editProveedor(request, codigo):
     proveedor=Proveedor.objects.get(id=codigo)
@@ -103,7 +125,6 @@ def editarPro(request):
         response = {
             'status': 'error',
             'message': 'Ya existe un proveedor registrado con este RUC'
-      
           }
     elif Proveedor.objects.exclude(id=request.POST.get('id')).filter(nombre=nombrep).exists():
         response = {
@@ -117,6 +138,7 @@ def editarPro(request):
             'message': 'Ya existe un proveedor registrado con este télefono'
       
           }
+          
 
     else:
         proveedor.nombre=nombrep
@@ -133,9 +155,33 @@ def editarPro(request):
     return JsonResponse(response)
 
 #metodo para eliminar a los proveedores
-def deleteProveedor(request, codigo):
-    proveedor=Proveedor.objects.get(id=codigo)
-    proveedor.delete()
+def deleteProveedor(request, codigo, estado):
+    #proveedor=Proveedor.objects.get(id=codigo)
+    #proveedor.delete()
+    #return redirect('/proveedores')
+
+    proveedor = get_object_or_404(Proveedor, id=codigo)
+
+    if request.method == 'GET':
+        # Cambiar el estado del proveedor a inactivo
+        print (estado)
+        if estado == 0:
+            proveedor.estado = True
+            proveedor.save()
+            messages.success(
+            request, 'El proveedor se habilitado exitosamente.')
+        else:
+            proveedor.estado = False
+            proveedor.save()
+            messages.success(
+            request, 'El proveedor ha sido dado de baja exitosamente.')
+
+        # Agregar un mensaje de confirmación
+      
+
+    else:
+        messages.warning(request, 'El proveedor no pudo ser eliminado')
+
     return redirect('/proveedores')
 
 #metodo para verificar existencia AJAX
