@@ -2,301 +2,201 @@
 {% load static %}
 
 {% block content %}
-<!DOCTYPE html>
-<html>
+<div class="content-menu" >
 
-<head>
-    <title>ADUTEQ - Socios</title>
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-        }
-
-        .header {
-            background-color: #34b234;
-            color: #fff;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .socios-content {
-            margin: 20px;
-        }
-
-        .socios-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .socios-table th,
-        .socios-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .socios-table th {
-            background-color: #34b234;
-            color: #fff;
-        }
-
-        .socios-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .socios-table td.actions {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .socios-table .edit-btn,
-        .socios-table .delete-btn,
-        .add-socio-btn {
-            padding: 5px 10px;
-            background-color: #ECB932;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .socios-table .edit-btn:hover,
-        .socios-table .delete-btn:hover,
-        .add-socio-btn:hover {
-            background-color: #62c562;
-        }
-
-        .add-socio-btn {
-            margin-bottom: 10px;
-        }
-
-        /* Estilos para el botón verde */
-        .green-button {
-            background-color: #62c562;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        /* Estilos para el botón rojo */
-        .red-button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            width: max-content;
-            border-radius: 4px;
-        }
-
-        /* Estilos para el icono de visto */
-        .visto-icon {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: white;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .no-visto-icon {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: white;
-            margin-right: 5px;
-        }
-
-        .search-form {
-            position: absolute;
-
-            display:block;
-            align-items: center;
-        }
-
-        .search-form label {
-            margin-right: 5px;
-        }
-
-        .search-form select,
-        .search-form input[type="text"],
-        .search-form button {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-left: 5px;
-        }
-
-        .search-form select {
-            margin-right: 5px;
-        }
-
-        .search-form button {
-            background-color: #ECB932;
-            color: #fff;
-          
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .search-form button:hover {
-            background-color: #62c562;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <div class="content-menu">
-
-        <div class="header">
-            <h1>Socios</h1>
-        </div>
-        <div class="socios-content ">
-            <div style="display:flex;">
-                <a href="{% url 'agg_socios' %}" > <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
-                <form method="GET" action="{% url 'buscar_socios' %}">
-                    <div class="search-form">
-                  
-                        <select id="criterio" name="criterio">
-                            <option value="nombres">Nombre</option>
-                            <option value="apellidos">Apellido</option>
-                            <option value="categoria">Categoría</option>
-                            <option value="facultad">Facultad</option>
-                            <option value="cedula">Cédula</option>
-                            <option value="1">Activo</option>
-                            <option value="0">Inactivo</option>
-                        </select>
-                        <input type="text" id="valor" name="valor">
-                        <a href="/buscar_socios"><button type="submit">Buscar</button></a>
-                        
-                    </div>
-    
-    
-                  </form>
-                
-            </div>
-
-
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th>Cedula</th>
-                        <th>Nombres</th>
-                        <th>Apellidos</th>
-                        <th>Dirección</th>
-                        <th>Teléfono</th>
-                        <th>Correo Electrónico</th>
-                        <th>Categoria</th>
-                        <th>Estado</th>
-                        <th>Editar</th>
-                        <th>Eliminar</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for socio in socios %}
-                    <tr>
-                        <td>{{ socio.cedula }}</td>
-                        <td>{{ socio.nombres }}</td>
-                        <td>{{ socio.apellidos }}</td>
-                        <td>{{ socio.direccion_domiciliaria }}</td>
-                        <td>{{ socio.numero_telefonico }}</td>
-                        <td>{{ socio.correo_electronico }}</td>
-                        <td>{{ socio.categoria }}</td>
-                        <td>
-                            {% if socio.activo %}
-                            <button class="green-button">
-                                <span class="visto-icon"></span>
-                                Activo
-                            </button>
-                            {% else %}
-                            <button class="red-button">
-                                <span class="no-visto-icon"></span> Inactivo
-
-                            </button>
-                            {% endif %}
-
-                        </td>
-                        <td>
-                            <button class="edit-btn"
-                                onclick="confirmarEdicion('{{ socio.id }}','{{ socio.nombres }}','{{ socio.apellidos }}')">
-                                Editar
-                            </button></a>
-
-
-                        </td>
-                        <td>
-
-                            <button class="delete-btn"
-                                onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.nombres }}','{{ socio.apellidos }}')">
-                                Eliminar
-                            </button>
-
-
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <!-- Resto del contenido de la página -->
+    <div class="header">
+        <h1>Socios</h1>
     </div>
+    <div class="socios-content ">
+        <div class="botones-sup">
+            <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
+            <form method="GET" action="{% url 'buscar_socios' %}">
+                <div class="search-form">
 
-    <script>
-        function confirmarEdicion(socioId, socioNombre, socioApellido) {
-            swal({
-                title: '¿Estás seguro?',
-                text: 'Deseas editar al soci@ ' + socioNombre + ' ' + socioApellido,
-                icon: 'warning',
-                buttons: { si: true, cancel: "Cancelar" },
-                dangerMode: true,
-            }).then((willDelete) => {
-                if (willDelete) {
-                    // El usuario ha confirmado la edición, redirigir a la página de edición
-                    window.location.href = '/editar_socio/' + socioId + '/';
-                }
-            });
+                    <select id="criterio" name="criterio">
+                        <option value="nombres">Nombre</option>
+                        <option value="apellidos">Apellido</option>
+                        <option value="categoria">Categoría</option>
+                        <option value="facultad">Facultad</option>
+                        <option value="cedula">Cédula</option>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                    <input type="text" id="valor" name="valor">
+                    <a href="/buscar_socios"><button type="submit">Buscar</button></a>
+
+                </div>
+
+
+            </form>
+            <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()"> 
+                <button class="add-socio-btn">Enviar correo a todos</button>
+            </a>
+        </div>
+
+
+        <table class="socios-table">
+            <thead>
+                <tr>
+                    <th>Cedula</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Correo Electrónico</th>
+                    <th>Categoria</th>
+                    <th>Estado</th>
+                    <th>Editar</th>
+                    <th>Enviar Correo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.socio.cedula }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.socio.direccion_domiciliaria }}</td>
+                    <td>{{ user.socio.numero_telefonico }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.socio.categoria }}</td>
+                    <td>
+                        {% if user.is_active %}
+                        <button class="green-button" onclick="confirmarEliminacion('{{ user.id }}','{{ user.first_name }}','{{ user.last_name }}','{{ user.is_active }}')">
+                            <span class="visto-icon"></span>
+                            Activo
+                        </button>
+                        {% else %}
+                        <button class="red-button" onclick="confirmarEliminacion('{{ user.id }}','{{ user.first_name }}','{{ user.last_name }}','{{ user.is_active }}')">
+                            <span class="no-visto-icon"></span> Inactivo
+                        </button>
+                        {% endif %}
+
+                    </td>
+                    <td>
+                        <button class="edit-btn"
+                            onclick="confirmarEdicion('{{ user.socio.id }}','{{ user.first_name }}','{{ user.last_name }}')">
+                            Editar
+                        </button>
+                    </td>
+                    <td>
+                        <a onclick="confirmarEnvioCorreo('{{ user.socio.id }}','{{ user.first_name }}','{{ user.last_name }}')" class="edit-btn"> Notificar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- Resto del contenido de la página -->
+</div>
+
+<script>
+    function confirmarEdicion(socioId, socioNombre, socioApellido) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas editar al soci@ ' + socioNombre + ' ' + socioApellido,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/editar_socio/' + socioId + '/';
+            }
+        });
+    }
+</script>
+
+<script>
+    function confirmarEliminacion(socioId, socioNombre, socioApellido,socioActivo) {
+
+        var valor;
+        
+        if(socioActivo == 'True')
+        {
+            valor = 1;
+            Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Dar de baja de Aduteq al soci@ ' + socioNombre + ' ' + socioApellido,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/eliminar_socio/' + socioId + '/' + valor + '/';
+                print(valor)
+            }
+        });
+
         }
-    </script>
-
-    <script>
-        function confirmarEliminacion(socioId, socioNombre, socioApellido) {
-            swal({
-                title: '¿Estás seguro?',
-                text: 'Dar de baja de Aduteq al soci@ ' + socioNombre + ' ' + socioApellido,
-                icon: 'warning',
-                buttons: { si: true, cancel: "Cancelar" },
-                dangerMode: true,
-            })
-                .then((willDelete) => {
-                    if (willDelete) {
-                        window.location.href = '/eliminar_socio/' + socioId + '/';
-                    }
-
-                });
-
-
+        else{
+            valor = 0;
+            Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Habilitar al soci@ ' + socioNombre + ' ' + socioApellido,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/eliminar_socio/' + socioId + '/' + valor + '/';
+                print(valor)
+            }
+        });
         }
-    </script>
-</body>
 
-</html>
+   
+
+
+    }
+</script>
+
+<script>
+    function confirmarEnvioCorreo(socioId, socioNombre, socioApellido) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas enviar correo al soci@ ' + socioNombre + ' ' + socioApellido,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/enviar_gastos/' + socioId + '/';
+            }
+        });
+    }
+</script>
+<script>
+    function confirmarEnvioCorreoTodos() {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas enviar correo a todos los soci@s',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Se confirma el envio de correo a todos los soci@s
+                window.location.href = '/enviar_gastos_todos';
+            }
+        });
+    }
+</script>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
 {% endblock %}

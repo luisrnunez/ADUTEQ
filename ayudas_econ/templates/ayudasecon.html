@@ -1,32 +1,186 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>ADUTEQ - Ayudas</title>
-    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        .header {
+            background-color: #34b234;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .socios-content {
+            margin: 20px;
+        }
+
+        .socios-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .socios-table th,
+        .socios-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .socios-table th {
+            background-color: #34b234;
+            color: #fff;
+        }
+
+        .socios-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .socios-table td.actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .socios-table .edit-btn,
+        .socios-table .delete-btn,
+        .add-socio-btn {
+            padding: 5px 10px;
+            background-color: #ECB932;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .socios-table .edit-btn:hover,
+        .socios-table .delete-btn:hover,
+        .add-socio-btn:hover {
+            background-color: #62c562;
+        }
+
+        .add-socio-btn {
+            margin-bottom: 10px;
+        }
+
+        /* Estilos para el botón verde */
+        .green-button {
+            background-color: #62c562;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* Estilos para el botón rojo */
+        .red-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            width: max-content;
+            border-radius: 4px;
+        }
+
+        /* Estilos para el icono de visto */
+        .visto-icon {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .no-visto-icon {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            margin-right: 5px;
+        }
+
+        .search-form {
+            position: absolute;
+
+            display: block;
+            align-items: center;
+        }
+
+        .search-form label {
+            margin-right: 5px;
+        }
+
+        .search-form select,
+        .search-form input[type="text"],
+        .search-form button {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        .search-form select {
+            margin-right: 5px;
+        }
+
+        .search-form button {
+            background-color: #ECB932;
+            color: #fff;
+
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-form button:hover {
+            background-color: #62c562;
+        }
+    </style>
 </head>
 
 <body>
 
-    
+
     {% block content %}
     <!-- Aquí va el contenido de la página -->
-    <div class="content-menu">
+    <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
             <h1>Ayudas Economicas</h1>
         </div>
 
         <div class="socios-content ">
-            <a href="/formAggAyuda"> <button class="add-socio-btn"> Agregar Ayuda</button></a>
-            <div class="search-container">
-                <input type="text" id="barbusqueda" placeholder="Buscar">
-                <button type="submit">Buscar</button>
-                <div id="searchResults"></div>
-            </div>
+            <div class="botones-sup">
+                <div style="display:inline-flex; ">
+                    <a href="/formAggAyuda"> <button class="add-socio-btn"> Agregar Ayuda</button></a>
+                    <div class="search-form" style="margin-left: 6px; margin-block-end:auto;">
+                        <input type="text" id="barbusqueda" placeholder="Buscar">
+                        <button class="add-socio-btn" type="submit">Buscar</button>
 
+                    </div>
+                </div>
+
+            </div>
 
 
             <!--barra de busqueda-->
@@ -45,7 +199,8 @@
                         <th>fecha</th>
                         <th>motivo</th>
                         <th>Total</th>
-
+                        <th>Editar</th>
+                        <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,12 +218,17 @@
                         <td>Habilitado</td>
 
                         {% endif %}-->
-                        <td class="actions">
+                        <td>
                             <!--<button class="edit-btn">Editar</button>
                             <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
-                            <a style="text-decoration: none;" class="edit-btn" href="/formeditarayuda/{{ayuda.id}}">Editar</a>
+                            <a style="text-decoration: none;" class="edit-btn"
+                                href="/formeditarayuda/{{ayuda.id}}">Editar</a>
                             <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
-                            <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/')">Eliminar</a>
+
+                        </td>
+                        <td>
+                            <a style="text-decoration: none;" class="delete-btn" href="#"
+                                onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/')">Eliminar</a>
                         </td>
                         <!--<td>{{proveedor.id}}</td>-->
                     </tr>

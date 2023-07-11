@@ -8,7 +8,7 @@ urlpatterns = [
     path('registrarproveedor/', views.aggProveedor),
     path('editProveedor/<int:codigo>', views.editProveedor),
     path('editarPro/', views.editarPro),
-    path('deleteProveedor/<int:codigo>', views.deleteProveedor),
+    path('deleteProveedor/<int:codigo>/<int:estado>/', views.deleteProveedor),
 
     path('verificarexiste/', views.verificarexi),
     #barra de busqueda
