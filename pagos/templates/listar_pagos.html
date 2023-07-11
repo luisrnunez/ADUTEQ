@@ -11,17 +11,8 @@
         </div>
         <div class="socios-content ">
             <div class="botones-sup">
-                <a href="/agregar_pago/"> <button class="add-socio-btn"> Agregar Descuento</button></a>
-
-                <form style="margin-left: 10px;display: flex; "action="{% url 'extraer_pdf' %}" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="custom-file" style="display: flex;">
-                        <input class="add-socio-btn" style="width: 100%; " type="file" id="pdf_file" name="pdf_file" accept=".pdf" required>
-                        <button  style="margin-left: 5px;" type="submit" class="add-socio-btn" >Extraer datos del PDF</button>
-                    </div>
-                   
-                  </form>                  
-
+                <a href="/agregar_pago/"> <button class="add-socio-btn"> Agregar descuento</button></a>
+                <a style="margin-left: 10px;" href="/extraer_descuentos/"> <button class="add-socio-btn"> Agregar descuentos desde archivo</button></a>
             </div>
             <table class="socios-table">
                 <thead>

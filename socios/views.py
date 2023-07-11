@@ -1,5 +1,7 @@
 import datetime
 import re
+import datetime
+import re
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.forms import UserCreationForm
@@ -12,6 +14,9 @@ from socios.models import Socios
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.views import View
+from socios.models import Socios
+from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 # Create your views here.
@@ -34,6 +39,12 @@ def cerrar_sesion(request):
 
 
 @login_required
+def cerrar_sesion(request):
+    logout(request)
+    return render(request, 'login.html')
+
+
+@login_required
 def Principal(request):
     return render(request, "base.html")
 
@@ -42,7 +53,7 @@ def Principal(request):
 def PanelActividades(request):
     return render(request, "emp_actividades.html")
 
- 
+
 def Autenticacion_usuarios(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -62,7 +73,9 @@ def Autenticacion_usuarios(request):
 
 
 
+@login_required
 def guardar_socio(request):
+
 
     if request.method == 'POST':
         username = request.POST.get('username')

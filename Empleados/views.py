@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 @login_required
-def listar_empleados(request): 
+def listar_empleados(request):
     empleados = models.Empleado.objects.all()
     return render(request, "lista_empleados.html", {'empleados': empleados})
 
@@ -21,7 +21,7 @@ def editar_empleado(request, empleado_id):
     empleado = get_object_or_404(Empleado, id=empleado_id)
     user = empleado.user
     if request.method == 'POST':
-        empleado.user.username = request.POST.get('username') 
+        empleado.username = request.POST.get('username')
         password = request.POST['password']
         if password:
             user.set_password(password)
@@ -70,7 +70,7 @@ def eliminar_empleado(request, empleado_id, valor):
             empleado.save()
             empleado.user.save()
             messages.success(
-            request, 'El empleado se habilitado exitosamente.')
+            request, 'El empleado se habilitado exitosamente.') 
         else:
             empleado.activo = False
             empleado.user.is_active=False
