@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -15,7 +15,7 @@
 
 {% block content %}
     <!-- Aquí va el contenido de la página -->
-    <div class="content-menu">
+    <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
             <h1>Agregar ayudas</h1>
@@ -52,9 +52,10 @@
                     <label for="evidencia">Evidencia:</label>
                     <input value="{{ ayuda.evidencia }}" style="margin: 0px 0px 20px 0px;" type="file" id="evidencia" name="evidencia">
 
-
                     <input type="submit" value="Agregar Ayuda">
-                    <a class="form-control mb-2" id="cancel" href="/motivos">Cancelar</a>
+                    <a id="cancel" href="/verayudas/"><input type="button" value="Cancelar"
+                        class="cancel-btn" style="background-color: red;
+                    "></a>
                 </form>
             </div>
         </div>

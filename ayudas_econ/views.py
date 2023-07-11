@@ -14,7 +14,7 @@ def formRegistro(request):
     return render(request,'aggmotivo.html')
 
 def aggMotivo(request):
-    motivo=AyudasMot(motivo=request.POST['motivo'], descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'])
+    motivo=AyudasMot(motivo=request.POST['motivo'], descripcion=request.POST['descripcion'])
 
     if(userexist(request.POST['motivo'])):
         response = {
@@ -112,7 +112,7 @@ def aggAyuda(request):
             'status': 'error',
             'message': 'Ha existido algún error, intentelo de nuevo'
             }
-    return JsonResponse(response)
+    return redirect("lista_ayudas")
 
 #metodo para eliminar una ayuda.
 def deleteAyuda(request, codigo):

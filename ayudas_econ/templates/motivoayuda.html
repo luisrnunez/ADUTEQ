@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -13,20 +13,23 @@
     
     {% block content %}
     <!-- Aquí va el contenido de la página -->
-    <div class="content-menu">
+    <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
             <h1>Motivos</h1>
         </div>
 
-        <div class="socios-content ">
+        <div class="socios-content "> <div class="botones-sup">
             <a href="/formotivos"> <button class="add-socio-btn"> Agregar Motivo</button></a>
-            <div class="search-container">
+            <div class="search-form">
                 <input type="text" id="barbusqueda" placeholder="Buscar">
                 <button type="submit">Buscar</button>
                 <div id="searchResults"></div>
             </div>
 
+        </div>
+            
+    
 
 
             <!--barra de busqueda-->
@@ -43,6 +46,8 @@
                         <th>Motivo</th>
                         <th>Descripción</th>
                         <th>Evidencia</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
 
                     </tr>
                 </thead>
@@ -64,7 +69,9 @@
                             <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
                             <a style="text-decoration: none;" class="edit-btn" href="/editmotivo/{{motivo.id}}">Editar</a>
                             <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
-                            <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/')">Eliminar</a>
+                           
+                        </td>
+                        <td> <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/')">Eliminar</a>
                         </td>
                         <!--<td>{{proveedor.id}}</td>-->
                     </tr>

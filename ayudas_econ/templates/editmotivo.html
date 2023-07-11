@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -15,7 +15,7 @@
 
 {% block content %}
     <!-- Aquí va el contenido de la página -->
-    <div class="content-menu">
+    <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
             <h1>Editar Motivos</h1>
@@ -36,7 +36,10 @@
                     <input value="{{motivos.evidencia}}" type="file" id="evidencia" name="evidencia">
 
                     <input type="submit" value="Editar Motivo">
-                    <a class="form-control mb-2" id="cancel" href="/motivos">Cancelar</a>
+                    <a class="form-control mb-2" id="cancel" href="/motivos">
+                        <input type="button" value="Cancelar"
+                        class="cancel-btn" style="background-color: red; ">
+                    </a>
                 </form>
             </div>
         </div>

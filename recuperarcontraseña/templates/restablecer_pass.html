@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ADUTEQ - Recuperación de Contraseña</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .form-container {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .form-container h1 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .form-container label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .form-container input[type="email"],
+        .form-container input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .form-container input[type="submit"] {
+            background-color: #34b234;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .form-container input[type="submit"]:hover {
+            background-color: #62c562;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Recuperar cuenta</h1>
+            
+            <p> iud: {{uidb64}}</p>
+            <p>token: {{token}}</p>
+
+            <h2>Restablecer contraseña</h2>
+            <form method="POST"> {% csrf_token %}
+                {{ form.new_password1.label_tag }}
+                {{ form.new_password1 }}
+                {{ form.new_password2.label_tag }}
+                {{ form.new_password2 }}
+                <!-- <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required> -->
+                
+                <input type="submit" value="Restablecer Contraseña">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

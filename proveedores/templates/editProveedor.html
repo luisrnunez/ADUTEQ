@@ -1,18 +1,9 @@
-{% extends 'base1.html' %}
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>ADUTEQ - Socios</title>
-
-</head>
-
-<body>
 
 {% block content %}
     <!-- Aquí va el contenido de la página -->
-    <div class="content-menu">
+    <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
             <h1>Editar Proveedor</h1>
@@ -51,7 +42,8 @@
 
 
                     <input type="submit" value="Guardar cambios">
-                    <input type="submit" id="cancel" value="Cancelar">
+                    <a href="/proveedores"> <input type="button" value="Cancelar"
+                        style="background-color: red;"></a>
                 </form>
             </div>
         </div>

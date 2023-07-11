@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
+    background-color: white;
 }
 
 .header {
@@ -11,8 +11,280 @@ body {
     padding: 15px;
     text-align: center;
 }
+
 .header h1 {
     font-size: 18px;
     font-weight: bold;
     margin: 0;
+}
+
+.content {
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 70px);
+}
+
+
+.form-container {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 600px;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 10px;
+    width: max-content;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="number"],
+.form-container input[type="date"],
+.form-container input[type="submit"],
+.form-container input[type="button"],
+.form-container select,
+.form-container textarea,
+.form-container button,
+.input#file-upload-button {
+    background-color: white;
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.form-container input[type="submit"],
+.form-container input[type="button"],
+.form-container button {
+    background-color: #34b234;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.form-container input[type="submit"]:hover,
+.form-container input[type="button"]:hover,
+.form-container button:hover,
+.input#file-upload-button:hover {
+    background-color: #62c562;
+    width: 100%;
+}
+
+.upload-preview {
+    margin-bottom: 10px;
+    height: auto;
+    width: 200px;
+}
+
+.upload-preview p {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.upload-preview img {
+    max-width: 200px;
+    display: block;
+    margin-top: 10px;
+    
+}
+
+.custom-file {
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+    /* Personaliza el ancho según tus necesidades */
+}
+
+.custom-file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    background-color: #34b234;
+    transition: background-color 0.3s;
+}
+
+.custom-file-label {
+    width: 100%;
+    display: block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    align-items: center;
+    line-height: 1.42857143;
+    color: white;
+    background-color: #34b234;
+    transition: background-color 0.3s;
+
+}
+
+.custom-file-label:hover{
+    background-color: white;
+}
+
+.custom-file-input:focus~.custom-file-label {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+
+.generated-credentials {
+
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #62c562;
+    background-color: white;
+    display: block;
+    position: relative;
+    text-align: center;
+}
+
+.generated-credentials p {
+    margin: 10px;
+}
+
+.socios-content {
+    margin: 20px;
+}
+
+.socios-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.socios-table th,
+.socios-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.socios-table th {
+    background-color: #34b234;
+    color: #fff;
+}
+
+.socios-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.socios-table td.actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.socios-table .edit-btn,
+.socios-table .delete-btn, .cancel-btn,
+.add-socio-btn {
+    padding: 5px 10px;
+    background-color: #ECB932;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+
+}
+
+.socios-table .edit-btn:hover,
+.socios-table .delete-btn:hover,
+.add-socio-btn:hover {
+    background-color: #62c562;
+}
+
+/* Estilos para el botón verde */
+.green-button {
+    background-color: #62c562;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Estilos para el botón rojo */
+.red-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    width: max-content;
+    border-radius: 4px;
+}
+
+/* Estilos para el icono de visto */
+.visto-icon {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.no-visto-icon {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    margin-right: 5px;
+}
+
+.search-form {
+    position: relative;
+    display: inline-block;
+    align-items: center;
+}
+
+.search-form label {
+    margin-right: 5px;
+}
+
+.search-form select,
+.search-form input[type="text"],
+.search-form button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 5px;
+}
+
+.search-form select {
+    margin-right: 5px;
+}
+
+.search-form button {
+    background-color: #ECB932;
+    color: #fff;
+
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-form button:hover {
+    background-color: #62c562;
+}
+
+.cancel-btn {
+    width: 100%; background-color: red;
+}
+
+
+.botones-sup{
+    display:inline-flex;
+    margin-bottom: 10px;
 }

@@ -46,8 +46,14 @@ def aggProveedor(request):
                 'message': 'Ya existe un proveedor registrado con este RUC'
             }
             else:
-                proveedor.save()
-                response = {
+                if(userexistr(request.POST['telefono'])):
+                    response = {
+                    'status': 'error',
+                    'message': 'Ya existe un proveedor registrado con este telefono'
+                }
+                else:
+                    proveedor.save()
+                    response = {
                     'status': 'success',
                     'message': 'Proveedor registrado correctamente.'
                     }
@@ -81,6 +87,13 @@ def userexistr(ruc):
     except Proveedor.DoesNotExist:
         return False   
 
+def userexistr(telefono):
+    try:
+        proveedor = Proveedor.objects.get(telefono=telefono)
+        return True
+    except Proveedor.DoesNotExist:
+        return False  
+
 #metodos editar proveedores
 def editProveedor(request, codigo):
     proveedor=Proveedor.objects.get(id=codigo)
@@ -103,7 +116,6 @@ def editarPro(request):
         response = {
             'status': 'error',
             'message': 'Ya existe un proveedor registrado con este RUC'
-      
           }
     elif Proveedor.objects.exclude(id=request.POST.get('id')).filter(nombre=nombrep).exists():
         response = {
@@ -117,6 +129,7 @@ def editarPro(request):
             'message': 'Ya existe un proveedor registrado con este télefono'
       
           }
+          
 
     else:
         proveedor.nombre=nombrep
@@ -133,9 +146,33 @@ def editarPro(request):
     return JsonResponse(response)
 
 #metodo para eliminar a los proveedores
-def deleteProveedor(request, codigo):
-    proveedor=Proveedor.objects.get(id=codigo)
-    proveedor.delete()
+def deleteProveedor(request, codigo, estado):
+    #proveedor=Proveedor.objects.get(id=codigo)
+    #proveedor.delete()
+    #return redirect('/proveedores')
+
+    proveedor = get_object_or_404(Proveedor, id=codigo)
+
+    if request.method == 'GET':
+        # Cambiar el estado del proveedor a inactivo
+        print (estado)
+        if estado == 0:
+            proveedor.estado = True
+            proveedor.save()
+            messages.success(
+            request, 'El proveedor se habilitado exitosamente.')
+        else:
+            proveedor.estado = False
+            proveedor.save()
+            messages.success(
+            request, 'El proveedor ha sido dado de baja exitosamente.')
+
+        # Agregar un mensaje de confirmación
+      
+
+    else:
+        messages.warning(request, 'El proveedor no pudo ser eliminado')
+
     return redirect('/proveedores')
 
 #metodo para verificar existencia AJAX
