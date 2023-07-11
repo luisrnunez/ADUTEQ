@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <style>
+        .socios-content select,
+        .socios-content input[type="date"],
+        .socios-content input[type="file"],
+        .socios-content input[type="text"],
+        .socios-content input[type="email"],
+        .socios-content input[type="number"] {
+            background-color: white;
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+
+        }
+
+        .socios-content label {
+            display: block;
+            margin-bottom: 10px;
+            width: max-content;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .left {
+            width: 50%;
+            padding: 10px;
+        }
+
+        .right {
+            width: 50%;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Agregar descuentos desde un archivo</h1>
+        </div>
+        <div class="socios-content ">
+            <div class="container">
+                <div class="left">
+                    <h4>Subir Archivo</h4>
+
+                    <form class="form-container" style="width: 90%;" action="{% url 'extraer_pdf' %}" method="post"
+                        enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="custom-file">
+                            <input type="file" style="width: 100%;" id="pdf_file" name="pdf_file" accept=".pdf"
+                                required>
+                        </div>
+                        <button class="add-socio-btn" type="submit">Cargar
+                            datos</button>
+                    </form>
+                </div>
+
+                <div class="right">
+                    <h4>Seleccionar Proveedor</h4>
+                    <select name="proveedor" id="proveedor" required>
+                        {% for proveedor in proveedores %}
+                        <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <h4>Seleccionar Fecha</h4>
+
+                    <input type="date" name="fecha" id="fecha" required>
+                    <button class="add-socio-btn" style="width: 100%; height: 30px;" type="button"
+                        onclick="guardarTodoLosRegistros()">GUARDAR TODO</button>
+                </div>
+            </div>
+            <br><br>
+            <form id="miFormulario">
+                  {% csrf_token %}
+                <table class="socios-table" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th scope="col">Cedula</th>
+                            <th scope="col">Socio</th>
+                            <th scope="col">Descuento</th>
+                            <th scope="col">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for datos in datos_tabla %}
+                        <tr>
+                            <td><input name="cedula" type="number" value="{{datos.cedula}}"></td>
+                            <td><input name="nombre" type="text" value="{{datos.nombre }}"></td>
+                            <td><input name="consumo_total" type="number" value="{{ datos.consumo_total|cut:'$' }}">
+                            </td>
+
+                            <td>
+                                <button class="delete-btn" type="button"
+                                    onclick="eliminarRegistro(this)">Eliminar</button>
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+
+
+        </div>
+    </div>
+    <script>
+        function guardarTodoLosRegistros() {
+            const proveedor = document.getElementById('proveedor');
+            const Fecha = document.getElementById('fecha');
+            const formulario = document.getElementById('miFormulario');
+            const formData = new FormData(formulario);
+            if (proveedor.value != null && Fecha.value != null) {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Deseas agregar los registros al proveedor ' + proveedor.options[proveedor.selectedIndex].text ,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    cancelButtonText: 'Cancelar',
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        fetch('/guardar_descuentos_prov' + '/' + proveedor.value + '/' + Fecha.value + '/', {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => {
+                                window.location.href = '/listar_pagos/'
+                            })
+                            .catch(error => {
+                                // Manejar errores
+                            });
+                    }
+                });
+            }
+
+        }
+    </script>
+    <script>
+        function eliminarRegistro(btn) {
+            var fila = btn.parentNode.parentNode;
+            fila.parentNode.removeChild(fila);
+        }
+    </script>
+
+    <script> var campoNumerico = document.getElementById("cedula");
+        campoNumerico.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });</script>
+</body>
+{% endblock %}

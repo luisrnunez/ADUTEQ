@@ -1,19 +1,28 @@
 import datetime
 import os
+import re
+import PyPDF2
 from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from .models import Socios, Proveedor, Pagos
 from .forms import PagosForm
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from datetime import datetime
-
+import tabula
+from django.contrib import messages
 
 
 # Create your views here.
 def lista_pagos(request):
     pagos = Pagos.objects.all()
     return render(request, 'listar_pagos.html', {'pagos': pagos})
+
+
+def extraer_descuentos(request):
+    proveedores = Proveedor.objects.all()
+    return render(request, 'extraer_descuentos.html', {'proveedores': proveedores})
 
 
 def agrefar_pagos(request):
@@ -57,7 +66,6 @@ def eliminar_pago(request, pago_id):
 
 
 def extraer_datos_pdf(request):
-
     if request.method == 'POST':
 
         pdf_file = request.FILES['pdf_file']
@@ -68,47 +76,60 @@ def extraer_datos_pdf(request):
         file_path = fs.save('archivo.pdf', pdf_file)
         file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
 
-        print(file_path)
-        with open(file_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
+        tables = tabula.read_pdf(pdf_file, pages="all")
 
-            # Leer el contenido del PDF
-            content = ''
-            page_num = 0
-            for page_num in range(len(reader.pages)):
-                page = reader.pages[page_num]
-                content += page.extract_text()
+        datos_tabla = []
 
-                lineas = content.split('\n')
-                proveedor = None
-                fecha = None
-                datos_socios = []
-                for linea in lineas:
-                        if linea.startswith('Proveedor:'):
-                            proveedor = linea.split(':')[1].strip()
-                            print(proveedor)
-                        elif linea.startswith('Fecha:'):
-                            fecha_str = linea.split(':')[1].strip()
-                            fecha = datetime.strptime(fecha_str, '%d/%m/%Y')
-                            print(fecha)
-                        elif linea.startswith('Cédula'):
-                            continue  # Saltar la línea de encabezados
-                        else:
-                            datos = linea.split('\t')
-                            if len(datos) >= 3:
-                                cedula = datos[0].strip() 
-                                nombre = datos[1].strip()
-                                consumo_total = float(datos[2].replace('$', '').replace(',', ''))
-                                print(cedula + ' ' + nombre + ' ' + consumo_total)
-                                print(cedula)
-                                datos_socios.append({'cedula': cedula, 'nombre': nombre, 'consumo_total': consumo_total})
-            # Guardar los datos en la base de datos
+        # Procesar cada tabla extraída
+        for table in tables:
+            # Obtener los encabezados de la tabla
+            headers = table.columns.tolist()
 
-                print(datos_socios)
-                proveedor_obj = Proveedor.objects.get(nombre=proveedor)
-                for datos_socio in datos_socios:
-                        socio_obj = Socios.objects.get(cedula=datos_socio['cedula'], nombre=datos_socio['nombre'])
-                        Pagos.objects.create(socio=socio_obj, proveedor=proveedor_obj, consumo_total=datos_socio['consumo_total'], fecha=fecha)
-                 
+            # Recorrer las filas de la tabla
+            for index, row in table.iterrows():
+                # Obtener los valores de cada columna en la fila
+                column = row.tolist()
+                row_data = {}
+                row_data['cedula'] = column[0] if len(column) >= 1 else ''
+                row_data['nombre'] = column[1] if len(column) >= 2 else ''
+                row_data['consumo_total'] = column[2] if len(
+                    column) >= 3 else ''
+                datos_tabla.append(row_data)
+
+        proveedores = Proveedor.objects.all()
+        return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
 
     return redirect('/listar_pagos/')
+
+
+def guardar_descuentos_prov(request, id, fecha):
+    if request.method == 'POST':
+        registros_formulario = request.POST
+        i = 0
+        for key, value in registros_formulario.items():
+            if key.startswith('cedula') | key.startswith('nombre'):
+                # Procesa cada registro del formulario
+            
+                cedula = registros_formulario.getlist('cedula')[i]
+                nombre = registros_formulario.getlist('nombre')[i]
+                consumo_total = registros_formulario.getlist('consumo_total')[i]
+                i = i + 1
+                print('cedula', cedula)
+                print('nombre', nombre)
+                print('consumo_total', consumo_total)
+                if cedula != None:
+                    socios = Socios.objects.filter(cedula__icontains=cedula)
+                if nombre != None:
+                    users = User.objects.filter(first_name__icontains=nombre)
+                    socios = Socios.objects.filter(user__in=users)
+                
+                proveedor = Proveedor.objects.get(id=id)
+                if socios.exists():
+                    socio = socios.first()  # Obtener la primera instancia de Socios en la queryset socios
+                    Pagos.objects.create(socio=socio, proveedor=proveedor, consumo_total=consumo_total, fecha_consumo=fecha)
+
+        response = {
+                    'status': 'success',
+                    'message': 'Registros guardados correctamente.'
+                    }
+    return JsonResponse(response)

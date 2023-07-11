@@ -55,7 +55,7 @@ def aggProveedor(request):
                 'message': 'Ya existe un proveedor registrado con este RUC'
             }
             else:
-                if(userexistl(request.POST['telefono'])):
+                if(userexistr(request.POST['telefono'])):
                     response = {
                     'status': 'error',
                     'message': 'Ya existe un proveedor registrado con este telefono'
