@@ -206,7 +206,7 @@
                 <tbody>
                     {% for ayuda in ayudas %}
                     <tr>
-                        <td>{{ayuda.socio.nombres}}</td>
+                        <td>{{ayuda.socio.user.first_name}}</td>
                         <td>{{ayuda.descripcion}}</td>
                         <td>{{ayuda.fecha}}</td>
                         <td>{{ayuda.motivo}}</td>
@@ -228,7 +228,7 @@
                         </td>
                         <td>
                             <a style="text-decoration: none;" class="delete-btn" href="#"
-                                onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/')">Eliminar</a>
+                                onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/', 'Ayuda economica')">Eliminar</a>
                         </td>
                         <!--<td>{{proveedor.id}}</td>-->
                     </tr>

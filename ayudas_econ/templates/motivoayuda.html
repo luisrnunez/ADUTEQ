@@ -45,7 +45,7 @@
                     <tr>
                         <th>Motivo</th>
                         <th>Descripción</th>
-                        <th>Evidencia</th>
+                        <!-- <th>Evidencia</th> -->
                         <th>Editar</th>
                         <th>Eliminar</th>
 
@@ -56,7 +56,7 @@
                     <tr>
                         <td>{{motivo.motivo}}</td>
                         <td>{{motivo.descripcion}}</td>
-                        <td>{{motivo.evidencia}}</td>
+                        <!-- <td>{{motivo.evidencia}}</td> -->
 
                         <!--{% if proveedor.estado == False %}
                         <td>Desabilitado</td>
@@ -71,7 +71,7 @@
                             <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
                            
                         </td>
-                        <td> <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/')">Eliminar</a>
+                        <td> <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/', 'Motivo')">Eliminar</a>
                         </td>
                         <!--<td>{{proveedor.id}}</td>-->
                     </tr>

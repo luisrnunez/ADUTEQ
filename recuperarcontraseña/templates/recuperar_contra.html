@@ -65,7 +65,7 @@
             <h1>Recuperar cuenta</h1>
             
             <h5>Ingresa tu correo para recuperar tu cuenta, en tu correo se enviara un email con los pasos para este proceso</h5>
-            <form method="post" action="{% url 'password_reset' %}"> {% csrf_token %}
+            <form method="post"> {% csrf_token %}
                 {{ form.email.label_tag }}
                 {{ form.email }}
                 <!-- <label for="email">Email:</label>

@@ -27,7 +27,7 @@
                     <!-- <input maxlength="50" type="text" id="motivo" placeholder="Fulanito" name="motivo" required> -->
                     <select name="socio">
                         {% for opcion in opciones %}
-                        <option value="{{ opcion.id }}">{{ opcion.nombres }}</option>
+                        <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
                         {% endfor %}
                     </select>
 
@@ -64,6 +64,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/aggmotivo.js' %} "></script>
+    <script src="{% static 'js/editmotivo.js' %} "></script>
     {% endblock %}
 </body>
 

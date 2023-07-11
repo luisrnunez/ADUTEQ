@@ -25,7 +25,7 @@ def aggMotivo(request):
         motivo.save()
         response = {
             'status': 'success',
-            'message': 'Proveedor registrado correctamente.'
+            'message': 'Motivo registrado correctamente.'
             }
     return JsonResponse(response)
 
@@ -60,7 +60,7 @@ def editarmotivo(request):
     else:
         motivoo.motivo=motivop
         motivoo.descripcion=descripcionp
-        motivoo.evidencia=evidenciap
+        # motivoo.evidencia=evidenciap
         motivoo.save()
         response = {
             'status': 'success',
@@ -89,7 +89,7 @@ def viewayudas(request):
     })
 
 def formRegistroAyuda(request):
-    opciones = Socios.objects.all()
+    opciones = Socios.objects.select_related('user').all()
     motivos=AyudasMot.objects.all()
     return render(request,'aggAyuda.html',{
         'opciones':opciones, 'motivos':motivos
@@ -112,7 +112,7 @@ def aggAyuda(request):
             'status': 'error',
             'message': 'Ha existido algún error, intentelo de nuevo'
             }
-    return redirect("lista_ayudas")
+    return JsonResponse(response)
 
 #metodo para eliminar una ayuda.
 def deleteAyuda(request, codigo):

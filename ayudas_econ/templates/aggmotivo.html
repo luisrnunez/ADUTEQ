@@ -33,7 +33,10 @@
                     <input type="file" id="evidencia" name="evidencia">
 
                     <input type="submit" value="Agregar Motivo">
-                    <a class="form-control mb-2" id="cancel" href="/motivos">Cancelar</a>
+                    <a class="form-control mb-2" id="cancel" href="/motivos">
+                        <input type="button" value="Cancelar"
+                        class="cancel-btn" style="background-color: red; ">
+                    </a>
                 </form>
             </div>
         </div>
@@ -41,6 +44,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/aggmotivo.js' %} "></script>
+    <script src="{% static 'js/editmotivo.js' %} "></script>
     {% endblock %}
 </body>
 
