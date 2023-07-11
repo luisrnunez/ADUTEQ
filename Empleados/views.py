@@ -8,14 +8,15 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from . import models
 from .models import Empleado
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
-
+@login_required
 def listar_empleados(request):
     empleados = models.Empleado.objects.all()
     return render(request, "lista_empleados.html", {'empleados': empleados})
 
-
+@login_required
 def editar_empleado(request, empleado_id):
     empleado = get_object_or_404(Empleado, id=empleado_id)
     user = empleado.user
@@ -56,7 +57,7 @@ def editar_empleado(request, empleado_id):
         return render(request, 'edit_empleados.html', {'empleado': empleado})
 
 
-
+@login_required
 def eliminar_empleado(request, empleado_id, valor):
     empleado = get_object_or_404(Empleado, id=empleado_id)
 
@@ -65,12 +66,16 @@ def eliminar_empleado(request, empleado_id, valor):
         print (valor)
         if valor == 0:
             empleado.activo = True
+            empleado.user.is_active=True
             empleado.save()
+            empleado.user.save()
             messages.success(
-            request, 'El empleado se habilitado exitosamente.')
+            request, 'El empleado se habilitado exitosamente.') 
         else:
             empleado.activo = False
+            empleado.user.is_active=False
             empleado.save()
+            empleado.user.save()
             messages.success(
             request, 'El empleado ha sido dado de baja exitosamente.')
 
@@ -82,9 +87,11 @@ def eliminar_empleado(request, empleado_id, valor):
 
     return redirect('listar_empleados')
 
+@login_required
 def agg_empleado(request):
     return render(request, "agg_empleados.html")
 
+@login_required
 def guardar_empleado(request):
     if request.method == 'POST':
 

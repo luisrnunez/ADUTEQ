@@ -1,5 +1,7 @@
 import datetime
 import re
+import datetime
+import re
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.forms import UserCreationForm
@@ -11,12 +13,29 @@ from . import models
 from socios.models import Socios
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.views import View
+from socios.models import Socios
+from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 # Create your views here.
 
 def login_(request):
     return render(request, "login.html")
+
+def is_superuser_or_staff(user):
+    return user.is_superuser or user.is_staff
+
+class SinAccesoView(View):
+    def get(self, request):
+        mensaje = "Lo siento, no tienes acceso."
+        return render(request, 'login.html', {'mensaje': mensaje})
+
+@login_required
+def cerrar_sesion(request):
+    logout(request)
+    return render(request, 'login.html')
 
 
 @login_required
@@ -53,8 +72,10 @@ def Autenticacion_usuarios(request):
         return render(request, 'login.html')
 
 
+
 @login_required
 def guardar_socio(request):
+
 
     if request.method == 'POST':
         username = request.POST.get('username')
