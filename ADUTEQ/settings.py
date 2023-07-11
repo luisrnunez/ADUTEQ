@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'Empleados',
     'recuperarcontraseña',
     'informes',
-    'Prestamos'
+    'Prestamos',
 
 
 ]
