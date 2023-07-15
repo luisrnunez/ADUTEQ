@@ -17,7 +17,7 @@ from django.views import View
 from socios.models import Socios
 from django.utils import timezone
 from django.contrib.auth.models import User
-
+from . import models
 
 # Create your views here.
 
@@ -65,9 +65,8 @@ def Autenticacion_usuarios(request):
             # redirige a la página de inicio después del inicio de sesión exitoso
             return redirect('principal')
         else:
-            messages.warning(
-                request, "Usuario o contraseña incorrecto, porfavor ingrese de nuevo")
-            return render(request, 'login.html')
+           
+            return render(request, 'login.html',{'error_message': 'Usuario o contraseña incorrecto, porfavor ingrese de nuevo'})
     else:
         return render(request, 'login.html')
 

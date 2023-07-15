@@ -2,6 +2,7 @@ from datetime import date
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Prestamo,Socios
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 def guardar_prestamo(request):
     if request.method == 'POST':
@@ -25,7 +26,9 @@ def guardar_prestamo(request):
         return redirect('mostrar_prestamo')
     else:
         prestamo = Prestamo.objects.all()
-        socios =  Socios.objects.select_related('user').all()
+        users = User.objects.filter(is_active=True)
+        socios = Socios.objects.filter(user__in=users)
+        
         return render(request, 'agregar_prestamo.html', {'prestamo': prestamo,'socios' : socios })
 
 

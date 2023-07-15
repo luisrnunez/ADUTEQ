@@ -14,6 +14,8 @@
       flex-wrap: wrap;
       height: 100vh;
       background-color: white;
+      align-items: center; justify-content: center;
+      
     }
 
     .row {
@@ -76,13 +78,14 @@
       background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.5));
     }
   </style>
+  </style>
 </head>
 
 <body>
-  <div class="content-menu">
+  <div class="content-menu" >
 
 
-    <div class="container" style="align-items: center; justify-content: center;">
+    <div class="container">
       <div class="row">
 
         <button class="boton">
@@ -104,7 +107,7 @@
           <a href="/prestamos">
             <img src="{% static 'img/icon-prestamo.png' %}" alt="Imagen" class="imagen">
           </a>
-          <h2>Prestamos</h2>
+          <h2>PRESTAMOS</h2>
         </button>
 
         <button class="boton">
@@ -112,7 +115,8 @@
             <img src="{% static 'img/icon-ayudas.png' %}" alt="Imagen" class="imagen">
 
           </a>
-          <h2>AYUDAS ECONOMICAS</h2>
+          <h2>AYUDAS <br>
+            ECONOMICAS</h2>
         </button>
       </div>
 
@@ -141,8 +145,8 @@
         </button>
 
         <button class="boton">
-          <img src="{% static 'img/icon-ajustes.png' %}" alt="Imagen" class="imagen">
-          <h2>AJUSTES</h2>
+          <img src="{% static 'img/icon-publicidad2.png' %}" alt="Imagen" class="imagen">
+          <h2>PUBLICIDAD</h2>
         </button>
       </div>
     </div>

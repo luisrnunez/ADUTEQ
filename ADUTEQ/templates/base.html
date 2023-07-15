@@ -16,19 +16,16 @@
     <script src="{% static 'js/editproveedor.js' %} "></script>
     <script src="{% static 'js/aggmotivo.js' %} "></script>
     <script src="{% static 'js/editmotivo.js' %} "></script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-
-    <!--ESTILOS CSS
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
 
-
+    <style>
+      
+    </style>
 </head>
 
 <body>
@@ -76,32 +73,49 @@
 
     <div class="sidebar">
         <div class="logo">
-            <div class="profile-lg">
+            <div class="profile-lg" style="margin-left: 7px;">
                 <a href="/principal"><img src="{% static 'img/aduteq.png' %} " alt="ADUTEQ Logo"></a>
             </div>
 
         </div>
         <ul>
-            <li><a href="/socios"><img src="{% static 'img/icon-socios.png' %}" alt="Socios" width="30px">&nbsp<span>
+            <li><a href="/socios"><img src="{% static 'img/icon-socios.png' %}" alt="Socios"
+                        width="33px">&nbsp&nbsp<span>
                         Socios</span></a></li>
             <li><a href="/proveedores"><img src="{% static 'img/icon-proveedores.png' %} " alt="Proveedores"
-                        width="30px">&nbsp<span> Proveedores</span></a></li>
+                        width="33px">&nbsp&nbsp<span> Proveedores</span></a></li>
+            {% if request.user.is_authenticated %}
+            {% if request.user.username == 'admin' %}
             <li><a href="/empleados"><img src=" {% static 'img/icon-empleado.png' %} " alt="Empleados"
-                        width="30px">&nbsp<span>
+                        width="33pxx">&nbsp &nbsp<span>
                         Empleados</span></a></li>
+            {% endif %}
+            {% endif %}
             <li><a href="/actividades"><img src=" {% static 'img/icon-actividades.png' %}" alt="Actividades"
-                        width="30px">&nbsp<span> Actividades</span></a></li>
-            <li><a href="#"><img src=" {% static 'img/icon-reportes.png' %}" alt="Reportes" width="30px">&nbsp<span>
+                        width="33px">&nbsp &nbsp<span> Actividades</span></a></li>
+            <li><a href="#"><img src=" {% static 'img/icon-reportes.png' %}" alt="Reportes" width="33px">&nbsp
+                    &nbsp<span>
                         Reportes</span></a></li>
 
-            <li><a href="#"><img src=" {% static 'img/icon-cuenta.png' %} " alt="Cuenta" width="30px">&nbsp<span>
-                        Cuenta</span></a></li>
+            <li><a href="#"><img src=" {% static 'img/img-ajustes.png' %} " alt="Cuenta" width="33px">&nbsp &nbsp<span>
+                        Ajustes</span></a></li>
 
         </ul>
-        <div class="profile">
-            <img src="{% static 'img/icon-usuarios.png' %}" alt="Foto de perfil">&nbsp
-            <span>Usuario</span>
+        <div class="profile" style="margin-left: 7px;">
+            <a>
+                <img src="{% static 'img/icon-usuarios.png' %}" alt="Foto de perfil">
+                {% if request.user.is_authenticated %}
+                {% if request.user.username != 'admin' %}
+                <span>{{ request.user.empleado.nombres }}</span>
+                {% endif %}
+                {% if request.user.username == 'admin' %}
+                <span>Administrador</span>
+                {% endif %}
+                {% endif %}
+            </a>
+
         </div>
+
     </div>
     <!-- Aquí va el contenido de la página -->
     <div class="sidebar-open">
@@ -116,7 +130,7 @@
             <div class="section">
                 <h1>ADUTEQ</h1>
             </div>
-            <a href="/login">
+            <a href="/cerrar_sesion">
                 <div class="add-socio-btn" style="position: absolute; right: 20px; bottom: 10px;">
 
                     <span>Salir</span>

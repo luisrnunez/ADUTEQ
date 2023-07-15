@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>ADUTEQ - Recuperación de Contraseña</title>
     <style>
@@ -9,14 +10,14 @@
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
         }
-        
+
         .container {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
-        
+
         .form-container {
             background-color: #fff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -24,28 +25,30 @@
             max-width: 400px;
             width: 100%;
         }
-        
+
         .form-container h1 {
             text-align: center;
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
         }
-        
+
+
+
         .form-container label {
             display: block;
             margin-bottom: 10px;
         }
-        
+
         .form-container input[type="email"],
         .form-container input[type="submit"] {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             margin-bottom: 10px;
         }
-        
+
         .form-container input[type="submit"] {
             background-color: #34b234;
             color: #fff;
@@ -53,27 +56,40 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
+
         .form-container input[type="submit"]:hover {
             background-color: #62c562;
         }
+
+        .btn-volver {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="form-container">
             <h1>Recuperar cuenta</h1>
-            
-            <h5>Ingresa tu correo para recuperar tu cuenta, en tu correo se enviara un email con los pasos para este proceso</h5>
+
+            <h5>Ingresa tu correo para recuperar tu cuenta, en tu correo se enviara un email con los pasos para este
+                proceso</h5>
             <form method="post"> {% csrf_token %}
                 {{ form.email.label_tag }}
                 {{ form.email }}
                 <!-- <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required> -->
-                
-                <input type="submit" value="Recuperar Contraseña">
+
+                <input style="width: 100%;" type="submit" value="Recuperar Contraseña">
             </form>
+            <br>
+            <a href="/login" type="button" class="btn-volver" value="Volver"><span>Volver</span></a>
         </div>
     </div>
 </body>
+
 </html>
