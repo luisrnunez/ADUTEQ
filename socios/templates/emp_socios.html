@@ -51,23 +51,23 @@
                 </tr>
             </thead>
             <tbody>
-                {% for user in users %}
+                {% for socio in socios %}
                 <tr>
-                    <td>{{ user.socio.cedula }}</td>
-                    <td>{{ user.first_name }}</td>
-                    <td>{{ user.last_name }}</td>
-                    <td>{{ user.socio.direccion_domiciliaria }}</td>
-                    <td>{{ user.socio.numero_telefonico }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.socio.categoria }}</td>
+                    <td>{{ socio.cedula }}</td>
+                    <td>{{ socio.user.first_name }}</td>
+                    <td>{{ socio.user.last_name }}</td>
+                    <td>{{ socio.direccion_domiciliaria }}</td>
+                    <td>{{ socio.numero_telefonico }}</td>
+                    <td>{{ socio.user.email }}</td>
+                    <td>{{ socio.categoria }}</td>
                     <td>
-                        {% if user.is_active %}
-                        <button class="green-button" onclick="confirmarEliminacion('{{ user.id }}','{{ user.first_name }}','{{ user.last_name }}','{{ user.is_active }}')">
+                        {% if socio.user.is_active %}
+                        <button class="green-button" onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
                             <span class="visto-icon"></span>
                             Activo
                         </button>
                         {% else %}
-                        <button class="red-button" onclick="confirmarEliminacion('{{ user.id }}','{{ user.first_name }}','{{ user.last_name }}','{{ user.is_active }}')">
+                        <button class="red-button" onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
                             <span class="no-visto-icon"></span> Inactivo
                         </button>
                         {% endif %}
@@ -75,12 +75,12 @@
                     </td>
                     <td>
                         <button class="edit-btn"
-                            onclick="confirmarEdicion('{{ user.socio.id }}','{{ user.first_name }}','{{ user.last_name }}')">
+                            onclick="confirmarEdicion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
                             Editar
                         </button>
                     </td>
                     <td>
-                        <a onclick="confirmarEnvioCorreo('{{ user.socio.id }}','{{ user.first_name }}','{{ user.last_name }}')" class="edit-btn"> Notificar
+                        <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')" class="edit-btn"> Notificar
                         </a>
                     </td>
                 </tr>

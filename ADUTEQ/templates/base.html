@@ -84,12 +84,10 @@
                         Socios</span></a></li>
             <li><a href="/proveedores"><img src="{% static 'img/icon-proveedores.png' %} " alt="Proveedores"
                         width="33px">&nbsp&nbsp<span> Proveedores</span></a></li>
-            {% if request.user.is_authenticated %}
-            {% if request.user.username == 'admin' %}
+            {% if request.user.is_superuser %}
             <li><a href="/empleados"><img src=" {% static 'img/icon-empleado.png' %} " alt="Empleados"
                         width="33pxx">&nbsp &nbsp<span>
                         Empleados</span></a></li>
-            {% endif %}
             {% endif %}
             <li><a href="/actividades"><img src=" {% static 'img/icon-actividades.png' %}" alt="Actividades"
                         width="33px">&nbsp &nbsp<span> Actividades</span></a></li>
@@ -104,16 +102,16 @@
         <div class="profile" style="margin-left: 7px;">
             <a>
                 <img src="{% static 'img/icon-usuarios.png' %}" alt="Foto de perfil">
-                {% if request.user.is_authenticated %}
-                {% if request.user.username != 'admin' %}
+                {{user.username}}
+                <!-- {% if request.user.is_authenticated %}
+                {% if request.user.is_superuser %}
                 <span>{{ request.user.empleado.nombres }}</span>
                 {% endif %}
                 {% if request.user.username == 'admin' %}
                 <span>Administrador</span>
                 {% endif %}
-                {% endif %}
+                {% endif %} -->
             </a>
-
         </div>
 
     </div>

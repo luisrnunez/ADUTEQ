@@ -196,19 +196,23 @@ def editar_socio(request, socio_id):
 
 @login_required
 def eliminar_socio(request, user_id, valor):
-    socio = get_object_or_404(models.User, id=user_id)
+    socio = Socios.objects.get(id=user_id)
 
     if request.method == 'GET':
         # Cambiar el estado del socio a inactivo
         print(valor)
         if valor == 0:
             socio.is_active = True
+            socio.user.is_active=True
             socio.save()
+            socio.user.save()
             messages.success(
                 request, 'El socio se habilitado exitosamente.')
         else:
             socio.is_active = False
+            socio.user.is_active=False
             socio.save()
+            socio.user.save()
             messages.success(
                 request, 'El socio ha sido dado de baja exitosamente.')
 
@@ -263,8 +267,8 @@ def Recuperar_cuenta(request):
 
 @login_required
 def ListaSocios(request):
-    users = User.objects.filter(is_superuser__icontains='False')
-    return render(request, "emp_socios.html", {'users': users})
+    socios = Socios.objects.all()
+    return render(request, "emp_socios.html", {'socios': socios})
 
 
 def AggSocio(request):
