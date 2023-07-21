@@ -141,7 +141,7 @@ def guardar_empleado(request):
             messages.warning(request, 'El correo electrónico ingresado no es válido')
             return render(request, 'agg_empleados.html', {'empleado': request.POST})
         # Crear el usuario
-        user = User.objects.create_user(username=username, password=password,is_superuser='True')
+        user = User.objects.create_user(username=username, password=password,is_staff='True')
 
         # Crear el objeto Empleado
         empleado = Empleado(user=user, cedula=cedula, nombres=nombres, apellidos=apellidos,
