@@ -1,10 +1,14 @@
 from django.db import models
 from socios.models import Socios
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from datetime import date
 
 class Prestamo(models.Model):
     socio = models.ForeignKey(Socios, on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_prestamo = models.DateField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_pago = models.DateField(null=True)
     plazo_meses = models.PositiveIntegerField()
     tasa_interes = models.DecimalField(max_digits=5, decimal_places=2)
@@ -12,4 +16,28 @@ class Prestamo(models.Model):
     cancelado = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Prestamo de {self.monto} a {self.socio.nombres} {self.socio.apellidos}"
+        return f"Prestamo de {self.monto} a {self.socio.user.first_name} {self.socio.user.last_name}"
+
+class PagoMensual(models.Model):
+    socio = models.ForeignKey(Socios, on_delete=models.CASCADE)
+    prestamo=models.ForeignKey(Prestamo, on_delete=models.CASCADE)
+    numero_cuota = models.PositiveIntegerField()
+    monto_pago = models.DecimalField(max_digits=8, decimal_places=2)
+    evidencia=models.FileField(blank=True)
+    cancelado = models.BooleanField(default=False)
+    fecha_pago = models.DateField()
+
+    def __str__(self):
+        return f"Pago de {self.monto_pago} a {self.socio.user.first_name} {self.socio.user.last_name}"
+
+@receiver(post_save, sender=PagoMensual)
+def actualizar_estado_prestamo(sender, instance, **kwargs):
+    prestamos = instance.prestamo
+    #todas_cuotas_pagadas = prestamos.pagomensual_set.filter(cancelado=False).count() == 0
+    todas_cuotas_pagadas = prestamos.pagomensual_set.filter(cancelado=False).exists()
+    prestamos.cancelado = not todas_cuotas_pagadas
+    prestamos.fecha_pago=date.today()
+    prestamos.save()
+
+post_save.connect(actualizar_estado_prestamo, sender=PagoMensual)
+

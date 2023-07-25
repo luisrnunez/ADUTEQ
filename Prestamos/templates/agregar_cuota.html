@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Agregar Cuota</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form method="post" action="{% url 'guardar_prestamo' %}">
+                    {% csrf_token %}
+                    <label for="socio">Socio:</label>
+                    <select class="form-control mb-2" name="socio" required style="width: 100%;">
+                        {% for socio in socios %}
+                        <option value="{{ socio.id }}">{{ socio.user.first_name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select class="form-control mb-2" name="prestamo" required style="width: 100%;">
+                        {% for prestamo in prestamoss %}
+                        <option value="{{ prestamo.id }}">{{ prestamo.user.first_name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="monto">Monto:</label>
+                    <input type="number" id="monto" name="monto" required>
+                  
+                    <!-- <label for="num_cuota">Numero de cuota:</label>
+                    <input type="number" pattern="[1][12]" maxlength="2" id="num_cuota" name="num_cuota" value="{{ prestamo.plazo_meses }}" required> -->
+                    <select name="num_cuota" id="num_cuota">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                  
+                    <input type="file" class="custom-file-input" id="foto" name="evidencia"
+                            onchange="previewImage(event)">
+                  
+                    <label for="fecha_pago">Fecha:</label>
+                    <input type="date" id="fechaid" name="fecha_pago" required>
+                  
+                  
+                    <input type="submit" value="Agregar prestamo">
+
+                    <a href="/prestamos"> <input type="button" value="Cancelar"
+                        style="background-color: red;"></a>
+                  </form>                     
+                </form>
+            </div>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    
+    <script>
+           var campoNumerico = document.getElementById("ruc");
+        campoNumerico.addEventListener("input", function() {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 13);
+        });
+        campoNumerico = document.getElementById("telefono");
+        campoNumerico.addEventListener("input", function() {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });
+    </script>
+    <script>
+        
+$(document).ready(function () {
+    $('#registro-form').on('submit', function (event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: '/registrarproveedor/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.status === 'error') {
+                    Swal.fire({
+                        "title": "Falló",
+                        "text": response.message,
+                        "icon": "warning"
+                    })
+                } else if (response.status === 'success') {
+                    Swal.fire({
+                        "title": "Éxito",
+                        "text": response.message,
+                        "icon": "success"
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            window.location.href = "/proveedores/"
+                        }
+                    })
+
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                Swal.fire('Error', 'Ocurrió un error al procesar la solicitud.', 'error');
+            }
+        });
+    });
+});
+    </script>
+
+<script>
+    // Obtener el campo de fecha por su ID
+    const fechaInput = document.getElementById('fechaid');
+
+    // Obtener la fecha actual en formato día, mes y año (dd/mm/yyyy)
+    const fechaActual = new Date();
+    const fechaActualFormatted = fechaActual.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    // Establecer la fecha actual como valor predeterminado en el campo de fecha
+    fechaInput.value = fechaActualFormatted;
+</script>
+    {% endblock %}
+</body>
+</html>
