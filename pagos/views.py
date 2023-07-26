@@ -13,17 +13,32 @@ from django.core.files.storage import FileSystemStorage
 from datetime import datetime, timedelta
 import tabula
 from django.contrib import messages
+from django.core.paginator import Paginator, PageNotAnInteger
 
 
 # Create your views here.
 def lista_pagos(request):
     pagos = Pagos.objects.all().order_by("fecha_consumo")
+    items_por_pagina = 8
+    paginator = Paginator(pagos, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        pagos=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        pagos=paginator.get_page(1)
     return render(request, 'listar_pagos.html', {'pagos': pagos})
 
 
 def lista_pagos_cuotas(request):
     pago_cuotas = Pagos_cuotas.objects.all().order_by("fecha_descuento")
-    return render(request, 'pagos_cuotas.html', {'pago_cuotas': pago_cuotas})
+    items_por_pagina = 8
+    paginator = Paginator(pago_cuotas, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        pagos_paginados=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        pagos_paginados=paginator.get_page(1)
+    return render(request, 'pagos_cuotas.html', {'pago_cuotas': pagos_paginados})
 
 
 def extraer_descuentos(request):
@@ -116,8 +131,15 @@ def editar_pago(request, pago_id):
 def detalles_cuota(request, pago_cuota_id):
     detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id).order_by('numero_cuota')
     pago_cu = Pagos_cuotas.objects.get(id=pago_cuota_id)
+    items_por_pagina = 8
+    paginator = Paginator(detalle_cuotas, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        detalles_paginados=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        detalles_paginados=paginator.get_page(1)
     return render(request, 'listar_detalle_cuotas.html',
-                  {'detalle_cuotas': detalle_cuotas, 'pago_cu': pago_cu})
+                  {'detalle_cuotas': detalles_paginados, 'pago_cu': pago_cu})
 
 
 def registra_pago_cuota(request, det_cuo_id):
