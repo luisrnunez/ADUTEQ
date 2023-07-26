@@ -54,11 +54,6 @@
 
                     <td>
                         {% if detalle_cuota.estado == False %}
-                        <!-- <div class="botones-sup">
-                                <form action="{% url 'registra_pago_cuota' det_cuo_id=detalle_cuota.id %}">
-                                    <button class="add-socio-btn">Registar Pago</button>
-                                </form>
-                            </div> -->
                         <button class="edit-btn"
                             onclick="confirmarPagoCuota('{{ detalle_cuota.id }}','{{ detalle_cuota.pago_cuota.socio }}')">
                             Registrar pago
@@ -67,10 +62,12 @@
                     </td>
 
                     <td>
-                        <form action="{% url 'agregar_pdf' detalle_cuota.id %}"> 
+                        {% if detalle_cuota.estado == True %}
+                        <form action="{% url 'agregar_pdf' detalle_cuota.id %}">
                             {% csrf_token %}
                             <button class="edit-btn">Agregar Evidencia</button>
                         </form>
+                        {% endif %}
                     </td>
 
                 </tr>
