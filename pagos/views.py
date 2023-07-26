@@ -114,7 +114,7 @@ def editar_pago(request, pago_id):
 
 
 def detalles_cuota(request, pago_cuota_id):
-    detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id)
+    detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id).order_by('numero_cuota')
     pago_cu = Pagos_cuotas.objects.get(id=pago_cuota_id)
     return render(request, 'listar_detalle_cuotas.html',
                   {'detalle_cuotas': detalle_cuotas, 'pago_cu': pago_cu})
@@ -164,8 +164,17 @@ def eliminar_pago_cuota(request, det_cuo_id):
     #     messages.success(request, 'Ups, ha ocurrido un problema')
     # return redirect('/lista_pagos_cuotas/')
 
-def evidencia(request):
-    return render(request,'agregar_evidencia.html')
+
+
+def agregar_pdf(request, det_id):
+    detalle_cuotas = Detalle_cuotas.objects.get(id=det_id)
+    if request.method == 'GET':
+        return render(request,'agregar_evidencia.html', {'detalle_cuotas': detalle_cuotas}) 
+    else:
+        archivo_pdf = request.FILES['evidencia']
+        detalle_cuotas.evidencia=archivo_pdf
+        detalle_cuotas.save()
+        return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
 
 def eliminar_pago(request, pago_id):
     pagos = Pagos.objects.get(id=pago_id)

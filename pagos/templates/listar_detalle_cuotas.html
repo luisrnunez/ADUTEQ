@@ -17,7 +17,9 @@
                     <th scope="col">Valor Cuota</th>
                     <th scope="col">Estado</th>
                     <th scope="col">Fecha de Pago</th>
+                    <th scope="col">Evidencia</th>
                     <th scope="col">Registar Pago</th>
+                    <th scope="col">Registar Evidencia</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,6 +39,19 @@
                         {% endif %}
                     </td>
                     <td>{{detalle_cuota.fecha_descuento}}</td>
+
+                    <td>
+
+                        {% if detalle_cuota.evidencia %}
+                        <a href="{{ detalle_cuota.evidencia.url }}" target="_blank">
+                            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                        </a>
+                        {% else %}
+                        Sin evidencia
+                        {% endif %}
+
+                    </td>
+
                     <td>
                         {% if detalle_cuota.estado == False %}
                         <!-- <div class="botones-sup">
@@ -49,6 +64,13 @@
                             Registrar pago
                         </button>
                         {% endif %}
+                    </td>
+
+                    <td>
+                        <form action="{% url 'agregar_pdf' detalle_cuota.id %}"> 
+                            {% csrf_token %}
+                            <button class="edit-btn">Agregar Evidencia</button>
+                        </form>
                     </td>
 
                 </tr>
