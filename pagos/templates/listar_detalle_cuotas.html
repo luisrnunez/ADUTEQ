@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="content-menu" style="padding-top: 0%;">
+
+    <div class="header">
+        <h1> Detalle Cuotas {{pago_cu.socio}} {{pago_cu.socio.user.last_name}}</h1>
+    </div>
+    <div class="socios-content ">
+        <div class="botones-sup">
+            <a href="/lista_pagos_cuotas/"> <button class="add-socio-btn">Lista Pagos Cuotas</button></a>
+        </div>
+        <table class="socios-table">
+            <thead>
+                <tr>
+                    <th scope="col">No Cuota</th>
+                    <th scope="col">Valor Cuota</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha de Pago</th>
+                    <th scope="col">Registar Pago</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle_cuota in detalle_cuotas %}
+                <tr>
+                    <td>{{detalle_cuota.numero_cuota}}</td>
+                    <td>{{detalle_cuota.pago_cuota.valor_cuota}}</td>
+                    <td>
+                        {% if detalle_cuota.estado %}
+                        <button class="green-button">
+                            Cancelado
+                        </button>
+                        {% else %}
+                        <button class="red-button">
+                            Pendiente
+                        </button>
+                        {% endif %}
+                    </td>
+                    <td>{{detalle_cuota.fecha_descuento}}</td>
+                    <td>
+                        {% if detalle_cuota.estado == False %}
+                        <!-- <div class="botones-sup">
+                                <form action="{% url 'registra_pago_cuota' det_cuo_id=detalle_cuota.id %}">
+                                    <button class="add-socio-btn">Registar Pago</button>
+                                </form>
+                            </div> -->
+                        <button class="edit-btn"
+                            onclick="confirmarPagoCuota('{{ detalle_cuota.id }}','{{ detalle_cuota.pago_cuota.socio }}')">
+                            Registrar pago
+                        </button>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <script>
+
+        function confirmarPagoCuota(cuotaId, socioNombre) {
+            var valor;
+
+            valor = 0;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Registrar el pago de esta cuota al soci@ ' + socioNombre,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // El usuario ha confirmado la edición, redirigir a la página de edición
+                    window.location.href = '/registra_pago_cuota/' + cuotaId;
+                }
+            });
+
+        }
+
+    </script>
+
+    {% endblock %}

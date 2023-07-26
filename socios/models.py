@@ -18,4 +18,4 @@ class Socios(models.Model):
     aporte = models.DecimalField(max_digits=8,decimal_places=2)
 
     def __str__(self):
-        return self.user.username
+        return self.user.first_name

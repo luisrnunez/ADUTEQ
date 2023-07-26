@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="content-menu" style="padding-top: 0%;">
+
+    <div class="header">
+        <h1>Pagos Cuotas</h1>
+    </div>
+    <div class="socios-content ">
+        <div class="botones-sup">
+            <a href="/agregar_pagos_cuotas/"> <button class="add-socio-btn">Agregar Descuento Cuotas</button></a>
+        </div>
+        <div class="botones-sup">
+            <a href="/listar_pagos/"> <button class="add-socio-btn">Lista de Descuentos</button></a>
+        </div>
+        <table class="socios-table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Socio</th>
+                    <th scope="col">Proveedor</th>
+                    <th scope="col">Numero Cuotas</th>
+                    <th scope="col">Cuota Actual</th>
+                    <th scope="col">Consumo Total</th>
+                    <th scope="col">Valor Cuota</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha Descuento</th>
+                    <th scope="col">Detalle</th>
+                    <th scope="col">Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago_cuota in pago_cuotas %}
+                <tr>
+                    <td>{{pago_cuota.id}}</td>
+                    <td>{{pago_cuota.socio.user.first_name }}</td>
+                    <td>{{pago_cuota.proveedor.nombre}}</td>
+                    <td>{{pago_cuota.numero_cuotas}}</td>
+                    <td>{{pago_cuota.cuota_actual}}</td>
+                    <td>{{pago_cuota.consumo_total}}</td>
+                    <td>{{pago_cuota.valor_cuota}}</td>
+                    <td>
+                        {% if pago_cuota.estado %}
+                        <button class="green-button">
+                            Cancelado
+                        </button>
+                        {% else %}
+                        <button class="red-button">
+                            Pendiente
+                        </button>
+                        {% endif %}
+                    </td>
+                    <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
+                    <td>
+                        <form action="{% url 'detalles_cuota' pago_cuota.id %}">
+                            <button class="edit-btn">Ver Detalle</button>
+                        </form>
+                    </td>
+                    <!-- <td>
+                        <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
+                            <button class="edit-btn">Eliminar</button>
+                        </form>
+                    </td> -->
+                    <td>
+                        <button class="edit-btn" onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    <script>
+        function confirmarEliminacion(prestamo_id, socioNombre) {
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: 'Deseas eliminar el descuento del soci@ ' + socioNombre,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí',
+                        cancelButtonText: 'Cancelar',
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // El usuario ha confirmado la edición, redirigir a la página de edición
+                            window.location.href = '/eliminar_pago_cuota/' + prestamo_id;
+                            print(valor)
+                        }
+                    });
+            }
+    </script>
+    {% endblock %}
