@@ -18,6 +18,7 @@ from socios.models import Socios
 from django.utils import timezone
 from django.contrib.auth.models import User
 from . import models
+from django.core.paginator import Paginator, PageNotAnInteger
 
 # Create your views here.
 
@@ -267,8 +268,15 @@ def Recuperar_cuenta(request):
 
 @login_required
 def ListaSocios(request):
-    socios = Socios.objects.all()
-    return render(request, "emp_socios.html", {'socios': socios})
+    socios = Socios.objects.all().order_by('user')
+    items_por_pagina = 8
+    paginator = Paginator(socios, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+         socios_pag=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+         socios_pag=paginator.get_page(1)
+    return render(request, "emp_socios.html", {'socios': socios_pag})
 
 
 def AggSocio(request):

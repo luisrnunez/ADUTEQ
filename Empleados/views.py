@@ -9,12 +9,20 @@ from django.contrib import messages
 from . import models
 from .models import Empleado
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, PageNotAnInteger
 # Create your views here.
 
 @login_required
 def listar_empleados(request):
-    empleados = models.Empleado.objects.all()
-    return render(request, "lista_empleados.html", {'empleados': empleados})
+    empleados = models.Empleado.objects.all().order_by('nombres')
+    items_por_pagina = 8
+    paginator = Paginator(empleados, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        empleados_pag=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        empleados_pag=paginator.get_page(1)
+    return render(request, "lista_empleados.html", {'empleados': empleados_pag})
 
 @login_required
 def editar_empleado(request, empleado_id):
