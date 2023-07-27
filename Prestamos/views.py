@@ -242,7 +242,7 @@ def presagregar_pdf(request, det_id):
         archivo_pdf = request.FILES['evidencia']
         pago_men.evidencia=archivo_pdf
         pago_men.save()
-        return redirect('/mostrar_detalles/' + str(pago_men.socio.id) + str(pago_men.prestamo.id))
+        return redirect('/detalles_pago/' + str(pago_men.socio.id) +'/'+ str(pago_men.prestamo.id))
 
 
 #eliminar prestamos y sus respectivas cuotas
