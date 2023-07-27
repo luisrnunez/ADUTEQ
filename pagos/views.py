@@ -128,20 +128,20 @@ def registra_pago_cuota(request, det_cuo_id):
         fecha_descuento__lt=cuota_actual.fecha_descuento).last()
     pago_cuotas = Pagos_cuotas.objects.get(id=detalle_cuotas.pago_cuota.id)
 
-    if cuota_anterior is not None and cuota_anterior.estado:
-        detalle_cuotas.estado = True
-        pago_cuotas.cuota_actual += 1
-        if pago_cuotas.cuota_actual == pago_cuotas.numero_cuotas:
+    # if cuota_anterior is not None and cuota_anterior.estado:
+    detalle_cuotas.estado = True
+    pago_cuotas.cuota_actual += 1
+    if pago_cuotas.cuota_actual == pago_cuotas.numero_cuotas:
             pago_cuotas.estado = True
-        detalle_cuotas.save()
-        pago_cuotas.save()
-        messages.success(
-            request, 'Se ha registrado el pago de la cuota exitosamente.')
-        return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
-    else:
-        messages.warning(request,
-                         'No se puede pagar la cuota actual. La cuota del mes anterior no ha sido pagada.')
-        return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
+    detalle_cuotas.save()
+    pago_cuotas.save()
+    messages.success(
+        request, 'Se ha registrado el pago de la cuota exitosamente.')
+    return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
+    # else:
+    #     messages.warning(request,
+    #                      'No se puede pagar la cuota actual. La cuota del mes anterior no ha sido pagada.')
+    #     return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
 
 
 def eliminar_pago_cuota(request, det_cuo_id):
