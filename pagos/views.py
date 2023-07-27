@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger
 
 
-# Create your views here.
+# Create your views here. 
 def lista_pagos(request):
     pagos = Pagos.objects.all().order_by("fecha_consumo")
     items_por_pagina = 8
@@ -146,25 +146,47 @@ def registra_pago_cuota(request, det_cuo_id):
     detalle_cuotas = Detalle_cuotas.objects.get(id=det_cuo_id)
 
     cuota_actual = detalle_cuotas
+<<<<<<< HEAD
     cuota_anterior = Detalle_cuotas.objects.filter(
         fecha_descuento__lt=cuota_actual.fecha_descuento).last()
     pago_cuotas = Pagos_cuotas.objects.get(id=detalle_cuotas.pago_cuota.id)
     print(cuota_actual.numero_cuota)
+=======
+>>>>>>> fe47ed72c2c78cd43b66fa1c3c2e1e64d65f3810
 
-    if cuota_anterior is not None and cuota_anterior.estado:
+    if cuota_actual.numero_cuota == 1:
         detalle_cuotas.estado = True
+        pago_cuotas = Pagos_cuotas.objects.get(id=detalle_cuotas.pago_cuota.id)
         pago_cuotas.cuota_actual += 1
+
         if pago_cuotas.cuota_actual == pago_cuotas.numero_cuotas:
             pago_cuotas.estado = True
+
         detalle_cuotas.save()
         pago_cuotas.save()
-        messages.success(
-            request, 'Se ha registrado el pago de la cuota exitosamente.')
+
+        messages.success(request, 'Se ha registrado el pago de la cuota exitosamente.')
         return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
     else:
-        messages.warning(request,
-                         'No se puede pagar la cuota actual. La cuota del mes anterior no ha sido pagada.')
-        return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
+        cuota_anterior = Detalle_cuotas.objects.filter(
+            fecha_descuento__lt=cuota_actual.fecha_descuento).last()
+
+        if cuota_anterior is not None and cuota_anterior.estado:
+            detalle_cuotas.estado = True
+            pago_cuotas = Pagos_cuotas.objects.get(id=detalle_cuotas.pago_cuota.id)
+            pago_cuotas.cuota_actual += 1
+
+            if pago_cuotas.cuota_actual == pago_cuotas.numero_cuotas:
+                pago_cuotas.estado = True
+
+            detalle_cuotas.save()
+            pago_cuotas.save()
+
+            messages.success(request, 'Se ha registrado el pago de la cuota exitosamente.')
+            return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
+        else:
+            messages.warning(request, 'No se puede pagar la cuota actual. La cuota del mes anterior no ha sido pagada.')
+            return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
 
 
 def eliminar_pago_cuota(request, det_cuo_id):
