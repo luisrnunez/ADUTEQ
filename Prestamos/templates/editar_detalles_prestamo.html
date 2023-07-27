@@ -10,30 +10,11 @@
         </div>
         <div class="content">
             <div class="form-container">
-                <form method="post" action="{% url 'guardar_edicion' %}">
+                <form method="post" action="{% url 'presagregar_pdf' pago_men.id %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <input value="{{cuota.id}}" type="number" id="id" name="id" required hidden>
-                    <!-- <label for="socio">Socio:</label>
-                    <select class="form-control mb-2" name="socio" required style="width: 100%;">
-                        {% for socio in socios %}
-                        <option value="{{ socio.id }}" {% if socio == cuota.socio %} selected {% endif %}>{{ socio.user.first_name }}</option>
-                        {% endfor %}
-                    </select> -->
-
-                    <!-- <label for="prestamo">Prestamo:</label>
-                    <input type="number" id="prestamo" name="prestamo" value="{{ prestamo.prestamo }}" required>
-                  
-                    <label for="montopagar">Monto a pagar:</label>
-                    <input type="number" pattern="[1][12]" maxlength="2" id="montopagar" name="montopagar" value="{{ prestamo.monto_pagar }}" required> -->
                   
                     <label for="evidencia">Evidencia:</label>
-                    <input type="file" id="evidencia" name="evidencia" value="{{ prestamo.evidencia }}" required>
-
-                    <!-- <label for="evidencia">Cancelado:</label>
-                    <input type="text" id="evidencia" name="evidencia" value="{{ prestamo.evidencia }}" required>
-                  
-                    <label for="fecha_prestamo">Fecha:</label>
-                    <input type="date" id="fecha_prestamo" name="fecha_prestamo" value="{{ prestamo.fecha_prestamo|date:'Y-m-d' }}" required> -->
+                    <input type="file" id="evidencia" name="evidencia" value="{{ pago_men.evidencia }}" required>
                   
                     <input type="submit" value="Guardar">
 

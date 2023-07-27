@@ -204,7 +204,7 @@ def eliminar_pago_cuota(request, det_cuo_id):
 
 
 
-def agregar_pdf(request, det_id):
+def agregar_pdf(request, det_id): 
     detalle_cuotas = Detalle_cuotas.objects.get(id=det_id)
     if request.method == 'GET':
         return render(request,'agregar_evidencia.html', {'detalle_cuotas': detalle_cuotas}) 

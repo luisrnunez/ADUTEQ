@@ -41,7 +41,17 @@
                         <td>{{ cuota.socio.user.first_name }}</td>
                         <td>{{ cuota.numero_cuota}}</td>
                         <td>{{ cuota.monto_pago }}$</td>
-                        <td>{{ cuota.evidencia }}</td>
+                        <td>
+
+                            {% if cuota.evidencia %}
+                            <a href="{{ cuota.evidencia.url }}" target="_blank">
+                                <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                            </a>
+                            {% else %}
+                            Sin evidencia
+                            {% endif %}
+
+                        </td>
 
                         <td>
                             {% if cuota.cancelado %}
@@ -56,18 +66,20 @@
                         </td>
 
                         <td>{{ cuota.fecha_pago }}</td>
-                            <td>
-                                {% if cuota.cancelado == False %}
-                                    <button class="edit-btn"
-                                        onclick="confirmarPagoCuota('{{ cuota.id }}','{{ cuota.socio.user.first_name }}','{{ cuota.cancelado }}','{{ cuota.socio.id }}','{{ cuota.prestamo.id }}')">
-                                        Registrar pago
-                                    </button>
-                                {% endif %}
-                            </td>
                         <td>
-                            <form action="{% url 'editar_detalles' cuota.id cuota.socio.id cuota.prestamo.id %}">
+                            {% if cuota.cancelado == False %}
+                            <button class="edit-btn"
+                                onclick="confirmarPagoCuota('{{ cuota.id }}','{{ cuota.socio.user.first_name }}','{{ cuota.cancelado }}','{{ cuota.socio.id }}','{{ cuota.prestamo.id }}')">
+                                Registrar pago
+                            </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cuota.cancelado %}
+                            <form action="{% url 'presagregar_pdf' cuota.id %}">
                                 <button class="edit-btn">Editar</button>
                             </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
