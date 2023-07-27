@@ -149,6 +149,7 @@ def registra_pago_cuota(request, det_cuo_id):
     cuota_anterior = Detalle_cuotas.objects.filter(
         fecha_descuento__lt=cuota_actual.fecha_descuento).last()
     pago_cuotas = Pagos_cuotas.objects.get(id=detalle_cuotas.pago_cuota.id)
+    print(cuota_actual.numero_cuota)
 
     if cuota_anterior is not None and cuota_anterior.estado:
         detalle_cuotas.estado = True
