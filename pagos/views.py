@@ -18,7 +18,7 @@ from django.core.paginator import Paginator, PageNotAnInteger
 
 # Create your views here. 
 def lista_pagos(request):
-    pagos = Pagos.objects.all().order_by("fecha_consumo")
+    pagos = Pagos.objects.all().order_by("-fecha_consumo")
     items_por_pagina = 8
     paginator = Paginator(pagos, items_por_pagina)
     numero_pagina = request.GET.get('page')
@@ -30,7 +30,7 @@ def lista_pagos(request):
 
 
 def lista_pagos_cuotas(request):
-    pago_cuotas = Pagos_cuotas.objects.all().order_by("fecha_descuento")
+    pago_cuotas = Pagos_cuotas.objects.all().order_by("estado")
     items_por_pagina = 8
     paginator = Paginator(pago_cuotas, items_por_pagina)
     numero_pagina = request.GET.get('page')
@@ -129,7 +129,7 @@ def editar_pago(request, pago_id):
 
 
 def detalles_cuota(request, pago_cuota_id):
-    detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id).order_by('numero_cuota')
+    detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id).order_by("estado", "numero_cuota")
     pago_cu = Pagos_cuotas.objects.get(id=pago_cuota_id)
     items_por_pagina = 8
     paginator = Paginator(detalle_cuotas, items_por_pagina)
