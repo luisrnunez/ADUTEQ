@@ -160,6 +160,13 @@ body {
     margin: 20px;
 }
 
+.rounded-image {
+    border-radius: 50%; /* Esto hará que la imagen sea redondeada */
+    width: 150px; /* Ajusta el tamaño de la imagen según lo necesites */
+    height: 150px; /* Ajusta el tamaño de la imagen según lo necesites */
+    object-fit: cover; /* Esto asegura que la imagen se ajuste dentro del contenedor redondeado */
+}
+
 .socios-table {
     width: 100%;
     border-collapse: collapse;

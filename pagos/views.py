@@ -18,7 +18,7 @@ from django.core.paginator import Paginator, PageNotAnInteger
 
 # Create your views here. 
 def lista_pagos(request):
-    pagos = Pagos.objects.all().order_by("fecha_consumo")
+    pagos = Pagos.objects.all().order_by("-fecha_consumo")
     items_por_pagina = 8
     paginator = Paginator(pagos, items_por_pagina)
     numero_pagina = request.GET.get('page')
@@ -30,7 +30,7 @@ def lista_pagos(request):
 
 
 def lista_pagos_cuotas(request):
-    pago_cuotas = Pagos_cuotas.objects.all().order_by("fecha_descuento")
+    pago_cuotas = Pagos_cuotas.objects.all().order_by("estado")
     items_por_pagina = 8
     paginator = Paginator(pago_cuotas, items_por_pagina)
     numero_pagina = request.GET.get('page')
@@ -129,7 +129,7 @@ def editar_pago(request, pago_id):
 
 
 def detalles_cuota(request, pago_cuota_id):
-    detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id).order_by('numero_cuota')
+    detalle_cuotas = Detalle_cuotas.objects.filter(pago_cuota=pago_cuota_id).order_by("estado", "numero_cuota")
     pago_cu = Pagos_cuotas.objects.get(id=pago_cuota_id)
     items_por_pagina = 8
     paginator = Paginator(detalle_cuotas, items_por_pagina)
@@ -204,7 +204,7 @@ def eliminar_pago_cuota(request, det_cuo_id):
 
 
 
-def agregar_pdf(request, det_id):
+def agregar_pdf(request, det_id): 
     detalle_cuotas = Detalle_cuotas.objects.get(id=det_id)
     if request.method == 'GET':
         return render(request,'agregar_evidencia.html', {'detalle_cuotas': detalle_cuotas}) 
@@ -233,23 +233,29 @@ def extraer_datos_pdf(request):
 
         tables = tabula.read_pdf(pdf_file, pages="all")
 
+     
+
         datos_tabla = []
+
+        # print(tables)
 
         # Procesar cada tabla extraída
         for table in tables:
             # Obtener los encabezados de la tabla
-            headers = table.columns.tolist()
+            #headers = table.columns.tolist()
+            #print(headers)
 
             # Recorrer las filas de la tabla
             for index, row in table.iterrows():
                 # Obtener los valores de cada columna en la fila
-                column = row.tolist()
+                #column = row.tolist()
                 row_data = {}
-                row_data['cedula'] = column[0] if len(column) >= 1 else ''
-                row_data['nombre'] = column[1] if len(column) >= 2 else ''
-                row_data['consumo_total'] = column[2] if len(
-                    column) >= 3 else ''
-                datos_tabla.append(row_data)
+                # print(row.tolist())
+                #row_data['cedula'] = column[0] if len(column) >= 1 else ''
+                #row_data['nombre'] = column[1] if len(column) >= 2 else ''
+                #row_data['consumo_total'] = column[2] if len(
+                #    column) >= 3 else ''
+                datos_tabla.append(row.tolist())
 
         proveedores = Proveedor.objects.filter(estado=True)
         return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
@@ -259,55 +265,114 @@ def extraer_datos_pdf(request):
 
 def guardar_descuentos_prov(request, id, fecha):
     if request.method == 'POST':
+
         registros_formulario = request.POST
 
         campos = list(registros_formulario.keys())
-        # Omitir el campo del token CSRF si está presente
-        campos.remove('csrfmiddlewaretoken')
+
+        campos.remove('csrfmiddlewaretoken')  # Omitir el campo del token CSRF si está presente
         # Obtener la longitud de la lista de campos
         cant_campos = len(campos)
         # Obtener la longitud de los registros (asumiendo que todos los campos tienen la misma cantidad de valores)
         cant_registros = len(registros_formulario.getlist(campos[0]))
-        print('cantidad de registros:', cant_registros)
-        print('cantidad de campos:', cant_campos)
-        if cant_campos == 3:
-            # validando que el primer campo se ha cedula
-            nombres = None
-            cedulas = None
-            consumos = None
-            campo1 = registros_formulario.getlist(campos[0])
-            if campo1[0].isdigit():
-                cedulas = registros_formulario.getlist(campos[0])
-                if len(cedulas[0]) != 10:
-                    cedulas = None
-            # Validando si el segundo campo es nombre
-            nombres = registros_formulario.getlist(campos[1])
-            campo3 = registros_formulario.getlist(campos[2])
-            if campo3[0].isdigit():
-                consumos = registros_formulario.getlist(campos[2])
 
-            for i in range(cant_registros):
-                if cedulas != None:
-                    cedula = cedulas[i]
+
+        nombres = None
+        cedulas = None
+        consumos = None
+        ide = registros_formulario.getlist('ide')
+        print(ide)
+        if ide[0].isdigit():
+            cedulas = registros_formulario.getlist('ide')
+            if len(cedulas[0]) != 10:
+                cedulas = None
+        else:
+            nombres = registros_formulario.getlist('ide')   
+        des = registros_formulario.getlist('des')
+        if des[0].isdigit():
+            consumos = registros_formulario.getlist('des')
+
+
+
+        for i in range(cant_registros):
+            nombre = None
+            cedula = None
+            consumo_total = None
+            socios = None
+            if cedulas != None:
+                cedula = cedulas[i]
+            else:
                 nombre = nombres[i]
-                consumo_total = consumos[i]
+            consumo_total = consumos[i]
+            print(nombre)
+            print(consumo_total)
 
-                print('cedula:', cedula)
-                print('nombre:', nombre)
-                print('consumo_total:', consumo_total)
+            if cedula != None:
+                socios = Socios.objects.filter(cedula__icontains=cedula)
+            elif nombre and socios is None:
+                users = User.objects.filter(first_name__icontains=nombre)
+                socios = Socios.objects.filter(user__in=users)
+                print(socios)
+            proveedor = Proveedor.objects.get(id=id)
+            if socios.exists():
+                socio = socios.first()  # Obtener la primera instancia de Socios en la queryset socios
+                Pagos.objects.create(socio=socio, proveedor=proveedor, consumo_total=consumo_total, fecha_consumo=fecha)
+                response = {
+                                            'status': True,
+                                            'message': 'Registros guardados correctamente.'
+                                            }
+            else:
+                response = {
+                                                'status': False,
+                                                'message': 'Registros no se pudieron guardar'
+                                                }   
+    return JsonResponse(response)
 
-                if cedula != None:
-                    socios = Socios.objects.filter(cedula__icontains=cedula)
-                elif nombre and socios is None:
-                    users = User.objects.filter(first_name__icontains=nombre)
-                    socios = Socios.objects.filter(user__in=users)
-                proveedor = Proveedor.objects.get(id=id)
-                if socios.exists():
-                    socio = socios.first()  # Obtener la primera instancia de Socios en la queryset socios
-                    Pagos.objects.create(
-                        socio=socio, proveedor=proveedor, consumo_total=consumo_total, fecha_consumo=fecha)
-                    response = {
-                        'status': 'success',
-                        'message': 'Registros guardados correctamente.'
-                    }
+def verificar_registros(request):
+    if request.method == 'POST':
+        registros_formulario = request.POST
+
+        campos = list(registros_formulario.keys())
+        campos.remove('csrfmiddlewaretoken')
+        registros_con_estilo = []
+        cant_registros = len(registros_formulario.getlist(campos[0]))
+        valor = 0
+        for i in range(cant_registros):
+            datos = {} 
+            for campo in campos:
+                datos[campo] = registros_formulario.getlist(campo)[i]  # Obtenemos el valor del campo para el registro actual
+            datos['estilo_color'] = 'normal'  # Agregamos la nueva columna 'estilo_color' con valor 'normal'
+            
+            ide = registros_formulario.getlist('ide')
+            if ide[i].isdigit():
+                if Socios.objects.filter(cedula__icontains=ide[i]).exists():
+                    datos['estilo_color'] = 'normal'
+                else:
+                    valor=1
+                    datos['estilo_color'] = 'rojo'
+            else:
+                if User.objects.filter(first_name__icontains=ide[i]).exists():
+                    datos['estilo_color'] = 'normal'
+                    print('existe de usuario')
+                else:
+                    valor=1
+                    datos['estilo_color'] = 'rojo'
+                    print(' no existe de usuario')
+            registros_con_estilo.append(datos)
+        print(registros_con_estilo)
+        proveedores = Proveedor.objects.filter(estado=True)
+        if valor == 1:
+            response = {
+                'status': False,
+                'message': 'Se han encontrado errores en los registros. Por favor, verifíquelos.',
+                'registros': registros_con_estilo  # Agrega los registros con estilo a la respuesta
+            }
+        else:
+            response = {
+                'status': True,
+                'message': 'No se han encontrado errores en los registros',
+                'registros': registros_con_estilo  # Agrega los registros con estilo a la respuesta
+            }
+
+        #return redirect(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': registros_con_estilo})
     return JsonResponse(response)

@@ -40,7 +40,6 @@ def guardar_prestamo(request):
                 prestamo=prestamo,
                 numero_cuota=numero_cuota,
                 monto_pago=monto_pago_mensual,
-                evidencia="null",
                 cancelado=False,
                 fecha_pago=fecha_pago
             )
@@ -236,11 +235,15 @@ def editar_detalles(request, detalle_id, socio_id, prestamo_id):
 
         return redirect('/detalles_pago/'+ str(socio_id) +'/'+str(prestamo_id))
     
-def guardaredicion(request):
-    evidencia=request.FILES['evidencia']
-    pagomensual= get_object_or_404(PagoMensual, id=request.POST.get('id'))
-    pagomensual.evidencia=evidencia
-    pagomensual.save()
+def presagregar_pdf(request, det_id): 
+    pago_men = PagoMensual.objects.get(id=det_id)
+    if request.method == 'GET':
+        return render(request,'editar_detalles_prestamo.html', {'pago_men': pago_men}) 
+    else:
+        archivo_pdf = request.FILES['evidencia']
+        pago_men.evidencia=archivo_pdf
+        pago_men.save()
+        return redirect('/detalles_pago/' + str(pago_men.socio.id) +'/'+ str(pago_men.prestamo.id))
 
 
 #eliminar prestamos y sus respectivas cuotas
