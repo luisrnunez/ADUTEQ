@@ -18,7 +18,7 @@ from django.core.paginator import Paginator, PageNotAnInteger
 
 # Create your views here. 
 def lista_pagos(request):
-    pagos = Pagos.objects.all().order_by("-fecha_consumo")
+    pagos = Pagos.objects.all().order_by("-fecha_consumo", "proveedor")
     items_por_pagina = 8
     paginator = Paginator(pagos, items_por_pagina)
     numero_pagina = request.GET.get('page')
