@@ -198,18 +198,25 @@
                         <th>descripcion</th>
                         <th>fecha</th>
                         <th>motivo</th>
+                        <th>Valor-Socio</th>
                         <th>Total</th>
-                        <th>Editar</th>
+                        <!-- <th>Editar</th> -->
                         <th>Eliminar</th>
+                        <th>Detalles</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for ayuda in ayudas %}
                     <tr>
-                        <td>{{ayuda.socio.user.first_name}}</td>
+                        {% if ayuda.socio.user.first_name %}
+                            <td>{{ayuda.socio.user.first_name}}</td>
+                        {% else %}
+                            <td>OTRO</td>
+                        {% endif %}
                         <td>{{ayuda.descripcion}}</td>
                         <td>{{ayuda.fecha}}</td>
                         <td>{{ayuda.motivo}}</td>
+                        <td>{{ayuda.valorsocio}}</td>
                         <td>{{ayuda.total}}</td>
 
                         <!--{% if proveedor.estado == False %}
@@ -218,17 +225,22 @@
                         <td>Habilitado</td>
 
                         {% endif %}-->
-                        <td>
+                     
                             <!--<button class="edit-btn">Editar</button>
                             <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
-                            <a style="text-decoration: none;" class="edit-btn"
-                                href="/formeditarayuda/{{ayuda.id}}">Editar</a>
+
+                            <!-- <a style="text-decoration: none;" class="edit-btn"
+                                href="/formeditarayuda/{{ayuda.id}}">Editar</a> -->
+
                             <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
 
-                        </td>
+                        
                         <td>
                             <a style="text-decoration: none;" class="delete-btn" href="#"
                                 onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/', 'Ayuda economica')">Eliminar</a>
+                        </td>
+                        <td>
+                            <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Detalles Ayuda</a>
                         </td>
                         <!--<td>{{proveedor.id}}</td>-->
                     </tr>

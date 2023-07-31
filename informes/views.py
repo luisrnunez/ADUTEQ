@@ -4,17 +4,35 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.contrib import messages
 from socios.models import Socios
+from proveedores.models import Proveedor
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from datetime import datetime, timedelta
+from django.db.models import Sum
 
 
 # Create your views here.
 
 def obtenerValores(socio_id):
     sociop=Socios.objects.get(id=socio_id)
-    gasto=Pagos.objects.filter(socio=sociop)
-    return gasto
+
+    #obtener consumos totales de un socio
+    hoy = datetime.today()
+    ultimo_mes = hoy - timedelta(days=30)
+    total_general = 0
+    gastos_por_proveedor = Pagos.objects.filter(socio_id=socio_id, fecha_consumo__gte=ultimo_mes).values('proveedor').annotate(total_proveedor=Sum('consumo_total'))
+    gastos_por_proveedor_list = []
+    for gasto_proveedor in gastos_por_proveedor:
+        proveedor = gasto_proveedor['proveedor']
+        total_proveedor = gasto_proveedor['total_proveedor']
+        nameproveedor=Proveedor.objects.get(id=proveedor)
+        total_general +=total_proveedor
+        gastos_por_proveedor_list.append({'proveedor': nameproveedor.nombre, 'total_proveedor': total_proveedor, 'total':total_general})
+    
+
+    print(gastos_por_proveedor, total_general)
+    return gastos_por_proveedor_list
 
 def enviarGastoEmail(socio_id):
     sociop=Socios.objects.get(id=socio_id)

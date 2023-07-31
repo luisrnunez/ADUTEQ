@@ -184,7 +184,8 @@ def aplicar_pago_cuota(request, cuota_id, valor, socio_id, prestamo_id):
     ult_cuota=cuotas.last()
     #cuota anterior a la actual
     cuota_anterior = cuotas_ord.filter(fecha_pago__lt=cuota.fecha_pago).last()
-
+    # print(cuota)
+    # print(cuota_anterior)
     if request.method == 'GET':
         # Cambiar el estado del cancelado
         print (valor)

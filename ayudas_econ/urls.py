@@ -21,6 +21,10 @@ urlpatterns = [
 
     path('formeditarayuda/<int:codigo>', views.feditAyuda),
 
-    path('eliminarayuda/<int:codigo>', views.deleteAyuda),
+    path('eliminarayuda/<int:codigo>', views.eliminar_ayuda),
+    #detallesayuda
+    path('detalleayuda/<int:ayuda_id>', views.detallesAyuda),
+    path('registrarayuda/<int:detalle_id>/<int:valor>/', views.registro_ayuda),
+    path('prestamo/presagregar_pdf/<int:det_id>/',views.presagregar_pdf, name = 'presagregar_pdf'),
 
 ]

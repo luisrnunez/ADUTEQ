@@ -7,6 +7,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Socios, Proveedor, Pagos, Pagos_cuotas, Detalle_cuotas
+from proveedores.models import detallesCupos
 from .forms import PagosForm
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
@@ -58,13 +59,15 @@ def agrefar_pagos(request):
 
         proveedor_id = request.POST.get('proveedor')
         proveedores = Proveedor.objects.get(id=proveedor_id)
-
-        cantidad = request.POST.get('consumo_total')
+        cupo=detallesCupos.objects.get(proveedor=proveedores,socio=socios)
         fecha = request.POST.get('fecha_consumo')
-
-        pagos = Pagos.objects.create(
-            socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_consumo=fecha)
-
+        cantidad = request.POST.get('consumo_total')
+        if(float(cantidad)<=cupo.cupo):
+            pagos = Pagos.objects.create(socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_consumo=fecha)
+            messages.success(request, 'Exito')
+            return redirect('/listar_pagos/')
+        else:
+            messages.warning(request, 'La cantidad que desea ingresar es superior a la brindada por el proveedor')
         return redirect('/listar_pagos/')
 
 
@@ -83,6 +86,8 @@ def agregar_pagos_cuotas(request):
             proveedores = Proveedor.objects.get(id=proveedor_id)
 
             cantidad = request.POST.get('consumo_total')
+            cupo=detallesCupos.objects.get(socio=socio_id)
+
             # fecha = request.POST.get('fecha_descuento')
             numero_cuoa = request.POST.get('numero_cuotas')
 
@@ -94,6 +99,9 @@ def agregar_pagos_cuotas(request):
             cantidadval = float(cantidad)
             n_cuota = float(numero_cuoa)
             valor_cuo = cantidadval / n_cuota
+
+            # if(str(cantidad)>cupo):
+            #     messages.warning(request, 'El valor que desea ingrear es superior al cupo brindado por el proveedor')
 
             pagoscuotas = Pagos_cuotas.objects.create(
                 socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha,

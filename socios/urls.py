@@ -20,4 +20,8 @@ urlpatterns = [
     path('eliminar_socio/<int:user_id>/<int:valor>/', views.eliminar_socio, name='eliminar_socio'),
     path('buscar_socios/', views.buscar_socios, name='buscar_socios'),
     path('cerrar_sesion/', views.cerrar_sesion),
+    #--------APORTACIONES---------
+    path('aportaciones/', views.veraportaciones),
+    path('aportaciones_socio/<int:socio_id>', views.veraportacionesocio),
+    path('registraraportaciones/', views.registrar_aportaciones_mensuales)
 ]
