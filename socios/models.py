@@ -19,3 +19,14 @@ class Socios(models.Model):
 
     def __str__(self):
         return self.user.first_name
+    
+class Aportaciones(models.Model):
+    TIPOS_APORTACION = (
+        ('AE', 'Ayuda Económica'),
+        ('CO', 'Cuota Ordinaria'),
+    )
+
+    socio = models.ForeignKey(Socios, on_delete=models.CASCADE)
+    tipo_aportacion = models.CharField(max_length=2, choices=TIPOS_APORTACION)
+    monto = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha = models.DateField(null=True)

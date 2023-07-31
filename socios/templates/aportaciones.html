@@ -25,11 +25,11 @@
 <div class="content-menu">
 
     <div class="header">
-        <h1>Socios</h1>
+        <h1>Aportaciones</h1>
     </div>
     <div class="socios-content ">
         <div class="botones-sup">
-            <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
+            <a href="/socios/"> <button class="add-socio-btn"> Atrás</button></a>
             <form method="GET" action="{% url 'buscar_socios' %}">
                 <div class="search-form">
 
@@ -49,65 +49,35 @@
 
 
             </form>
-            <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
+            <!-- <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
                 <button class="add-socio-btn">Enviar correo a todos</button>
-            </a>
-            <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
-                <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
-            </a>
+            </a> -->
         </div>
 
 
         <table class="socios-table">
             <thead>
                 <tr>
-                    <th>Cedula</th>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>Foto</th>
-                    <th>Dirección</th>
-                    <th>Teléfono</th>
-                    <th>Correo Electrónico</th>
-                    <!-- <th>Categoria</th> -->
-                    <th>Estado</th>
-                    <th>Editar</th>
-                    <th>Enviar Correo</th>
-                    <th>Aportaciones</th>
+                    <th>Aportación</th>
+                    <th>Socio</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <!-- <th>Editar</th> -->
                 </tr>
             </thead>
             <tbody>
-                {% for socio in socios %}
+                {% for aportacion in aportaciones %}
                 <tr>
-                    <td>{{ socio.cedula }}</td>
-                    <td>{{ socio.user.first_name }}</td>
-                    <td>{{ socio.user.last_name }}</td>
-                    <td>
-                        {% if socio.foto %}
-                        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image">
-                        {% else %}
-                        No hay foto disponible.
-                        {% endif %}
-                    </td>
-                    <td>{{ socio.direccion_domiciliaria }}</td>
-                    <td>{{ socio.numero_telefonico }}</td>
-                    <td>{{ socio.user.email }}</td>
-                    <!-- <td>{{ socio.categoria }}</td> -->
-                    <td>
-                        {% if socio.user.is_active %}
-                        <button class="green-button"
-                            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
-                            <span class="visto-icon"></span>
-                            Activo
-                        </button>
-                        {% else %}
-                        <button class="red-button"
-                            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
-                            <span class="no-visto-icon"></span> Inactivo
-                        </button>
-                        {% endif %}
-
-                    </td>
-                    <td>
+                    {% if aportacion.tipo_aportacion == "AE" %}
+                        <td>Ayuda Economica</td>
+                    {% else %}
+                        <td>Cuota Ordinaria</td>
+                    {% endif %}
+                    <td>{{ aportacion.socio.user.first_name }} {{ aportacion.socio.user.last_name }}</td>
+                    <td>{{ aportacion.monto }}</td>
+                    <td>{{ aportacion.fecha }}</td>
+                    
+                    <!-- <td>
                         <button class="edit-btn"
                             onclick="confirmarEdicion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
                             Editar
@@ -117,12 +87,7 @@
                         <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
                             class="edit-btn" style="text-decoration: none;"> Notificar
                         </a>
-                    </td>
-                    <td>
-                        <a href="/aportaciones_socio/{{socio.id}}"
-                            class="edit-btn" style="text-decoration: none;"> Aportación
-                        </a>
-                    </td>
+                    </td> -->
                 </tr>
                 {% endfor %}
             </tbody>
@@ -131,17 +96,17 @@
         <div class="pagination-container">
             <nav aria-label="...">
                 <ul class="pagination">
-                    {% if socios.has_previous %}
+                    {% if aportaciones.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ socios.previous_page_number }}">anterior</a>
+                        <a class="page-link" href="?page={{ aportaciones.previous_page_number }}">anterior</a>
                     </li>
                     {% endif %}
                     <li class="pagination-item active">
-                        <span style="border-radius: 5px;" class="page-link">{{ socios.number }}</span>
+                        <span style="border-radius: 5px;" class="page-link">{{ aportaciones.number }}</span>
                     </li>
-                    {% if socios.has_next %}
+                    {% if aportaciones.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ socios.next_page_number }}">siguiente</a>
+                        <a class="page-link" href="?page={{ aportaciones.next_page_number }}">siguiente</a>
                     </li>
                     {% endif %}
                 </ul>

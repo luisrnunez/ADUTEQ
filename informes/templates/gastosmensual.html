@@ -47,16 +47,18 @@
               <tr>
                 <th style="padding: 10px;">Proveedor</th>
                 <th style="padding: 10px;">Monto</th>
-                <th style="padding: 10px;">Fecha</th>
+                <!-- <th style="padding: 10px;">Fecha</th> -->
               </tr>
             </thead>
             <tbody>
               {% for gasto in gastos %}
               <tr>
-                <td style="padding: 10px;">{{ gasto.proveedor.nombre }}</td>
-                <td style="padding: 10px;">{{ gasto.consumo_total }}</td>
-                <td style="padding: 10px;">{{ gasto.fecha_consumo }}</td>
+                <td style="padding: 10px;">{{ gasto.proveedor }}</td>
+                <td style="padding: 10px;">{{ gasto.total_proveedor }}</td>
+                <!-- <td style="padding: 10px;">{{ gasto.consumo_total }}</td> -->
+                
               </tr>
+              <td style="padding: 10px;">{{ gasto.total }}</td>
               {% endfor %}
             </tbody>
           </table>

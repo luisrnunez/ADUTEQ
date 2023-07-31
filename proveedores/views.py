@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Proveedor
+from .models import Proveedor, detallesCupos
 from django.contrib import messages
 from django.db.models import Q
 from django.views import View
+from datetime import date
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
 
@@ -18,9 +19,7 @@ def proveedor(request):
         proveedores_paginados = paginator.get_page(numero_pagina)
     except PageNotAnInteger:
         proveedores_paginados = paginator.get_page(1)
-    return render(request,'proveedores.html', {
-        'proveedores': proveedores_paginados
-    })
+    return render(request,'proveedores.html', {'proveedores': proveedores_paginados})
 
 def formRegistro(request):
     return render(request,'aggProveedor.html')
@@ -35,7 +34,7 @@ def aggProveedor(request):
     comisionp=request.POST.get['comision']
     estadop=request.POST.get['estado']'''
     
-    proveedor=Proveedor(nombre=request.POST['nombre'], telefono=request.POST['telefono'], direccion=request.POST['direccion'], RUC=request.POST['ruc'], comision=request.POST['comision'], estado=request.POST['estado'])
+    proveedor=Proveedor(nombre=request.POST['nombre'], telefono=request.POST['telefono'], direccion=request.POST['direccion'], RUC=request.POST['ruc'], comision=request.POST['comision'], cupo=request.POST['cupo'], estado=request.POST['estado'])
 
     if(userexist(request.POST['nombre'],request.POST['ruc'])):
         response = {
@@ -116,6 +115,7 @@ def editarPro(request):
     RUCp=request.POST.get('ruc')
     direccionp=request.POST.get('direccion')
     comisionp=request.POST.get('comision')
+    cupop=request.POST.get('cupo')
     estadop=request.POST.get('estado')
     #proveedor=Proveedor.objects.get(id=request.POST.get('id'))
     proveedor= get_object_or_404(Proveedor, id=request.POST.get('id'))
@@ -146,6 +146,7 @@ def editarPro(request):
         proveedor.RUC=RUCp
         proveedor.direccion=direccionp
         proveedor.comision=comisionp
+        proveedor.cupo=cupop
         proveedor.estado=estadop
         proveedor.save()
         response = {
@@ -198,3 +199,54 @@ def busqueda(request):
 
 def prueba(request):
     return render(request,'prueba.html')
+
+#----------------------------------------------------------------------------------
+def presagregar_pdf(request, det_id): 
+    registro_pago = detallesCupos.objects.get(id=det_id)
+    if request.method == 'GET':
+        return render(request,'editar_detalles_prestamo.html', {'pago_men': registro_pago}) 
+    else:
+        archivo_pdf = request.FILES['evidencia']
+        registro_pago.evidencia=archivo_pdf
+        registro_pago.save()
+        return redirect('/detallescupo/' + str(detallesCupos.proveedor.id))
+
+def verdetallescupos(request, proveedor_id):
+    proveedor=Proveedor.objects.get(id=proveedor_id)
+    cupos=detallesCupos.objects.filter(proveedor=proveedor)
+    items_por_pagina = 10
+    paginator = Paginator(cupos, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        cupos_paginados = paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        cupos_paginados = paginator.get_page(1)
+    return render(request,'detalles_cupos.html', {'cupos': cupos_paginados, 'proveedor':proveedor})
+
+
+def editCupos(request, codigo):
+    cupos=detallesCupos.objects.get(id=codigo)
+    return render(request,'editarcupos.html',{
+        'cupo': cupos
+    })
+def editarcupos(request):
+    detallecupo=get_object_or_404(detallesCupos, id=request.POST.get('id'))
+    nuevocupo=request.POST.get('cupo')
+    nuevafecha=date.today()
+    
+    detallecupo.cupo=nuevocupo
+    detallecupo.fechaccupo=nuevafecha
+    if (request.method == 'POST'):
+        detallecupo.save()
+        response = {
+            'status': 'success',
+            'message': 'Datos actualizados correctamente'
+      
+          }
+    else:
+        response = {
+            'status': 'error',
+            'message': 'Ups, algo ha salido mal'
+      
+          }
+    return JsonResponse(response)
