@@ -51,8 +51,9 @@ INSTALLED_APPS = [
     'recuperarcontraseña',
     'informes',
     'Prestamos',
-
-
+]
+CRONJOBS = [
+    ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
 ]
 
 MIDDLEWARE = [

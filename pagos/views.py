@@ -86,7 +86,6 @@ def agregar_pagos_cuotas(request):
             proveedores = Proveedor.objects.get(id=proveedor_id)
 
             cantidad = request.POST.get('consumo_total')
-            cupo=detallesCupos.objects.get(socio=socio_id)
 
             # fecha = request.POST.get('fecha_descuento')
             numero_cuoa = request.POST.get('numero_cuotas')
@@ -119,7 +118,7 @@ def agregar_pagos_cuotas(request):
 
             return redirect('/lista_pagos_cuotas/')
     except Exception as e:
-        messages.success(request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
+        messages.warning(request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
     return redirect('/lista_pagos_cuotas/')
 
 
