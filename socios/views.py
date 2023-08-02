@@ -283,28 +283,32 @@ def AggSocio(request):
 
 #----------------------APORTACIONES-----------------------------------------
 def registrar_aportaciones_mensuales(request):
-    # Obtener la lista de socios activos
-    #socios_activos = User.objects.filter(is_active=True)
-    socios=Socios.objects.all()
+    socios = Socios.objects.all()
+
+    hoy = timezone.now().date()
+    primer_dia_mes_actual = hoy.replace(day=1)
 
     for socio in socios:
-        # Registrar la aportación de Ayuda Económica
-        if(socio.user.is_active):
+        aportaciones_ultimo_mes = Aportaciones.objects.filter(
+            socio=socio,
+            fecha__gte=primer_dia_mes_actual
+        )
+
+        if not aportaciones_ultimo_mes.exists() and socio.user.is_active:
             transaccion_ae = Aportaciones.objects.create(
                 socio=socio,
                 tipo_aportacion='AE',
                 monto=3,  # Monto de Ayuda Económica
-                fecha=timezone.now().date()
+                fecha=hoy
             )
 
-        # Registrar la aportación de Cuota Ordinaria
-        if(socio.user.is_active):
             transaccion_co = Aportaciones.objects.create(
                 socio=socio,
                 tipo_aportacion='CO',
                 monto=10,  # Monto de Cuota Ordinaria
-                fecha=timezone.now().date()
+                fecha=hoy
             )
+
     return redirect('/socios/')
 
 def veraportaciones(request):
