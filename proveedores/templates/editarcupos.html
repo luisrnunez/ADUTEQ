@@ -25,9 +25,9 @@
                     <input maxlength="13" value="{{cupo.cupo}}"   type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
                         required>
 
-                    <label for="fecha">Fecha:</label>
-                    <input disabled value="{{cupo.fechaccupo}}" type="datetime" maxlength="100" id="fecha" name="fecha"
-                        placeholder="0987654223" required>
+                        <label for="fecha">Fecha:</label>
+                        <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
+                        
 
                     <input type="submit" value="Guardar cambios">
                     <a href="/verdetallescupo/{{cupo.proveedor.id}}"> <input type="button" value="Cancelar"

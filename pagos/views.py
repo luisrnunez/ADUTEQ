@@ -15,6 +15,15 @@ from datetime import datetime, timedelta
 import tabula
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger
+from django.db import connection
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, KeepInFrame, Image
+from reportlab.lib.styles import getSampleStyleSheet
+
 
 
 # Create your views here. 
@@ -86,7 +95,7 @@ def agregar_pagos_cuotas(request):
             proveedores = Proveedor.objects.get(id=proveedor_id)
 
             cantidad = request.POST.get('consumo_total')
-            cupo=detallesCupos.objects.get(socio=socio_id)
+            
 
             # fecha = request.POST.get('fecha_descuento')
             numero_cuoa = request.POST.get('numero_cuotas')
@@ -117,9 +126,10 @@ def agregar_pagos_cuotas(request):
                 )
                 detalle_cuatas.save()
 
+            messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
             return redirect('/lista_pagos_cuotas/')
     except Exception as e:
-        messages.success(request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
+        messages.warning(request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
     return redirect('/lista_pagos_cuotas/')
 
 
@@ -384,3 +394,67 @@ def verificar_registros(request):
 
         #return redirect(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': registros_con_estilo})
     return JsonResponse(response)
+
+
+def generar_reporte_pdf(request):
+    mes = 7
+    anio = 2023
+
+    # Llamar al procedimiento almacenado en la base de datos y pasarle los parámetros
+    with connection.cursor() as cursor:
+        cursor.execute('CALL obtener_consumo_proveedores(%s, %s)', [mes, anio])
+
+    # Obtener los datos del reporte desde la tabla temporal creada por el procedimiento almacenado
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT * FROM consumo_proveedores')
+        datos_reporte = cursor.fetchall()
+
+    # Obtener los proveedores para la cabecera de la tabla en el reporte
+    proveedores = Proveedor.objects.all().order_by('nombre')
+
+    image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+
+    # Crear un objeto PDF utilizando ReportLab
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{mes}_{anio}.pdf"'
+
+    # Inicializar el documento PDF
+    PAGE_WIDTH, PAGE_HEIGHT = landscape(letter)
+
+    # Inicializar el documento PDF con tamaño de página apaisada
+    doc = SimpleDocTemplate(response, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
+
+    # Crear una lista con los datos del reporte
+    data = [['Nombre Socio'] + [proveedor.nombre for proveedor in proveedores]]
+    data.extend([row for row in datos_reporte])
+
+
+    # Crear una tabla con los datos y aplicar estilos
+    table = Table(data)
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ])
+    table.setStyle(style)
+
+    # Ajustar el ancho de las columnas automáticamente
+    table._argW[0] = 140  # Ancho de la primera columna (Nombre Socio)
+    for i in range(1, len(proveedores) + 1):
+        table._argW[i] = doc.width / (len(proveedores) + 1)
+
+
+    # Agregar la tabla al documento PDF
+    story = []
+    img_width = 100
+    img_height = 100
+    img = Image(image_path, width=img_width, height=img_height)
+    story.append(img)
+    story.append(table)
+    doc.build(story)
+
+    return response
