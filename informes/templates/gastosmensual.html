@@ -29,6 +29,17 @@
 .table-gastos tr:hover {
   background-color: #e6e6e6;
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
     </style>
   </head>
   <body style="background-color: #f7f7f7; font-family: Arial, sans-serif;">
@@ -42,22 +53,133 @@
       </tr>
       <tr>
         <td style="padding: 20px;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead style="background-color: #34b234; color: #ffffff;">
-              <tr>
-                <th style="padding: 10px;">Proveedor</th>
-                <th style="padding: 10px;">Monto</th>
-                <th style="padding: 10px;">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for gasto in gastos %}
-              <tr>
-                <td style="padding: 10px;">{{ gasto.proveedor.nombre }}</td>
-                <td style="padding: 10px;">{{ gasto.consumo_total }}</td>
-                <td style="padding: 10px;">{{ gasto.fecha_consumo }}</td>
-              </tr>
-              {% endfor %}
+          <!-- esta tabla es de los consumos normales -->
+          {% if gastos_por_proveedor %}
+            <h3 style="color: #32CD32; margin-top: 0; text-align: center;">Consumos Mes</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead style="background-color: #34b234; color: #ffffff;">
+                <tr>
+                  <th style="padding: 10px;">Proveedor</th>
+                  <th style="padding: 10px;">Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for gasto in gastos_por_proveedor  %}
+                <tr>
+                  <td style="padding: 10px;">{{ gasto.proveedor__nombre }}</td>
+                  <td style="padding: 10px;">{{ gasto.total_proveedor }}$</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                  <td style="padding: 10px;"><strong>TOTAL CONSUMO:</strong></td>
+                  <td style="padding: 10px;"><strong>{{ total_gastos_proveedor.total_gastos }}$</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          {% endif %}
+          <hr>
+
+
+          <!-- esta tabla es de los consumos por cuotas -->
+          {% if total_pagos_cuotas %}
+            <h3 style="color: #32CD32; margin-top: 0; text-align: center;">Consumos Mes Por Cuotas</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead style="background-color: #34b234; color: #ffffff;">
+                <tr>
+                  <th style="padding: 10px;">Proveedor</th>
+                  <th style="padding: 10px;">Monto</th>
+                  <th style="padding: 10px;">Cuotas pagadas</th>
+                  <th style="padding: 10px;">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for gasto in total_pagos_cuotas  %}
+                <tr>
+                  <td style="padding: 10px;">{{ gasto.proveedor__nombre }}</td>
+                  <td style="padding: 10px;">{{ gasto.valor_cuota }}$</td>
+                  <td style="padding: 10px;">{{ gasto.cuota_actual }} de {{ gasto.numero_cuotas }}</td>
+                  <td style="padding: 10px;">{{ gasto.fecha_descuento }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                  <td style="padding: 10px;"><strong>TOTAL CONSUMO:</strong></td>
+                  <td style="padding: 10px;"><strong>{{ total_gastos_proveedor_cuotas.total_gastos_cuotas }}$</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          {% endif %}
+          <hr>
+
+
+          <!-- esta tabla es de las aportaciones de los socios -->
+          {% if aportaciones_socio %}
+              <h3 style="color: #32CD32; margin-top: 0; text-align: center;">Aportaciones</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                  <thead style="background-color: #34b234; color: #ffffff;">
+                      <tr>
+                        <th style="padding: 10px;">Tipo Aportación</th>
+                        <th style="padding: 10px;">Valor</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    {% for aportacion in aportaciones_socio %}
+                      <tr>
+                        {% if aportacion.tipo_aportacion == "AE" %}
+                        <td style="padding: 10px;">Ayuda Economica</td>
+                        {% else %}
+                            <td style="padding: 10px;">Cuota Ordinaria</td>
+                        {% endif %}
+                        <td style="padding: 10px;">{{ aportacion.monto }}$</td>
+                      </tr>
+                    {% endfor %}
+                    <tr>
+                      <td style="padding: 10px;"><strong>TOTAL CONSUMO:</strong></td>
+                      <td style="padding: 10px;"><strong>{{ total_aportaciones_socio.total_aportaciones }}$</strong></td>
+                    </tr>
+                </tbody>
+              </table>
+            {% endif %}
+            <hr>
+
+
+            <!-- esta tabla es de las ayudas economicas en caso de que haya habido alguna durante el mes -->
+            {% if ayudasEcon_socio %}
+              <h3 style="color: #32CD32; margin-top: 0; text-align: center;">Ayudas económicas</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                  <thead style="background-color: #34b234; color: #ffffff;">
+                      <tr>
+                        <th style="padding: 10px;">Descripción</th>
+                        <th style="padding: 10px;">Valor</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                    {% for ayuda in ayudasEcon_socio %}
+                      <tr>
+                          <td style="padding: 10px;">{{ ayuda.ayuda.descripcion }}</td>
+                          <td style="padding: 10px;">{{ ayuda.valor }}$</td>
+                      </tr>
+                    {% endfor %}
+                    <tr>
+                      <td style="padding: 10px;"><strong>TOTAL CONSUMO:</strong></td>
+                      <td style="padding: 10px;"><strong>{{ total_ayuda.total_ayuda }}$</strong></td>
+                    </tr>
+                </tbody>
+              </table>
+            {% endif %}
+
+              <hr>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead style="background-color: #ff5e00; color: #ffffff;">
+                  <tr>
+                    <th style="padding: 10px;">Descripción</th>
+                    <th style="padding: 10px;">Valor</th>
+                  </tr>
+              </thead>
+              <tbody>
+                <tr style="background-color: darkgrey;">
+                  <td style="padding: 10px;"><strong><h3>ESTE ES EL CONSUMO TOTAL DE ESTE MES:</h3> </strong></td>
+                  <td style="padding: 10px;"><strong><h3>{{ total_total }}$</h3></strong></td>
+                </tr>
             </tbody>
           </table>
         </td>

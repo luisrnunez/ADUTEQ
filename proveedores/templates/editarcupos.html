@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Editar Proveedor</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form id="editarcupo" action="/actualizarcupos/" method="POST">{% csrf_token %}
+                    <!--utilizada para obtener id-->
+                    <input value="{{cupo.id}}" type="number" id="id" name="id" required hidden>
+
+                    <label for="nombre">Socio:</label>
+                    <input disabled value="{{cupo.socio.user.first_name}}" type="text" id="nombre" placeholder="Fulanito" name="nombre" maxlength="50" required>
+                        <p style="font-size: 13px; color: #fa3c3c;" id="alerta"></p>
+
+                    <label for="proveedor">Proveedor:</label>
+                    <input  data-valor="{{ cupo.proveedor.id }}" disabled maxlength="10" oninput="validarEspacios(this)" value="{{cupo.proveedor.nombre}}" type="text" id="proveedor" name="proveedor" required>
+
+                    <label for="cupo">Cupo:</label>
+                    <input maxlength="13" value="{{cupo.cupo}}"   type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
+                        required>
+
+                        <label for="fecha">Fecha:</label>
+                        <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
+                        
+
+                    <input type="submit" value="Guardar cambios">
+                    <a href="/verdetallescupo/{{cupo.proveedor.id}}"> <input type="button" value="Cancelar"
+                        style="background-color: red;"></a>
+                </form>
+            </div>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    <script src="{% static 'js/editproveedor.js' %} "></script>
+
+    <script>
+        $(document).ready(function () {
+        $('#editarcupo').on('submit', function (event) {
+            event.preventDefault();
+
+            var valorCupo = $('#proveedor').data('valor');
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/actualizarcupos/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.status === 'error') {
+                        Swal.fire({
+                            "title": "Falló",
+                            "text": response.message,
+                            "icon": "warning"
+                        })
+                    } else if (response.status === 'success') {
+                        Swal.fire({
+                            "title": "¿Desea guardar los cambios de este cupo?",
+                            "text": "Luego podrá editar nuevamente",
+                            "icon": "question",
+                            "showCancelButton": true,
+                            "cancelButtonText": "Cancelar",
+                            "confirmButtonText": "Si, guardar",
+                            "confirmButtonColor": "red",
+                            "cancelButtonColor": "blue"
+                        }).then(function (result) {
+                            if (result.isConfirmed) {
+                                window.location.href = '/verdetallescupo/'+valorCupo
+                            }
+                        })
+
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    Swal.fire('Error', 'Ocurrió un error al procesar la solicitud.', 'error');
+                }
+            });
+        });
+    });
+    </script>
+    {% endblock %}
+</body>
+
+</html>

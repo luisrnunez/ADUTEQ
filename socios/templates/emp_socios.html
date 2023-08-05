@@ -52,6 +52,9 @@
             <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
                 <button class="add-socio-btn">Enviar correo a todos</button>
             </a>
+            <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
+                <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
+            </a>
         </div>
 
 
@@ -69,6 +72,7 @@
                     <th>Estado</th>
                     <th>Editar</th>
                     <th>Enviar Correo</th>
+                    <th>Aportaciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,7 +115,12 @@
                     </td>
                     <td>
                         <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
-                            class="edit-btn"> Notificar
+                            class="edit-btn" style="text-decoration: none;"> Notificar
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/aportaciones_socio/{{socio.id}}"
+                            class="edit-btn" style="text-decoration: none;"> Aportación
                         </a>
                     </td>
                 </tr>

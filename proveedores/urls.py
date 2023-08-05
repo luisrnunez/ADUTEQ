@@ -15,4 +15,8 @@ urlpatterns = [
     path('busqueda/', views.busqueda, name='search'),
 
     path('prueba/', views.prueba),
+    #------------------------------------------------------------
+    path('verdetallescupo/<int:proveedor_id>', views.verdetallescupos),
+    path('editcupos/<int:codigo>', views.editCupos, name='editarcupos'),
+    path('actualizarcupos/', views.editarcupos, name='actualizar_cupos'),
 ]

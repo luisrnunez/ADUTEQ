@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
-from django.urls import reverse_lazy
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -53,8 +51,9 @@ INSTALLED_APPS = [
     'recuperarcontraseña',
     'informes',
     'Prestamos',
-
-
+]
+CRONJOBS = [
+    ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
 ]
 
 MIDDLEWARE = [
@@ -179,6 +178,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'elenviacorreos28@gmail.com'
 EMAIL_HOST_PASSWORD = 'vyartmmmrtyoxlbs'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 
 BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
 

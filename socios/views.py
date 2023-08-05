@@ -9,12 +9,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from . import models
 from socios.models import Socios
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.views import View
-from socios.models import Socios
+from socios.models import Socios, Aportaciones
 from django.utils import timezone
 from django.contrib.auth.models import User
 from . import models
@@ -281,3 +280,56 @@ def ListaSocios(request):
 
 def AggSocio(request):
     return render(request, "emp_agg_socios.html")
+
+#----------------------APORTACIONES-----------------------------------------
+def registrar_aportaciones_mensuales(request):
+    socios = Socios.objects.all()
+
+    hoy = timezone.now().date()
+    primer_dia_mes_actual = hoy.replace(day=1)
+
+    for socio in socios:
+        aportaciones_ultimo_mes = Aportaciones.objects.filter(
+            socio=socio,
+            fecha__gte=primer_dia_mes_actual
+        )
+
+        if not aportaciones_ultimo_mes.exists() and socio.user.is_active:
+            transaccion_ae = Aportaciones.objects.create(
+                socio=socio,
+                tipo_aportacion='AE',
+                monto=3,  # Monto de Ayuda Económica
+                fecha=hoy
+            )
+
+            transaccion_co = Aportaciones.objects.create(
+                socio=socio,
+                tipo_aportacion='CO',
+                monto=10,  # Monto de Cuota Ordinaria
+                fecha=hoy
+            )
+
+    return redirect('/socios/')
+
+def veraportaciones(request):
+     aportaciones=Aportaciones.objects.all()
+     items_por_pagina = 8
+     paginator = Paginator(aportaciones, items_por_pagina)
+     numero_pagina = request.GET.get('page')
+     try:
+          aport_paginadas=paginator.get_page(numero_pagina)
+     except PageNotAnInteger:
+          aport_paginadas=paginator.get_page(1)
+     return render (request, "aportaciones.html" ,{'aportaciones': aport_paginadas})
+
+def veraportacionesocio(request, socio_id):
+    socio=Socios.objects.get(id=socio_id)
+    aportaciones=Aportaciones.objects.filter(socio=socio)
+    items_por_pagina = 8
+    paginator = Paginator(aportaciones, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+         apor_paginados=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+         apor_paginados=paginator.get_page(1)
+    return render(request, 'aportaciones.html',{'aportaciones': apor_paginados})

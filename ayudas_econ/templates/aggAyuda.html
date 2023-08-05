@@ -23,27 +23,41 @@
         <div class="content">
             <div class="form-container">
                 <form id="registro-formayuda" action="/aggAyuda/" method="POST">{% csrf_token %}
-                    <label for="motivo">Beneficiario:</label>
+                    
                     <!-- <input maxlength="50" type="text" id="motivo" placeholder="Fulanito" name="motivo" required> -->
-                    <select name="socio">
-                        {% for opcion in opciones %}
-                        <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <label for="descripcion">Motivo:</label>
-                    <!-- <input maxlength="200" type="text" id="descripcion" name="descripcion" required> -->
-                    <select name="motivo">
+                    
+                    <label for="motivo">Motivo:</label>
+                    <select name="motivo" id="selectmotivos">
                         {% for motivo in motivos %}
                         <option value="{{ motivo.id }}">{{ motivo.motivo }}</option>
                         {% endfor %}
                     </select>
+                    
+                    <div id="opcionesb""">
+                        <label for="beneficiario">Beneficiario:</label>
+                        <select name="socio" id="beneficiarios">
+                            {% for opcion in opciones %}
+                                {% if opcion.user.is_active %}
+                                    <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                            <option value="null">Otro</option>
+                        </select>
+                    </div>
+
+                    <!-- <label for="socio">Beneficiario:</label>
+                    <input maxlength="200" type="socio" id="socio" name="socio" required> -->
+                    
+                    <!-- <input maxlength="200" type="text" id="descripcion" name="descripcion" required> -->
 
                     <label for="descripcion">Descripción:</label>
                     <input maxlength="200" type="text" id="descripcion" name="descripcion" required>
 
-                    <label for="total">Total:</label>
-                    <input type="number" step="any" id="total" name="total" placeholder="25.00" required>
+                    <label for="valorsocio">Valor por socio:</label>
+                    <input type="number" step="any" id="valorsocio" name="valorsocio" placeholder="3.00-10.00" required>
+
+                    <!-- <label for="total">Total:</label>
+                    <input type="number" step="any" id="total" name="total" placeholder="25.00" required> -->
 
                     <label for="fecha">Fecha:</label>
                     <input type="date" id="fecha" name="fecha">
@@ -66,6 +80,26 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'js/aggmotivo.js' %} "></script>
     <script src="{% static 'js/editmotivo.js' %} "></script>
+
+    <!-- <script>
+        $(document).ready(function () {
+          // Función que se ejecuta cuando cambia la opción seleccionada
+          $("#selectmotivos").change(function () {
+            var opcionSeleccionada = $(this).val();
+      
+            // Ocultar todos los controles
+            $("#opcionesb").hide();
+      
+            // Mostrar el control correspondiente a la opción seleccionada
+            if (opcionSeleccionada != "4") {
+              $("#opcionesb").show();
+            } else {
+              $("#opcionesb").hide();
+            }
+            // Agrega más condiciones para otras opciones si es necesario
+          });
+        });
+      </script> -->
     {% endblock %}
 </body>
 
