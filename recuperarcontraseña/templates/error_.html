@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        .password-reset-message {
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        padding: 20px;
+        text-align: center;
+        font-size: 30px;
+        
+        }
+
+        .password-reset-message p {
+        margin: 0;
+        }
+    </style>
+    {% if error_message %}
+    <div class="password-reset-message">
+        {{ error_message }}
+    </div>
+    {% endif %}
+</body>
+</html>

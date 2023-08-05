@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ADUTEQ - Ayudas</title>
+    
+</head>
+
+<body>
+
+    
+    {% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Motivos</h1>
+        </div>
+
+        <div class="socios-content "> <div class="botones-sup">
+            <a href="/formotivos"> <button class="add-socio-btn"> Agregar Motivo</button></a>
+            <div class="search-form">
+                <input type="text" id="barbusqueda" placeholder="Buscar">
+                <button type="submit">Buscar</button>
+                <div id="searchResults"></div>
+            </div>
+
+        </div>
+            
+    
+
+
+            <!--barra de busqueda-->
+            <!---
+            <div class="input-group">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <button type="button" class="btn btn-outline-primary">search</button>
+            </div>-->
+
+            <table class="socios-table">
+                <thead>
+                    <tr>
+                        <th>Motivo</th>
+                        <th>Descripción</th>
+                        <!-- <th>Evidencia</th> -->
+                        <th>Editar</th>
+                        <th>Eliminar</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for motivo in motivos %}
+                    <tr>
+                        <td>{{motivo.motivo}}</td>
+                        <td>{{motivo.descripcion}}</td>
+                        <!-- <td>{{motivo.evidencia}}</td> -->
+
+                        <!--{% if proveedor.estado == False %}
+                        <td>Desabilitado</td>
+                        {% else %}
+                        <td>Habilitado</td>
+
+                        {% endif %}-->
+                        <td class="actions">
+                            <!--<button class="edit-btn">Editar</button>
+                            <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
+                            <a style="text-decoration: none;" class="edit-btn" href="/editmotivo/{{motivo.id}}">Editar</a>
+                            <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
+                           
+                        </td>
+                        <td> <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/', 'Motivo')">Eliminar</a>
+                        </td>
+                        <!--<td>{{proveedor.id}}</td>-->
+                    </tr>
+                    {% endfor %}
+                    <!-- Agrega más filas con información de socios aquí -->
+                </tbody>
+            </table>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    {% endblock %}
+</body>
+
+</html>

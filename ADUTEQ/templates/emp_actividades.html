@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>ADUTEQ - Actividades</title>
+  <link rel="stylesheet" href="{% static 'css/estilo_base.css' %}" />
+  <style>
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      height: 100vh;
+      background-color: white;
+      align-items: center; justify-content: center;
+      
+    }
+
+    .row {
+      width: 75%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .boton {
+      flex-basis: 33.33%;
+      height: 33.33vh;
+      background-color: #34b234;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s ease;
+      margin-right: 20px;
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+
+
+    }
+
+
+    .boton:hover {
+      transform: scale(1.1);
+    }
+
+    .imagen {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: large;
+      color: white;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+
+    .boton-img::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+
+      background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.5));
+    }
+  </style>
+  </style>
+</head>
+
+<body>
+  <div class="content-menu" >
+
+
+    <div class="container">
+      <div class="row">
+
+        <button class="boton">
+
+          <a href="/listar_pagos">
+            <img src="{% static 'img/icon-descuento.png' %}" alt="Imagen" class="imagen">
+          </a>
+          <h2>DESCUENTOS</h2>
+        </button>
+
+        <button class="boton">
+          <a href="/listar_pagosp">
+            <img src="{% static 'img/icon-pagos.png' %}" alt="Imagen" class="imagen">
+          </a>
+          <h2>PAGOS</h2>
+        </button>
+
+        <button class="boton">
+          <a href="/prestamos">
+            <img src="{% static 'img/icon-prestamo.png' %}" alt="Imagen" class="imagen">
+          </a>
+          <h2>PRESTAMOS</h2>
+        </button>
+
+        <button class="boton">
+          <a href="/verayudas">
+            <img src="{% static 'img/icon-ayudas.png' %}" alt="Imagen" class="imagen">
+
+          </a>
+          <h2>AYUDAS <br>
+            ECONOMICAS</h2>
+        </button>
+      </div>
+
+      <div class="row">
+        <button class="boton">
+
+          <a href="/motivos">
+            <img src="{% static 'img/icon-motivo.png' %}" alt="Imagen" class="imagen"></a>
+          <h2>MOTIVOS</h2>
+        </button>
+
+
+
+
+
+        <button class="boton">
+          <a href="/categorias">
+            <img src="{% static 'img/icon-categoria.png' %}" alt="Imagen" class="imagen">
+          </a>
+          <h2>CATEGORIAS</h2>
+        </button>
+
+        <button class="boton">
+          <img src="{% static 'img/icon-tesoreria.png' %}" alt="Imagen" class="imagen">
+          <h2>TESORERIA</h2>
+        </button>
+
+        <button class="boton">
+          <img src="{% static 'img/icon-publicidad2.png' %}" alt="Imagen" class="imagen">
+          <h2>PUBLICIDAD</h2>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}

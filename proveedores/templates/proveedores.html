@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+    {% block content %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    </style>
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%; font-size:  16px;" >
+
+        <div class="header" style="border-radius: 0;">
+            <h1>Proveedores</h1>
+        </div>
+
+        <div class="socios-content ">
+            <div class="botones-sup">
+                <a href="/aggproveedor"> <button class="add-socio-btn"> Agregar Nuevo Proveedor</button></a>
+                <div class="search-form" style="position: relative;">
+                    <input type="text" id="valor" placeholder="Buscar">
+                    <button class="add-socio-btn" type="submit">Buscar</button>
+
+                </div>
+            </div>
+
+
+
+
+
+            <!--barra de busqueda-->
+            <!---
+            <div class="input-group">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <button type="button" class="btn btn-outline-primary">search</button>
+            </div>-->
+
+            <table class="socios-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Telefono</th>
+                        <th>Dirección</th>
+                        <th>RUC</th>
+                        <th>Comisión</th>
+                        <th>Estado</th>
+                        <th>Editar</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proveedor in proveedores%}
+                    <tr>
+                        <td>{{proveedor.nombre}}</td>
+                        <td>{{proveedor.telefono}}</td>
+                        <td>{{proveedor.direccion}}</td>
+                        <td>{{proveedor.RUC}}</td>
+                        <td>{{proveedor.comision}}</td>
+                        <td>
+                            {% if proveedor.estado %}
+                            <button class="green-button" onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
+                                <span class="visto-icon"></span>
+                                Activo
+                            </button>
+                            {% else %}
+                            <button class="red-button" onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
+                                <span class="no-visto-icon"> </span>Inactivo
+                            </button>
+                            {% endif %}
+
+                        </td>
+                        <td>
+
+                            <a href="/editProveedor/{{proveedor.id}}">
+                                <button class="edit-btn">
+                                    Editar
+                                </button></a>
+                            </a>
+                        </td> 
+                    </tr>
+                    {% endfor %}
+                    
+                </tbody>
+            </table>
+            <div class="pagination-container">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if proveedores.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ proveedores.previous_page_number }}">anterior</a>
+                            </li>
+                        {% endif %}
+                        <li class="pagination-item active">
+                            <span style="border-radius: 5px;" class="page-link">{{ proveedores.number }}</span>
+                        </li>
+                        {% if proveedores.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ proveedores.next_page_number }}">siguiente</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
