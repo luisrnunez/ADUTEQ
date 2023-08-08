@@ -28,7 +28,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 # Create your views here. 
 def lista_pagos(request):
-    pagos = Pagos.objects.all().order_by("-fecha_consumo", "proveedor")
+    pagos = Pagos.objects.all().order_by("-id")
     items_por_pagina = 8
     paginator = Paginator(pagos, items_por_pagina)
     numero_pagina = request.GET.get('page')
@@ -425,7 +425,7 @@ def generar_reporte_pdf(request):
     doc = SimpleDocTemplate(response, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
 
     # Crear una lista con los datos del reporte
-    data = [['Nombre Socio'] + [proveedor.nombre for proveedor in proveedores]]
+    data = [['Cedula'] + [proveedor.nombre for proveedor in proveedores]]
     data.extend([row for row in datos_reporte])
 
 
