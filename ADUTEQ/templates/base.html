@@ -51,7 +51,6 @@
             text-decoration: none;
             color: white;
         }
-
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -123,7 +122,8 @@
                     &nbsp<span>
                         Reportes</span></a></li>
 
-            <li><a href="#"><img src=" {% static 'img/icon-ajustes-2.png' %} " alt="Cuenta" width="33px">&nbsp &nbsp<span>
+            <li><a href="#"><img src=" {% static 'img/icon-ajustes-2.png' %} " alt="Cuenta" width="33px">&nbsp
+                    &nbsp<span>
                         Ajustes</span></a></li>
 
         </ul>
@@ -131,18 +131,24 @@
             <a>
                 <img src="{% static 'img/icon-usuarios.png' %}" alt="Foto de perfil">
                 <!-- {{user.username}} -->
+
                 {% if request.user.is_authenticated %}
-                {% if request.user.is_superuser %}
-                <span>{{ request.user.empleado.nombres }}</span>
+                {% if request.user.is_superuser == False %}
+                <span class="disable-underline">{{ request.user.empleado.nombres }}</span>
                 {% endif %}
                 {% if request.user.username == 'admin' %}
-                <span>Administrador</span>
+                <span class="disable-underline">Administrador</span>
                 {% endif %}
                 {% endif %}
             </a>
             <div id="user-menu" class="user-menu">
                 <ul>
-                    <li><a href="#">Perfil</a></li>
+                    {% if request.user.is_authenticated %}
+                    {% if request.user.is_superuser == False %}
+                    <li><a href="{% url 'info_empleado' empleado_id=request.user.empleado.id %}">Perfil</a></li>
+                    {% endif %}
+                    {% endif %}
+                    <li><a href="{% url 'actualizar_contra' %}">Cambiar contraseña</a></li>
                     <li><a href="/cerrar_sesion">Cerrar sesión</a></li>
                 </ul>
             </div>
@@ -160,9 +166,9 @@
 
             </div>
             <div class="section">
-                <h1>ADUTEQ</h1>
+                <h1 class="disable-underline">ADUTEQ</h1>
             </div>
-            <a href="/cerrar_sesion"> 
+            <a href="/cerrar_sesion">
                 <div class="add-socio-btn" style="position: absolute; right: 20px; bottom: 10px;">
 
                     <span>Salir</span>

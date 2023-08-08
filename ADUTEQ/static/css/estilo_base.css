@@ -5,7 +5,15 @@ body {
     background-color: white;
     font-size: 14px !important;
 }
-
+.disable-underline {
+    text-decoration: none; /* Deshabilita el subrayado */
+    cursor: default; /* Cambia el cursor a un cursor predeterminado */
+    overflow: hidden;
+    white-space: nowrap;
+    list-style-type: none;
+    z-index: 0;
+  }
+  
 .header {
     background-color: #34b234;
     color: #fff;
@@ -48,6 +56,7 @@ body {
 .form-container input[type="submit"],
 .form-container input[type="button"],
 .form-container input[type="file"],
+.form-container input[type="password"],
 .form-container select,
 .form-container textarea,
 .form-container button,

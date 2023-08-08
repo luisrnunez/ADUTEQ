@@ -10,6 +10,7 @@ from . import models
 from .models import Empleado
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger
+from django.contrib.auth import update_session_auth_hash
 # Create your views here.
 
 @login_required
@@ -208,4 +209,89 @@ def validar_correo_electronico(correo_electronico):
         return False
     except Empleado.DoesNotExist:
         return True
+
+def restablecer_contra_emp(request):
+    try:
+        usuario_id = request.POST.get('user_id')
+        print('usuario: ',usuario_id)
+        user = User.objects.get(pk=usuario_id)
+    except User.DoesNotExist:
+        user = None
+    passs = request.POST.get('password_old')
+    password = request.POST.get('password')
+    confirm_password = request.POST.get('confirm_password')
+
+    contras = {
+                'password_old': passs,
+                'password': password,
+                'confirm_password': confirm_password 
+            }
+    if user.check_password(passs):      
+        if request.method == 'POST':
+
+            if password != confirm_password:
+                 error_message = 'Las contraseñas no coinciden. Inténtalo de nuevo.'
+            else:
+                user.set_password(password)
+                user.save()
+                #update_session_auth_hash(request, user)
+                return render(request, 'restablecer_contra_emp.html', {'message': 'Se ha cambiado correctamente la contraseña, porfavor entre de nuevo.'})
+
+        return render(request, 'restablecer_contra_emp.html', {'error_message': error_message, 'contras': contras})
+    else:
+        error_message = 'La contraseña actual no es correcta'
+        return render(request, 'restablecer_contra_emp.html', {'error_message': error_message,'contras': contras})
+
+    
+
+
+    
+@login_required
+def actualizar_contra(request):
+    return render(request, "restablecer_contra_emp.html")
+
+@login_required
+def info_empleado(request,empleado_id):
+    print(empleado_id)
+    empleado = get_object_or_404(Empleado, id=empleado_id)
+    return render(request, 'edit_empleados_perfil.html', {'empleado': empleado})
+
+@login_required
+def editar_perfil(request):
+   
+    if request.method == 'POST':
+        empleado_id = request.POST.get('user_id')
+        empleado = get_object_or_404(Empleado, id=empleado_id)
+        user = empleado.user
+        empleado.username = request.POST.get('username')
+        empleado.cedula = request.POST.get('cedula')
+        empleado.nombres = request.POST.get('nombres')
+        empleado.apellidos = request.POST.get('apellidos')
+        empleado.fecha_nacimiento = request.POST.get('fecha_nacimiento')
+        empleado.correo_electronico = request.POST.get('correo_electronico')
+        empleado.numero_telefonico = request.POST.get('numero_telefonico')
+        empleado.direccion_domiciliaria = request.POST.get('direccion_domiciliaria')
+        empleado.fecha_ingreso = request.POST.get('fecha_ingreso')
+        empleado.titulo = request.POST.get('titulo')
+
+        if User.objects.exclude(id=empleado.user_id).filter(username=empleado.username).exists():
+            messages.warning(request, 'El nombre de usuario ya está registrado')
+            return render(request, 'edit_empleados_perfil.html', {'empleado': empleado})
+        if Empleado.objects.exclude(id=empleado_id).filter(cedula=empleado.cedula).exists():
+            messages.warning(request, 'El número de cédula ya está registrado')
+            return render(request, 'edit_empleados_perfil.html', {'empleado': empleado})
+        if Empleado.objects.exclude(id=empleado_id).filter(cedula=empleado.correo_electronico).exists():
+            messages.warning(request, 'El correo ya está registrado')
+            return render(request, 'edit_empleados_perfil.html', {'empleado': empleado})
+        if Empleado.objects.exclude(id=empleado_id).filter(cedula=empleado.numero_telefonico).exists():
+            messages.warning(request, 'El número de telefono ya está registrado')
+            return render(request, 'edit_empleados_perfil.html', {'empleado': empleado})
+
+        user.save()
+        empleado.save()
+
+        messages.success(request, 'Se ha guardado correctamente la informacion de perfil')
+        return redirect(f'/perfil/{empleado_id}/')
+
+    
 

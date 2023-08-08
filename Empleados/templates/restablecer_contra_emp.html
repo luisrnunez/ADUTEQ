@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<body>
+
+    <div class="content">
+        <div class="form-container">
+            <h1 style="text-align: center;">Actualizar Contraseña</h1>
+            <form id="socio-form" method="post" action="{% url 'restablecer_contra_emp' %}">
+                {% csrf_token %}
+                {% if error_message %}
+                <script>
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "{{ error_message }}"
+                    });
+                </script>
+                {% endif %}
+                {% if message %}
+                <script>
+                    Swal.fire({
+                        icon: "success",
+                        title: "Contraseña Actualizada",
+                        text: "{{ message }}",
+                    }).then(() => {
+                                        // Redireccionar después de mostrar el mensaje de éxito
+                                        window.location.href = '/login/';
+                                    });
+
+                </script>
+                {% endif %}
+              
+                <input type="hidden" name="user_id" value="{{ request.user.id }}">
+            
+                <label for="password">Contraseña Actual:</label>
+                <div style="position: relative;">
+                    <input type="password" id="password_old" name="password_old" value="{{ contras.password_old }}" required>
+                    <span id="tgl_password_old" class="fas fa-eye-slash"
+                        style="position: absolute; right: 20px;top: 25%; cursor: pointer;"></span>
+                </div>
+                <br>
+                <label for="password">Nueva Contraseña:</label>
+                <div style="position: relative;">
+                    <input type="password" id="password" name="password" value="{{ contras.password }}" required>
+                    <span id="tgl_password" class="fas fa-eye-slash"
+                        style="position: absolute; right: 20px;top: 25%; cursor: pointer;"></span>
+                </div>
+                <br>
+                <label for="confirm_password">Confirmar Nueva Contraseña:</label>
+                <div style="position: relative;">
+                    <input type="password" id="confirm_password" name="confirm_password" value="{{ contras.confirm_password }}" required>
+                    <span id="tgl_confirm_password" class="fas fa-eye-slash"
+                        style="position: absolute; right: 20px;top: 25%; cursor: pointer;"></span>
+                </div>
+                <br>
+                <br>
+
+                <input style="width: 100%;" type="submit" value="Restablecer Contraseña">
+
+            </form>
+
+        </div>
+    </div>
+    <script>
+        const passwordInputOld = document.getElementById("password_old");
+        const toggleIconOld = document.getElementById("tgl_password_old");
+
+        const passwordInput = document.getElementById("password");
+        const toggleIcon = document.getElementById("tgl_password");
+
+        const confirmPasswordInput = document.getElementById("confirm_password");
+        const toggleIconConfirm = document.getElementById("tgl_confirm_password");
+
+        toggleIconOld.addEventListener("click", togglePasswordVisibility.bind(null, passwordInputOld, toggleIconOld));
+        toggleIcon.addEventListener("click", togglePasswordVisibility.bind(null, passwordInput, toggleIcon));
+        toggleIconConfirm.addEventListener("click", togglePasswordVisibility.bind(null, confirmPasswordInput, toggleIconConfirm));
+
+        function togglePasswordVisibility(inputElement, iconElement) {
+            if (inputElement.type === "password") {
+                inputElement.type = "text";
+                iconElement.classList.remove("fa-eye-slash");
+                iconElement.classList.add("fa-eye");
+            } else {
+                inputElement.type = "password";
+                iconElement.classList.remove("fa-eye");
+                iconElement.classList.add("fa-eye-slash");
+            }
+        }
+    </script>
+</body>
+
+
+{% endblock %}
