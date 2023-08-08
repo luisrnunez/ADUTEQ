@@ -96,7 +96,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "dbaduteq",
         "USER": "postgres",
-        "PASSWORD": "root",
+        "PASSWORD": "123",
         "HOST": "127.0.0.1",
         "PORT":"5432",
     }
@@ -178,3 +178,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'elenviacorreos28@gmail.com'
 EMAIL_HOST_PASSWORD = 'vyartmmmrtyoxlbs'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
+

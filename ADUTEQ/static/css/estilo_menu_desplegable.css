@@ -58,14 +58,14 @@ body {
 
 .sidebar li {
     margin-bottom: 10px;
-    margin-left: 13px;
+    margin-left: 8px;
     overflow: hidden;
     white-space: nowrap;
     transition: margin-left 0.3s;
 }
 
 .sidebar:hover li {
-    margin-left: 0;
+    margin-left: 15px;
 }
 
 .sidebar a {

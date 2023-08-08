@@ -5,7 +5,7 @@ from . import views
 from django.contrib.auth import views as auth_views
 from .views import CustomPasswordResetView
 from django.contrib.auth.views import PasswordResetConfirmView
-from .views import CustomPasswordResetConfirmView, CustomPasswordResetDoneView, CustomPasswordResetCompleteView
+from .views import CustomPasswordResetConfirmView, CustomPasswordResetDoneView, CustomPasswordResetCompleteView,recuperar_contra
 
 urlpatterns = [
 
@@ -18,8 +18,10 @@ urlpatterns = [
     # path('reset-password/complete/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
 
     path('password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),
-    path('password-reset/confirm/<str:uidb64>/<str:token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('password-reset/confirm/<str:uid>/<str:token>/', CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/complete/', CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
-
+    path('recuperacion/envio/', recuperar_contra, name='recuperar_contra'),
+    path('restablecer/<str:user_id>/<str:token>/', views.restablecer_contra, name='restablecer_contra'),
+    path('restablecer/<str:user_id>/<str:token>/nueva/', views.restablecer_contra_nueva, name='restablecer_contra_nueva'),
     
 ]
