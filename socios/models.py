@@ -35,9 +35,9 @@ class Aportaciones(models.Model):
     monto = models.DecimalField(max_digits=8, decimal_places=2)
     fecha = models.DateField(null=True)
 
-@receiver(post_save, sender=Socios)
-def agregar_aportaciones_nuevo_socio(sender, instance, created, **kwargs):
-    if created:
-        # Agregar las aportaciones al nuevo socio
-        Aportaciones.objects.create(socio=instance, tipo_aportacion='AE', monto=3, fecha=date.today())
-        Aportaciones.objects.create(socio=instance, tipo_aportacion='CO', monto=10, fecha=date.today())
+# @receiver(post_save, sender=Socios)
+# def agregar_aportaciones_nuevo_socio(sender, instance, created, **kwargs):
+#     if created:
+#         # Agregar las aportaciones al nuevo socio
+#         Aportaciones.objects.create(socio=instance, tipo_aportacion='AE', monto=3, fecha=date.today())
+#         Aportaciones.objects.create(socio=instance, tipo_aportacion='CO', monto=10, fecha=date.today())
