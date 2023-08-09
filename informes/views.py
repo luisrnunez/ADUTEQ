@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from Pagos.models import Pagos
 from django.contrib import messages
-from socios.models import Socios, Aportaciones
+from socios.models import Socios, Aportaciones, obtener_datos_socioss
 from proveedores.models import Proveedor
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
@@ -82,28 +82,40 @@ def enviar_correo_uno(request,socio_id):
 
     return redirect('/socios')
 
+
+
+##########################-------NUEVO ENVIAR CORREO------##############################
+
+def nuevo_enviar_correo(request, socio_id):
+    hoy = datetime.today()
+    primer_dia_mes_actual = hoy.replace(day=1)  # Establecer el día al primero del mes actual
+
+    numero_mes = hoy.month
+    anio = hoy.year
+    
+    socio = Socios.objects.get(id=socio_id)
+    resultados = obtener_datos_socioss(socio_id, numero_mes-1, anio)
+
+    if enviarGastoEmail(socio_id, resultados):
+        messages.success(request, 'El correo se envió correctamente.')
+    else:
+        messages.info(request, 'El socio no se encuentra activo actualmente.')
+
+    return redirect('/socios')
+
+
 ###################################---ENVIAR CORREO TODOS----############################
 def enviar_correo_todos():
     socios=Socios.objects.all()
-    
+    hoy = datetime.today()
     for socio in socios:
         if(socio.user.is_active):
             try:
-                gastos_por_proveedor, gastos_por_proveedor_cuotas, aportaciones_socio, ayuda, total_gastos_proveedor,total_gastos_proveedor_cuotas,total_aportaciones_socio, total_ayuda, total_total = obtener_gastos_socio(socio.id)
+                numero_mes = hoy.month
+                anio = hoy.year
+                resultados = obtener_datos_socioss(socio.id, numero_mes-1, anio)
+                context={'gastos':resultados}
 
-                context = {
-                    'socio': socio,
-                    'gastos_por_proveedor': gastos_por_proveedor,
-                    'total_pagos_cuotas': gastos_por_proveedor_cuotas,
-                    'aportaciones_socio': aportaciones_socio,
-                    'ayudasEcon_socio': ayuda,
-
-                    'total_gastos_proveedor': total_gastos_proveedor,
-                    'total_gastos_proveedor_cuotas': total_gastos_proveedor_cuotas,
-                    'total_aportaciones_socio': total_aportaciones_socio,
-                    'total_ayuda': total_ayuda,
-                    'total_total': total_total,
-                }
                 template = get_template('gastosmensual.html')
                 content = template.render(context)
                 
@@ -126,7 +138,7 @@ def enviarGastoEmail(socio_id, context):
     context={'gastos':gastos}
 
     template =get_template('gastosmensual.html')
-    content=template.render(gastos)
+    content=template.render(context)
     email= EmailMultiAlternatives(
         'Informe mensual ADUTEQ',
         'Gastos',

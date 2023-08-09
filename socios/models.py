@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date
 from django.utils import timezone
+from django.db import connection
 # Create your models here.
 
 class Socios(models.Model):
@@ -41,3 +42,20 @@ class Aportaciones(models.Model):
 #         # Agregar las aportaciones al nuevo socio
 #         Aportaciones.objects.create(socio=instance, tipo_aportacion='AE', monto=3, fecha=date.today())
 #         Aportaciones.objects.create(socio=instance, tipo_aportacion='CO', monto=10, fecha=date.today())
+
+def obtener_datos_socioss(socio_id, mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT * FROM obtener_datos_socios({socio_id}, {mes}, {anio});"
+        )
+        resultados = cursor.fetchall()
+    
+    if resultados:
+        column_names = [
+            'nombre', 'cedula', 'cuota_prestamos', 'aportacion',
+            'descuento_proveedores', 'aportacion_ayudaseco', 'total'
+        ]
+        resultado_dict = dict(zip(column_names, resultados[0]))
+        return resultado_dict
+    else:
+        return None
