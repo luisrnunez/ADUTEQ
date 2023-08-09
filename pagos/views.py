@@ -397,8 +397,9 @@ def verificar_registros(request):
 
 
 def generar_reporte_pdf(request):
-    mes = 7
-    anio = 2023
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
 
     # Llamar al procedimiento almacenado en la base de datos y pasarle los parámetros
     with connection.cursor() as cursor:
@@ -430,7 +431,7 @@ def generar_reporte_pdf(request):
 
 
     # Crear una tabla con los datos y aplicar estilos
-    table = Table(data)
+    table = Table(data,colWidths=[100, 100, 100, 100, 100, 100, 100], repeatRows=1)
     style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),

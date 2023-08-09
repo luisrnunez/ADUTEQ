@@ -1,4 +1,4 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect,render
 from Pagos.models import Pagos
 from django.contrib import messages
 from socios.models import Socios, Aportaciones
@@ -11,6 +11,11 @@ from Pagos.models import Pagos_cuotas, Detalle_cuotas
 from datetime import datetime, timedelta
 from django.db.models import F, ExpressionWrapper, DecimalField, Sum
 from django.contrib.auth.models import User
+from django.db import connection
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle,Image,Spacer
 
 
 # Create your views here.
@@ -151,3 +156,59 @@ def enviar_correo_todoss(request):
         messages.info(request, 'Ups, ah ocurrido un error.')
 
     return redirect('/socios')
+
+def reportes(request):
+    return render(request, "reportes.html")
+
+def obtener_consumo_total_func(mes, anio):
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT * FROM obtener_consumo_total_func({mes}, {anio});"
+        )
+        result = cursor.fetchall()
+    return result
+
+def generar_reporte_pdf_total_usuarios(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_consumo.pdf"'
+
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    resultados = obtener_consumo_total_func(mes, anio)
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(letter))
+    elements = []
+
+    imagen = cargar_imagen('informes/static/img/aduteq.png')  # Ruta relativa desde la ubicación de la función
+    elements.append(imagen)
+
+
+    data = [['Nombre', 'Cédula', 'Cuota de préstamos', 'Aportación', 'Descuento de proveedores', 'Aportación Ayudas', 'Consumo total']]
+    data.extend(resultados)
+
+    table = Table(data, colWidths=[130, 100, 100, 100, 140, 100, 100], repeatRows=1)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+    ]))
+
+    elements.append(Spacer(1, 20))
+    elements.append(table)
+    doc.build(elements)
+    return response
+
+def cargar_imagen(path):
+    imagen = Image(path)
+    imagen.drawHeight = 50  # Ajusta la altura de la imagen
+    imagen.drawWidth = 50   # Ajusta el ancho de la imagen
+    return imagen
