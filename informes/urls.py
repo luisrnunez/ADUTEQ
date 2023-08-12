@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import enviar_correo_todoss, enviar_correo_uno, nuevo_enviar_correo
+from .views import enviar_correo_todoss, nuevo_enviar_correo
 
 urlpatterns = [
 

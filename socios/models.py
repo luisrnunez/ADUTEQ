@@ -59,3 +59,22 @@ def obtener_datos_socioss(socio_id, mes, anio):
         return resultado_dict
     else:
         return None
+    
+def datos_para_el_pdf(socio_id, mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM obtener_consumos_por_proveedor({socio_id}, {mes}, {anio});")
+        consumos_proveedor = cursor.fetchall()
+
+        cursor.execute(f"SELECT * FROM obtener_cuotas_pagadas({socio_id}, {mes}, {anio});")
+        consumos_cuotas = cursor.fetchall()
+
+        cursor.execute(f"SELECT * FROM obtener_aportacion_socio({socio_id}, {mes}, {anio});")
+        aportaciones_socio = cursor.fetchall()
+
+        cursor.execute(f"SELECT * FROM obtener_info_ayuda_economica({socio_id}, {mes}, {anio});")
+        aportaciones_ayuda = cursor.fetchall()
+
+        cursor.execute(f"SELECT * FROM obtener_informe_mensual({socio_id}, {mes}, {anio});")
+        consumo_total = cursor.fetchall()
+
+    return consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumo_total
