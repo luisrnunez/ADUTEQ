@@ -96,6 +96,7 @@ def recuperar_contra(request):
             subject = 'Recuperación de Contraseña'
             message = f'Hola, has solicitado un cambio de contraseña. Haz clic en el siguiente enlace para restablecer tu contraseña:\n\n'
             message += f'{settings.BASE_URL}/restablecer/{user_id}/{token}/\n\n'
+            
             message += 'Si no realizaste esta solicitud, ignora este correo.\n\n'
             message += 'Gracias.\n'
             from_email = 'tu_correo@example.com'  # Reemplaza esto con tu dirección de correo electrónico

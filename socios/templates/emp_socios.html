@@ -22,6 +22,7 @@
     }
 </style>
 
+
 <div class="content-menu">
 
     <div class="header">
@@ -30,7 +31,7 @@
     <div class="socios-content ">
         <div class="botones-sup">
             <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
-            <form method="GET" action="{% url 'buscar_socios' %}">
+            <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
                 <div class="search-form">
 
                     <select id="criterio" name="criterio">
@@ -42,13 +43,13 @@
                         <option value="1">Activo</option>
                         <option value="0">Inactivo</option>
                     </select>
-                    <input type="text" id="valor" name="valor">
-                    <a href="/buscar_socios"><button type="submit">Buscar</button></a>
+                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
+                    <!-- <button type="submit">Buscar</button> -->
 
                 </div>
 
 
-            </form>
+            <!-- </form> -->
             <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
                 <button class="add-socio-btn">Enviar correo a todos</button>
             </a>
@@ -58,7 +59,7 @@
         </div>
 
 
-        <table class="socios-table">
+        <table id="tablaSocios" class="socios-table">
             <thead>
                 <tr>
                     <th>Cedula</th>
@@ -75,7 +76,8 @@
                     <th>Aportaciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="socios-body">
+                <!-- {% include 'tabla_parcialSocios.html' %} -->
                 {% for socio in socios %}
                 <tr>
                     <td>{{ socio.cedula }}</td>
@@ -151,6 +153,54 @@
     </div>
     <!-- Resto del contenido de la página -->
 </div>
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+<script>
+    $(document).ready(function() {
+    $("#buscador_input").on("input", function() {
+        var query = $(this).val();
+        var criterio = document.getElementById('criterio').value; 
+        console.log(criterio)
+        console.log(query)
+        $.ajax({
+            url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                query: query,
+                criterio: criterio
+            },
+            success: function(data) {  // Verifica los datos devueltos por el servidor
+                $("#socios-body").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+$(document).ready(function() {
+    $("#criterio").on("change", function() {
+        var criterio = $(this).val();
+       
+        $.ajax({
+            url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                query: "",
+                criterio: criterio
+            },
+            success: function(data) {  // Verifica los datos devueltos por el servidor
+                $("#socios-body").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+
+
+</script>
+{% endblock %}
 
 <script>
     function confirmarEdicion(socioId, socioNombre, socioApellido) {

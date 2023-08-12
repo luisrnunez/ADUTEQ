@@ -1,16 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Proveedor, detallesCupos
+from .models import Proveedor, detallesCupos, CuentaBancaria
 from django.contrib import messages
 from django.db.models import Q
 from django.views import View
 from datetime import date
 from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
-
+from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
 # Create your views here.
 #metodo para mostrar todos los proveedores
 def proveedor(request):
-    proveedores=Proveedor.objects.all().order_by('nombre')
+    proveedores=Proveedor.objects.filter(estado=True).order_by('nombre')
     items_por_pagina = 10
 
     paginator = Paginator(proveedores, items_por_pagina)
@@ -26,6 +27,7 @@ def formRegistro(request):
 
 
 #metodo para agregar nuevos proveedores
+@login_required
 def aggProveedor(request):
     '''nombrep=request.POST.get['nombre']
     telefonop=request.POST.get['telefono']
@@ -193,9 +195,28 @@ def verificarexi(request):
 
 #Barra de busqueda
 def busqueda(request):
-    query = request.GET.get('query', '')
-    results = Proveedor.objects.filter(Q(nombre__icontains=query))
-    return render(request, 'busqueda.html', {'resultados': results})
+
+    if request.method == "POST":
+        criterio = request.POST.get('criterio')
+        valor = request.POST.get('query')
+        prov = []
+        if criterio:
+            # Filtrar socios según el criterio y el valor ingresados
+            if criterio == 'nombres':
+                prov = Proveedor.objects.filter(nombre__icontains=valor)
+            elif criterio == 'telefono':
+                prov = Proveedor.objects.filter(telefono__icontains=valor)
+            elif criterio == 'ruc':
+                prov = Proveedor.objects.filter(RUC__icontains=valor)
+            elif criterio == '1':
+                prov = Proveedor.objects.filter(estado=True)
+            elif criterio == '0':
+                prov = Proveedor.objects.filter(estado=False)
+        rendered_table = render_to_string("busqueda.html", {"proveedores": prov})
+        
+        return JsonResponse({"rendered_table": rendered_table})
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
 
 def prueba(request):
     return render(request,'prueba.html')
@@ -250,3 +271,71 @@ def editarcupos(request):
       
           }
     return JsonResponse(response)
+
+@login_required
+def agregarCuenta(request, codigo):
+    try:
+        proveedor = Proveedor.objects.get(id=codigo)
+        cuentas = CuentaBancaria.objects.filter(proveedor=proveedor)
+    except Proveedor.DoesNotExist:
+        proveedor = None
+        cuentas = []
+
+    context = {
+        'proveedor': proveedor,
+        'cuentas': cuentas
+    }
+
+    return render(request, 'lista_cuentas_banco.html', context)
+
+@login_required
+def agregarnuevacuenta(request,codigo):
+
+
+    proveedor = get_object_or_404(Proveedor, id=codigo)
+    return render(request, 'agregar_cuenta.html', {'proveedor': proveedor})
+
+def agregarnuevacuentabancaria(request,codigo):
+    if request.method == 'POST':
+        cuenta = CuentaBancaria(proveedor_id=codigo,banco=request.POST.get('banco')
+                                ,numero_cuenta=request.POST.get('n_cuenta')
+                                ,tipo_cuenta=request.POST.get('tipo')
+                                ,titular_cuenta=request.POST.get('titular')
+                                ,cedulaORuc=request.POST.get('cedula_ruc'))
+      
+        cuenta.save()
+        try:
+            proveedor = Proveedor.objects.get(id=codigo)
+            cuentas = CuentaBancaria.objects.filter(proveedor=proveedor)
+        except Proveedor.DoesNotExist:
+            proveedor = None
+            cuentas = []
+
+        context = {
+            'proveedor': proveedor,
+            'cuentas': cuentas
+        }
+        messages.success(request, 'Se ha agregado una nueva cuenta')
+        return render(request, 'lista_cuentas_banco.html', context)
+    
+
+def eliminarcuenta(request,codigo,prov):
+    print(codigo)
+    cuenta= get_object_or_404(CuentaBancaria, id=codigo)
+    cuenta.delete()
+    proveedor = get_object_or_404(Proveedor, id=prov)
+    print(proveedor)
+    print(prov)
+    try:
+        proveedor = Proveedor.objects.get(id=prov)
+        cuentas = CuentaBancaria.objects.filter(proveedor=proveedor)
+    except Proveedor.DoesNotExist:
+        proveedor = None
+        cuentas = []
+
+    context = {
+        'proveedor': proveedor,
+        'cuentas': cuentas
+    }
+    messages.success(request, 'Se ha eliminado correctamente esta cuenta bancaria')
+    return render(request, 'lista_cuentas_banco.html', context)

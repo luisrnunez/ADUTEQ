@@ -19,4 +19,9 @@ urlpatterns = [
     path('verdetallescupo/<int:proveedor_id>', views.verdetallescupos),
     path('editcupos/<int:codigo>', views.editCupos, name='editarcupos'),
     path('actualizarcupos/', views.editarcupos, name='actualizar_cupos'),
+    path('agregarCuenta/<int:codigo>', views.agregarCuenta,name='agregarCuenta'),
+    path('agregarnuevacuenta/<int:codigo>', views.agregarnuevacuenta,name='agregarnuevacuenta'),
+    path('agregarnuevacuentabancaria/<int:codigo>', views.agregarnuevacuentabancaria,name='agregarnuevacuentabancaria'),
+
+    path('eliminarcuenta/<int:codigo>/<int:prov>', views.eliminarcuenta,name='eliminarcuenta'),
 ]

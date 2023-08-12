@@ -2,7 +2,7 @@ import datetime
 import re
 import datetime
 import re
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
@@ -18,6 +18,12 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from . import models
 from django.core.paginator import Paginator, PageNotAnInteger
+from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
+
+from django.core.mail import send_mail
+
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -96,27 +102,35 @@ def guardar_socio(request):
         foto = request.FILES['foto']
 
         user = User(username=username,password=password, email=email, first_name=first_name, last_name=last_name)
-                             
+        
+        valor = False;   
         if User.objects.filter(username=username).exists():
                 messages.warning(
                     request, 'El nombre de usuario ya está registrado')
-                return render(request, 'emp_agg_socios.html', {'socio': request.POST,'user': user})
+                valor = True
         if Socios.objects.filter(cedula=cedula).exists():
                 messages.warning(
                     request, 'El número de cédula ya está registrado')
-                return render(request, 'emp_agg_socios.html', {'socio': request.POST,'user': user})
+                valor = True
         if User.objects.filter(email=email).exists():
                 messages.warning(
                     request, 'El correo ya está registrado, ingrese otro')
-                return render(request, 'emp_agg_socios.html', {'socio': request.POST,'user': user})
+                valor = True
         if Socios.objects.filter(numero_telefonico=numero_telefonico).exists():
                 messages.warning(
                     request, 'El número de telefono ya está registrado')
-                return render(request, 'emp_agg_socios.html', {'socio': request.POST,'user': user})
+                valor = True
         if Socios.objects.filter(numero_convencional=numero_convencional).exists():
                 messages.warning(
                     request, 'El número de convencional ya está registrado')
-                return render(request, 'emp_agg_socios.html', {'socio': request.POST,'user': user})
+                valor = True
+
+        if valor == True:
+            ListaDatos = carga_datos_html()
+            ListaDatos.update( {
+                            'socio': request.POST,'usuario': user
+                        })
+            return render(request, 'emp_agg_socios.html', ListaDatos)
 
         user = User.objects.create_user(username=username,password=password, email=email,
                               last_login=timezone.now().date(),
@@ -129,14 +143,23 @@ def guardar_socio(request):
                             dedicacion_academica=dedicacion_academica,aporte=aporte,
                             titulo=titulo,foto=foto)
       
-            
+    
         socios.save()
         messages.success(request, 'Se ha agregado un nuevo socio')
+        enviar_email_nuevaSocio(username,password,email)
 
         # Redirigir a la página deseada después de guardar los datos
         return redirect('listar_socios')
    
     return render(request, 'emp_socios.html')
+
+def enviar_email_nuevaSocio(username,password,email):
+    subject = 'Registro de un nuevo socio'
+    message = f'Te damos la bienvenidad en ADUTEQ, ahora podras ser parte de nosotros y acceder a buenos beneficios\n\nPara poder ver mensualmente tus consumos y todo sobre aduteq podras entrar a la app movil de aduteq, mediante las credenciales que te daremos podras entrar\n\n'
+    message += f'Usuario: {username}\n\n Contraseña: {password}\n\n'
+    message += 'Gracias.\n'
+    from_email = 'tu_correo@example.com'  # Reemplaza esto con tu dirección de correo electrónico
+    send_mail(subject, message, from_email, [email], fail_silently=False)
 
 @login_required
 def editar_socio(request, socio_id):
@@ -167,18 +190,47 @@ def editar_socio(request, socio_id):
             socio.titulo = request.POST.get('titulo')
             socio.aporte = request.POST.get('aporte')
 
+            # if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():
+            #     messages.warning(request, 'El nombre de usuario ya está registrado')
+            #     return render(request, 'emp_edit_socios.html', {'socio': socio})
+            # if Socios.objects.exclude(id=socio_id).filter(cedula=socio.cedula).exists():
+            #     messages.warning(request, 'El número de cédula ya está registrado')
+            #     return render(request, 'emp_edit_socios.html', {'socio': socio})
+            # if User.objects.exclude(id=usuario.id).filter(email=usuario.email).exists():
+            #     messages.warning(request, 'El correo ya está registrado')
+            #     return render(request, 'emp_edit_socios.html', {'socio': socio})
+            # if Socios.objects.exclude(id=socio_id).filter(numero_telefonico=socio.numero_telefonico).exists():
+            #     messages.warning(request, 'El número de telefono ya está registrado')
+            #     return render(request, 'emp_edit_socios.html', {'socio': socio})
+            
+            valor = False;   
             if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():
-                messages.warning(request, 'El nombre de usuario ya está registrado')
-                return render(request, 'emp_edit_socios.html', {'socio': socio})
+                    messages.warning(
+                        request, 'El nombre de usuario ya está registrado')
+                    valor = True
             if Socios.objects.exclude(id=socio_id).filter(cedula=socio.cedula).exists():
-                messages.warning(request, 'El número de cédula ya está registrado')
-                return render(request, 'emp_edit_socios.html', {'socio': socio})
+                    messages.warning(
+                        request, 'El número de cédula ya está registrado')
+                    valor = True
             if User.objects.exclude(id=usuario.id).filter(email=usuario.email).exists():
-                messages.warning(request, 'El correo ya está registrado')
-                return render(request, 'emp_edit_socios.html', {'socio': socio})
+                    messages.warning(
+                        request, 'El correo ya está registrado, ingrese otro')
+                    valor = True
             if Socios.objects.exclude(id=socio_id).filter(numero_telefonico=socio.numero_telefonico).exists():
-                messages.warning(request, 'El número de telefono ya está registrado')
-                return render(request, 'emp_edit_socios.html', {'socio': socio})
+                    messages.warning(
+                        request, 'El número de telefono ya está registrado')
+                    valor = True
+            if Socios.objects.exclude(id=socio_id).filter(numero_convencional=socio.numero_convencional).exists():
+                    messages.warning(
+                        request, 'El número de convencional ya está registrado')
+                    valor = True
+
+            if valor == True:
+                ListaDatos = carga_datos_html()
+                ListaDatos.update( {
+                                'socio': socio,'user': usuario
+                            })
+                return render(request, 'emp_edit_socios.html', ListaDatos)
 
 
             usuario.save()
@@ -191,7 +243,11 @@ def editar_socio(request, socio_id):
             #messages.warning(request, 'Error de integridad en los datos')
             #return redirect('listar_socios')
     else:
-        return render(request, 'emp_edit_socios.html', {'socio': socio})
+        ListaDatos = carga_datos_html()
+        ListaDatos.update( {
+                        'socio': socio,'user': usuario
+                    })
+        return render(request, 'emp_edit_socios.html', ListaDatos)
 
 
 @login_required
@@ -224,42 +280,50 @@ def eliminar_socio(request, user_id, valor):
     return redirect('listar_socios')
 
 
+# def buscar_socios(request):
+
+#    
+
+#     return render(request, 'emp_socios.html', {'socios': socios})
+
 def buscar_socios(request):
+    if request.method == "POST":
+        criterio = request.POST.get('criterio')
+        valor = request.POST.get('query')
+        socios = []
+        print(valor,criterio)
+        if criterio:
+            # Filtrar socios según el criterio y el valor ingresados
+            if criterio == 'nombres':
+                users = User.objects.filter(first_name__icontains=valor)
+                socios = Socios.objects.filter(user__in=users)
+                users = User.objects.filter(socio__in=socios)
+            elif criterio == 'apellidos':
+                users = User.objects.filter(last_name__icontains=valor)
+                socios = Socios.objects.filter(user__in=users)
+                users = User.objects.filter(socio__in=socios)
+            elif criterio == 'categoria':
+                socios = Socios.objects.filter(categoria__icontains=valor)
+                users = User.objects.filter(socio__in=socios)
+            elif criterio == 'facultad':
+                socios = Socios.objects.filter(facultad__icontains=valor)
+                users = User.objects.filter(socio__in=socios)
+            elif criterio == 'cedula':
+                socios = Socios.objects.filter(cedula__icontains=valor)
+                users = User.objects.filter(socio__in=socios)
+            elif criterio == '1':
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(user__in=users)
+                users = User.objects.filter(socio__in=socios)
+            elif criterio == '0':
+                users = User.objects.filter(is_active=False)
+                socios = Socios.objects.filter(user__in=users)
+                users = User.objects.filter(socio__in=socios)
+        rendered_table = render_to_string("tabla_parcialSocios.html", {"socios": socios})
+        
+        return JsonResponse({"rendered_table": rendered_table})
 
-    criterio = request.GET.get('criterio')
-    valor = request.GET.get('valor')
-    socios = []
-
-    if criterio:
-        # Filtrar socios según el criterio y el valor ingresados
-        if criterio == 'nombres':
-            users = User.objects.filter(first_name__icontains=valor)
-            socios = Socios.objects.filter(user__in=users)
-            users = User.objects.filter(socio__in=socios)
-        elif criterio == 'apellidos':
-            users = User.objects.filter(last_name__icontains=valor)
-            socios = Socios.objects.filter(user__in=users)
-            users = User.objects.filter(socio__in=socios)
-        elif criterio == 'categoria':
-            socios = Socios.objects.filter(categoria__icontains=valor)
-            users = User.objects.filter(socio__in=socios)
-        elif criterio == 'facultad':
-            socios = Socios.objects.filter(facultad__icontains=valor)
-            users = User.objects.filter(socio__in=socios)
-        elif criterio == 'cedula':
-            socios = Socios.objects.filter(cedula__icontains=valor)
-            users = User.objects.filter(socio__in=socios)
-        elif criterio == '1':
-            users = User.objects.filter(is_active=True)
-            socios = Socios.objects.filter(user__in=users)
-            users = User.objects.filter(socio__in=socios)
-        elif criterio == '0':
-            users = User.objects.filter(is_active=False)
-            socios = Socios.objects.filter(user__in=users)
-            users = User.objects.filter(socio__in=socios)
-
-    return render(request, 'emp_socios.html', {'users': users})
-
+    return JsonResponse({"error": "Método no permitido"}, status=400)
 
 def Recuperar_cuenta(request):
     return render(request, "recuperar_contra.html")
@@ -267,8 +331,10 @@ def Recuperar_cuenta(request):
 
 @login_required
 def ListaSocios(request):
-    socios = Socios.objects.all().order_by('user')
-    items_por_pagina = 8
+    usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
+    socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
+    
+    items_por_pagina = 10
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
@@ -279,7 +345,156 @@ def ListaSocios(request):
 
 
 def AggSocio(request):
-    return render(request, "emp_agg_socios.html")
+    categorias = models.Categorias.objects.all()
+    facultades = models.Facultades.objects.all()
+    categorias = models.Categorias.objects.all()
+    dedicacionAcademica = models.DedicacionAcademica.objects.all()
+    titulos = models.Titulos.objects.all()
+    return render(request, "emp_agg_socios.html", {'socios': request.POST,'categorias': categorias,'facultades': facultades,'dedicacionAcademica': dedicacionAcademica,'titulos': titulos})
+
+#--------------------SELECTS-----------
+def agregar_categoria_socios (request):
+    nombre = request.POST.get('nom_cat')
+    descripcion = request.POST.get('descripcion')
+    if models.Categorias.objects.filter(nombre_cat=nombre).exists():
+        response = cargar_categorias()
+        response.update({'valor':'1','icon': 'info', 'title':'Repetido' , 'text':'Ya se encuenta una facultad con este nombre'}
+                        )
+        return JsonResponse(response, safe=False)
+    categorias = models.Categorias(nombre_cat=nombre, descripcion=descripcion)
+    categorias.save()
+    return JsonResponse(cargar_categorias(), safe=False)
+
+
+def cargar_categorias():
+    categorias = models.Categorias.objects.all()
+    categorias_list = list(categorias.values())
+    response = {
+        'categorias': categorias_list
+    }
+    return response
+
+@csrf_exempt
+def agregar_facultad_socios (request):
+    nombre = request.POST.get('nom_facu')
+    descripcion = request.POST.get('descripcion')
+    if models.Facultades.objects.filter(nombre_facu=nombre).exists():
+        response = cargar_facu()
+        response.update({'valor':'1','icon': 'info', 'title':'Repetido' , 'text':'Ya se encuenta una facultad con este nombre'}
+                        )
+        return JsonResponse(response, safe=False)
+    facultades = models.Facultades(nombre_facu=nombre, descripcion=descripcion)
+    facultades.save()
+    return JsonResponse(cargar_facu(), safe=False)
+
+def cargar_facu():
+    facultades = models.Facultades.objects.all()
+    facultades_list = list(facultades.values())
+    response = {
+        'facultades': facultades_list
+    }
+    return response
+
+def agregar_dedicacion_socios (request):
+    nombre = request.POST.get('nom_de')
+    descripcion = request.POST.get('descripcion')
+    if models.DedicacionAcademica.objects.filter(nombre_de=nombre).exists():
+        response = cargar_dedicacion()
+        response.update({'valor':'1','icon': 'info', 'title':'Repetido' , 'text':'Ya se encuentra registrado'}
+                        )
+        return JsonResponse(response, safe=False)
+    dedicacionAcademica = models.DedicacionAcademica(nombre_de=nombre, descripcion=descripcion)
+    dedicacionAcademica.save()
+    return JsonResponse(cargar_dedicacion(), safe=False)
+
+
+def cargar_dedicacion():
+    dedicacionAcademica = models.DedicacionAcademica.objects.all()
+    dedicacionAcademica_list = list(dedicacionAcademica.values())
+    response = {
+        'dedicacionAcademica': dedicacionAcademica_list
+    }
+    return response
+     
+def agregar_titulo_socios (request):
+    nombre = request.POST.get('nom_ti')
+    descripcion = request.POST.get('descripcion')
+    if models.Titulos.objects.filter(nombre_ti=nombre).exists():
+        response = cargar_titulos()
+        response.update({'valor':'1','icon': 'info', 'title':'Repetido' , 'text':'Ya se encuenta registrado este titulo'}
+                        )
+        return JsonResponse(response, safe=False)
+
+    titulos = models.Titulos(nombre_ti=nombre, descripcion=descripcion)
+    titulos.save()    
+    return JsonResponse(cargar_titulos(), safe=False)                                            
+
+def cargar_titulos():
+    titulos = models.Titulos.objects.all()
+    titulos_list = list(titulos.values())
+    response = {
+        'titulos': titulos_list
+    }
+    return response
+
+def carga_datos_html():
+    facultades = models.Facultades.objects.all()
+    categorias = models.Categorias.objects.all()
+    dedicacionAcademica = models.DedicacionAcademica.objects.all()
+    titulos = models.Titulos.objects.all()
+    response = {
+                'facultades': facultades,
+                'categorias': categorias,
+                'dedicacionAcademica': dedicacionAcademica,
+                'titulos': titulos
+            }
+    return response
+
+def eliminar_facultad (request):
+    id = request.POST.get('id')
+    facultad = models.Facultades.objects.get(id=id)
+    facultad.delete()
+    facultades = models.Facultades.objects.all()
+    facultades_list = list(facultades.values())
+    response = {
+        'facultades': facultades_list
+    }
+    return JsonResponse(response, safe=False)
+
+def eliminar_categoria (request):
+    id = request.POST.get('id')
+    categorias = models.Categorias.objects.get(id=id)
+    categorias.delete()
+    categorias = models.Categorias.objects.all()
+    categorias_list = list(categorias.values())
+    response = {
+        'categorias': categorias_list
+    }
+    return JsonResponse(response, safe=False)
+
+def eliminar_dedicacion (request):
+    id = request.POST.get('id')
+    dedicacionAcademica = models.DedicacionAcademica.objects.get(id=id)
+    dedicacionAcademica.delete()
+    dedicacionAcademica = models.DedicacionAcademica.objects.all()
+    dedicacionAcademica_list = list(dedicacionAcademica.values())
+    response = {
+        'dedicacionAcademica': dedicacionAcademica_list
+    }
+    return JsonResponse(response, safe=False)
+
+def eliminar_titulo (request):
+    id = request.POST.get('id')
+    titulos = models.Titulos.objects.get(id=id)
+    titulos.delete()
+    titulos = models.Titulos.objects.all()
+    titulos_list = list(titulos.values())
+    response = {
+        'titulos': titulos_list
+    }
+    return JsonResponse(response, safe=False)
+
+
 
 #----------------------APORTACIONES-----------------------------------------
 def registrar_aportaciones_mensuales(request):

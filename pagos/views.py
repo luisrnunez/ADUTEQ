@@ -413,7 +413,7 @@ def verificar_registros(request):
 
         print(registros_con_estilo)
         proveedores = Proveedor.objects.filter(estado=True)
-        if valor == 1:
+        if valor == 0 and valor1 == 0:
             response = {
                 'status': False,
                 'message': 'Se han encontrado errores en los registros. Por favor, verifíquelos.',
