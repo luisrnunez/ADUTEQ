@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date
 from django.utils import timezone
+from Categorias.models import Categorias,Facultades,Titulos,DedicacionAcademica
 # Create your models here.
 
 class Socios(models.Model):

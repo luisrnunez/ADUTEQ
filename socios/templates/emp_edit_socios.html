@@ -62,38 +62,39 @@
                     <label for="facultad">Facultad:</label>
                     <select id="facultad" name="facultad" required placeholder="Seleccione la facultad"
                         value="{{ socio.facultad }}" style="width:100%;">
-                        <option value="">Seleccionar Facultad</option>
-                        <option value="FCI" {% if socio.facultad == "FCI" %}selected{% endif %}>FACULTAD DE CIENCIAS DE LA INGENIERIA</option>
-                        <option value="FCE" {% if socio.facultad == "FCE" %}selected{% endif %}>FACULTAD DE CIENCIAS DE LA EDUCACION</option>
-                        <option value="FCA" {% if socio.facultad == "FCA" %}selected{% endif %}>FACULTAD DE CIENCIAS AGRICOLAS</option>
+                        <option value="" disabled selected>Seleccionar Facultad</option>
+                            {% for facultad in facultades %}
+                            <option value="{{ facultad.nombre_facu }}"{% if socio.facultad == facultad.nombre_facu %}selected{% endif %}>{{ facultad.nombre_facu }}</option>
+                            {% endfor %}    
                     </select>
                     <label for="categoria">Categoría:</label>
                     <select id="categoria" name="categoria" required style="width:100%;">
-                        <option value="">Seleccionar Categoría</option>
-                        <option value="Titular" {% if socio.categoria == "Titular" %}selected{% endif %}>Titular</option>
-                        <option value="Contratado" {% if socio.categoria == "Contratado" %}selected{% endif %}>Contratado</option>
+                        <option value="" disabled selected>Seleccionar Categoría</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.nombre_cat }}"{% if socio.categoria == categoria.nombre_cat %}selected{% endif %}>{{ categoria.nombre_cat }}</option>
+                            {% endfor %}
                     </select>
                     
                     <label for="dedicacion_academica">Dedicación Académica:</label>
                     <select id="dedicacion" name="dedicacion_academica" required style="width:100%;">
-                        <option value="">Seleccionar Dedicación</option>
-                        <option value="INGENIERIA" {% if socio.dedicacion_academica == "INGENIERIA" %}selected{% endif %}>INGENIERIA</option>
-                        <option value="LICENCIATURA" {% if socio.dedicacion_academica == "LICENCIATURA" %}selected{% endif %}>LICENCIATURA</option>
+                        <option value="" disabled selected>Seleccionar Dedicación</option>
+                        {% for dedicacion in dedicacionAcademica %}
+                        <option value="{{ dedicacion.nombre_de }}"{% if socio.dedicacion_academica == dedicacion.nombre_de %}selected{% endif %}>{{ dedicacion.nombre_de }}</option>
+                        {% endfor %}
                     </select>
                     
 
                     <label for="titulo">Título:</label>
-                    <input type="text" id="titulo" name="titulo" value="{{ socio.titulo }}" required>
+                    <select id="titulo" name="titulo" required style="width:100%;">
+                        <option value="" disabled selected>Seleccionar Título</option>
+                        {% for titulo in titulos %}
+                        <option value="{{ titulo.nombre_ti }}"{% if socio.titulo == titulo.nombre_ti %}selected{% endif %}>{{ titulo.nombre_ti }}</option>
+                        {% endfor %}
+                    </select>
+
 
                     <label for="foto">Agregar foto de Perfil:</label>
                  
-
-                    <!-- <div class="file-input">
-                        <input type="file" id="foto" name="foto" value="{{ socio.foto }}" onchange="previewImage(event)"
-                            style="width: 70px;">
-                    </div>  -->
-                    <!--<input id="checkfoto" type="checkbox" name="checkfoto"> -->
-            
                     {% get_media_prefix as media_prefix %}
                     <div class="generated-credentials">           
                         <div class="custom-file">
@@ -113,7 +114,11 @@
                         <label for="username" style="margin-left: 5px;">Nombre de Usuario:</label>
                         <input type="text" id="username" name="username" value="{{ socio.user.username }}" required>
                         <label for="password">Contraseña:</label>
-                        <input type="text" style="margin-left: 5px;" id="password" name="password" value="{{ socio.user.password }}" required>
+                        <div style="position: relative;">
+                            <input type="password" id="password" name="password" required>
+                            <span id="tgl_password" class="fas fa-eye-slash"
+                                style="position: absolute; right: 20px;top: 25%; cursor: pointer;"></span>
+                        </div>
                         <button type="button" id="generate-credentials" style="width: 50%; margin-bottom: 10px;">Generar
                             Credenciales</button>
 

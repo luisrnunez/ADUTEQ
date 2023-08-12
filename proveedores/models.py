@@ -71,4 +71,16 @@ def crear_detalles_cupos_socios(sender, instance, created, **kwargs):
                 fechaccupo=timezone.now().date()
             )
 post_save.connect(crear_detalles_cupos_socios, sender=Socios)
-    
+
+
+
+class CuentaBancaria(models.Model):
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    banco = models.CharField(max_length=100)
+    numero_cuenta = models.CharField(max_length=50)
+    tipo_cuenta = models.CharField(max_length=50)
+    titular_cuenta = models.CharField(max_length=100)
+    cedulaORuc = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"Cuenta de {self.proveedor.nombre} - {self.numero_cuenta}"

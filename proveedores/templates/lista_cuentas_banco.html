@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<body>
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Cuentas bancarias de <b>{{ proveedor.nombre }}</b></h1>
+        </div>
+        <div class="socios-content ">
+            <div class="botones-sup">
+                <a href="/proveedores/"> <button class="add-socio-btn"> Atras</button></a> <br>
+                <a style="margin-left: 10px;" href="{% url 'agregarnuevacuenta' proveedor.id %}"> <button class="add-socio-btn"> Agregar nueva cuenta</button></a>
+            </div>
+            <table class="socios-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Proveedor</th>
+                        <th scope="col">Banco</th>
+                        <th scope="col">N. cuenta</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Titular</th>
+                        <th scope="col">CedulaORuc</th>
+                        <th scope="col">Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cuenta in cuentas %}
+                    <tr>
+                        <td>{{ cuenta.proveedor.nombre}}</td>
+                        <td>{{ cuenta.banco}}</td>
+                        <td>{{ cuenta.numero_cuenta}}</td>
+                        <td>{{ cuenta.tipo_cuenta}}</td>
+                        <td>{{ cuenta.titular_cuenta}}</td>
+                        <td>{{ cuenta.cedulaORuc}}</td>
+                    
+                        <td>
+                            <form action="{% url 'eliminarcuenta' cuenta.id proveedor.id %}">
+                                <button class="edit-btn">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+        {% endblock %}

@@ -23,5 +23,14 @@ urlpatterns = [
     #--------APORTACIONES---------
     path('aportaciones/', views.veraportaciones),
     path('aportaciones_socio/<int:socio_id>', views.veraportacionesocio),
-    path('registraraportaciones/', views.registrar_aportaciones_mensuales)
+    path('registraraportaciones/', views.registrar_aportaciones_mensuales),
+    #--------CATEGORIAS DE SOCIOS--------------
+    path('categoria/agregar/',views.agregar_categoria_socios,name="agregar_categoria_socios"),
+    path('facultad/agregar/',views.agregar_facultad_socios,name="agregar_facultad_socios"),
+    path('dedicacion/agregar/',views.agregar_dedicacion_socios,name="agregar_dedicacion_socios"),
+    path('titulo/agregar/',views.agregar_titulo_socios,name="agregar_titulo_socios"),
+    path('eliminar/facultad/', views.eliminar_facultad,name='eliminar_facultad'),
+    path('eliminar/categoria/', views.eliminar_categoria,name='eliminar_categoria'),
+    path('eliminar/dedicacion/', views.eliminar_dedicacion,name='eliminar_dedicacion'),
+    path('eliminar/titulo/', views.eliminar_titulo,name='eliminar_titulo'),
 ]
