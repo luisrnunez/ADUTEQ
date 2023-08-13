@@ -24,16 +24,19 @@
                     <label for="cupo">Cupo:</label>
                     <input maxlength="13" value="{{cupo.cupo}}"   type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
                         required>
+                  
+                    
+                    <div style="display: flex; align-items: center;">
+                        <label for="restaurar_cupo">Es permanente?:</label>
+                        <input type="checkbox" id="restaurar_cupo" name="restaurar_cupo" {% if cupo.permanente %}checked{% endif %} style="transform: scale(1.5); margin-left: 10px;">
+                    </div>
+                    <br>
 
-<<<<<<< HEAD
+
+
                     <label for="fecha">Fecha:</label>
-                    <input disabled value="{{cupo.fechaccupo}}" type="datetime" maxlength="100" id="fecha" name="fecha"
-                        placeholder="0987654223" required>
-=======
-                        <label for="fecha">Fecha:</label>
-                        <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
+                    <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
                         
->>>>>>> 00284f665914716187bb4d0faae4c854e7394e42
 
                     <input type="submit" value="Guardar cambios">
                     <a href="/verdetallescupo/{{cupo.proveedor.id}}"> <input type="button" value="Cancelar"

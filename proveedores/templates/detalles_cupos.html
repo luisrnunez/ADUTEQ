@@ -28,6 +28,7 @@
                         <th scope="col">Socio</th>
                         <th scope="col">Proveedor</th>
                         <th scope="col">Cupo</th>
+                        <th scope="col">Permanente</th>
                         <th scope="col">Fecha_Cupo</th>
                         <th scope="col">Editar</th>
                     </tr>
@@ -38,6 +39,18 @@
                         <td>{{ cupo.socio.user.first_name }} {{ cupo.socio.user.last_name }}</td>
                         <td>{{ cupo.proveedor.nombre}}</td>
                         <td>{{ cupo.cupo}}$</td>
+                       <td>
+                        {% if cupo.permanente %}
+                        <button class="green-button">
+                            <span class="visto-icon"></span>
+                            Si
+                        </button>
+                        {% else %}
+                        <button class="red-button">
+                            <span class="no-visto-icon"></span> No
+                        </button>
+                        {% endif %}
+                       </td>
                         <td>{{ cupo.fechaccupo}}</td>
 
                         <td>

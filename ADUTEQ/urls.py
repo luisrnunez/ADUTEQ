@@ -31,6 +31,7 @@ urlpatterns = [
     path('', include('recuperarcontraseña.urls')),
     path('', include('informes.urls')),
     path('', include('Prestamos.urls')),
+    path('', include('promociones.urls')),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

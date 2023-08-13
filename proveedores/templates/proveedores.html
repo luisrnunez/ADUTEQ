@@ -169,14 +169,14 @@ $(document).ready(function() {
 $("#criterio").on("change", function() {
     var criterio = $(this).val();
     $.ajax({
-        url: '{% url "search" %}',  // Cambia esto a la URL de tu vista de búsqueda
+        url: '{% url "search" %}', 
         type: "POST",
         data: {
-            csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+            csrfmiddlewaretoken: '{{ csrf_token }}',  
             query: "",
             criterio: criterio
         },
-        success: function(data) {  // Verifica los datos devueltos por el servidor
+        success: function(data) {  
             $("#proveedor-body").html(data.rendered_table); 
         }
     });

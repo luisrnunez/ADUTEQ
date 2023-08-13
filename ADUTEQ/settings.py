@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'recuperarcontraseña',
     'informes',
     'Prestamos',
+    'promociones',
 ]
 CRONJOBS = [
     ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
@@ -143,6 +144,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Agregar estas líneas
+SELECT2_PATH = 'select2/'
+STATICFILES_DIRS = [
+    # ... otras rutas ...
+    os.path.join(BASE_DIR, "venv/Lib/site-packages/django_select2/static/django_select2"),
+]
+
 LOGIN_URL = '/login'
 
 STATICFILES_DIRS = [
@@ -172,6 +180,7 @@ PASSWORD_HASHERS = [
 
 
 EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.googlemail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

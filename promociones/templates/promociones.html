@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .rounded-image {
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+
+
+<div class="content-menu">
+
+    <div class="header">
+        <h1>Promociones</h1>
+    </div>
+    <div class="socios-content ">
+        <div class="botones-sup">
+            <a href="{% url 'aggpromo' %}"> <button class="add-socio-btn"> Agregar Nueva Promo</button></a>
+            <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
+                <div class="search-form">
+
+                    <select id="criterio" name="criterio">
+                        <option value="titulo">Titulo</option>
+                        <option value="proveedor">Proveedor</option>
+                    </select>
+                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar promo...">
+                    <!-- <button type="submit">Buscar</button> -->
+
+                </div>
+
+
+            <!-- </form> -->
+
+        </div>
+
+
+        <table id="tablaSocios" class="socios-table">
+            <thead>
+                <tr>
+                    <th>Titulo</th>
+                    <th>Descripción</th>
+                    <th>Proveedor</th>
+                    <th>Imagen</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Estado</th>
+                    <th>Editar</th>
+                    <th>Eliminar</th>
+                    <th>Notificar</th>
+                    <!-- <th>Categoria</th> -->
+                </tr>
+            </thead>
+            <tbody id="socios-body">
+                <!-- {% include 'tabla_parcialSocios.html' %} -->
+                {% for promocion in promociones %}
+                <tr>
+                    <td>{{ promocion.titulo }}</td>
+                    <td>{{ promocion.descripcion }}</td>
+                    <td>{{ promocion.proveedor.nombre }}</td>
+                    <td>
+                        {% if promocion.imagen %}
+                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="rounded-image">
+                        {% else %}
+                        No hay foto disponible.
+                        {% endif %}
+                    </td>
+                    <td>{{ promocion.fecha_inicio|date:"j - n - Y" }}</td>
+                    <td>{{ promocion.fecha_fin|date:"j - n - Y" }}</td>
+                    <!-- <td>{{ socio.categoria }}</td> -->
+                    <td>
+                        {% if promocion.estado %}
+                        <button class="green-button"
+                            onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
+                            <span class="visto-icon"></span>
+                            Activo
+                        </button>
+                        {% else %}
+                        <button class="red-button"
+                            onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
+                            <span class="no-visto-icon"></span> Inactivo
+                        </button>
+                        {% endif %}
+
+                    </td>
+                    <td>
+                        <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
+                            <button class="edit-btn">
+                                Editar
+                            </button></a>
+                        </a>
+                    </td>
+                    <td>
+                        <button id="delete" class="edit-btn delete" data-promo-id="{{ promocion.id }}">Eliminar</button>
+                    </td>
+                    <td>
+                        <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
+                            class="edit-btn notify" style="text-decoration: none;"> Notificar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination-container">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    {% if promociones.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ promociones.previous_page_number }}">anterior</a>
+                    </li>
+                    {% endif %}
+                    <li class="pagination-item active">
+                        <span style="border-radius: 5px;" class="page-link">{{ promociones.number }}</span>
+                    </li>
+                    {% if promociones.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ promociones.next_page_number }}">siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+    <!-- Resto del contenido de la página -->
+</div>
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+<script>
+
+$(document).ready(function () {
+    $('.notify').on('click', function () {
+        const promoId = $(this).data('promo-id');
+
+        // Mostrar un cuadro de confirmación con SweetAlert2
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: '¿Desea enviar esta promoción a todos los socios?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Realizar la acción de enviar correo mediante AJAX
+                $.ajax({
+                    url: `/enviar_promocion_a_todos/${promoId}/`,
+                    type: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            Swal.fire('Éxito', response.message, 'success');
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function (xhr, errmsg, err) {
+                        Swal.fire('Error', 'Ocurrió un error al enviar la promoción', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+
+
+
+$(document).ready(function () {
+    $('.delete').on('click', function () {
+        const promoId = $(this).data('promo-id');
+        const botonEliminar = $(this); // Guardamos una referencia al botón
+
+        // Mostrar un cuadro de confirmación con SweetAlert2
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Desea eliminar esta promoción?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Realizar la eliminación mediante AJAX
+                $.ajax({
+                    url: `/eliminarpromo/${promoId}/`,
+                    type: 'POST',
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // Usamos la referencia al botón para encontrar la fila y eliminarla
+                            botonEliminar.closest('tr').remove();
+                        } else {
+                            Swal.fire('Error', 'Error al eliminar la promoción', 'error');
+                        }
+                    },
+                    error: function (xhr, errmsg, err) {
+                        Swal.fire('Error', 'Error al eliminar la promoción', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+
+
+
+    $(document).ready(function() {
+    $("#buscador_input").on("input", function() {
+        var query = $(this).val();
+        var criterio = document.getElementById('criterio').value; 
+        console.log(criterio)
+        console.log(query)
+        $.ajax({
+            url: '{% url "buscar_promos" %}',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                query: query,
+                criterio: criterio
+            },
+            success: function(data) {
+                $("#socios-body").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+$(document).ready(function() {
+    $("#criterio").on("change", function() {
+        var criterio = $(this).val();
+       
+        $.ajax({
+            url: '{% url "buscar_promos" %}',  // Cambia esto a la URL de tu vista de búsqueda
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                query: "",
+                criterio: criterio
+            },
+            success: function(data) {  // Verifica los datos devueltos por el servidor
+                $("#socios-body").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+
+
+</script>
+{% endblock %}
+
+<script>
+    function confirmarEliminacion(promocionid, nombrepromo, promoActivo) {
+
+        var valor;
+
+        if (promoActivo == 'True') {
+            valor = 1;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Desea desabilidar la promoción ' + nombrepromo,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // El usuario ha confirmado la edición, redirigir a la página de edición
+                    window.location.href = '/habilitar_desabilitar/' + promocionid + '/' + valor + '/';
+                    print(valor)
+                }
+            });
+
+        }
+        else {
+            valor = 0;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Desea habilitar la promoción ' + nombrepromo,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // El usuario ha confirmado la edición, redirigir a la página de edición
+                    window.location.href = '/habilitar_desabilitar/' + promocionid + '/' + valor + '/';
+                    print(valor)
+                }
+            });
+        }
+
+
+
+
+    }
+</script>
+
+<script>
+    function confirmarEdicion(promo_id, nombrepromo) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas editar la promo ' + nombrepromo,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/editpromo/' + promo_id;
+            }
+        });
+    }
+</script>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+{% endblock %}

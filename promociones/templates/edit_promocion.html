@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Agregar Promo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <style>
+        h1 {
+            text-align: center;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="content-menu" style="padding-top: 0%;">
+        <div class="header">
+            <h1>Agregar Promo</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+
+
+                <form id="edit-promo" action="{% url 'editpromo' promo_id=promocion.id %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <input type="hidden" id="id" name="id" value="{{ promocion.id }}"  >
+
+                    <label for="first_name">Titulo:</label>
+                    <input type="text" id="titulo" name="titulo" value="{{ promocion.titulo }}"  required>
+
+                    <label for="proveedor">Buscar o seleccionar proveedor:</label>
+                    <input type="text" id="proveedorInput" style="width:95%;" placeholder="Buscar proveedor...">
+                    <select id="proveedorSelect" name="proveedor" style="width:95%;" size="4">
+                        {% for proveedor in proveedores %}
+                        <!-- <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option> -->
+                        <option value="{{ proveedor.id }}" {% if proveedor == promocion.proveedor %} selected {% endif %}>{{ proveedor.nombre }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="last_name">Descripcion:</label>
+                    <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required>
+
+                    <label for="foto">Agregar Imagen Promo:</label>
+                    {% get_media_prefix as media_prefix %}
+                    <div class="generated-credentials">
+                        <div class="custom-file">
+                            <div class="upload-preview">
+                                <div id="imagePreview">
+                                    <img src="{{ media_prefix }}{{ promocion.imagen }}"  >
+                                </div>
+                            </div>
+                            <input type="file" class="custom-file-input" id="imagen" name="imagen"
+                                onchange="previewImage(event)">
+                            <label class="custom-file-label" for="id_foto_perfil">Seleccionar imagen</label>
+                        </div>
+                    </div>
+
+
+                    <label for="fecha_nacimiento">Fecha de Inicio:</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio"
+                        value="{{ promocion.fecha_inicio|date:'Y-m-d'}}" required>
+                    
+                    <label for="fecha_nacimiento">Fecha Final:</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin"
+                        value="{{ promocion.fecha_fin|date:'Y-m-d'}}" required>
+
+                    <input type="hidden" id="estado" name="estado" value="1">
+
+
+                    <input type="submit" value="Editar Promo" style="width: 100%;">
+                    <a href="/promociones"> <input type="button" value="Cancelar"
+                            style="width: 100%; background-color: red;"></a>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                var imagePreview = document.getElementById('imagePreview');
+                imagePreview.innerHTML = '<img src="' + reader.result + '" style="width: 100%;">';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+    
+    <script>
+        const inputElement = document.getElementById('proveedorInput');
+        const selectElement = document.getElementById('proveedorSelect');
+    
+        // Agregar evento de entrada al campo de texto
+        inputElement.addEventListener('input', function() {
+            const searchText = this.value.trim().toLowerCase();
+    
+            // Iterar a través de las opciones del select y mostrar/ocultar según la búsqueda
+            for (const option of selectElement.options) {
+                const optionText = option.text.toLowerCase();
+                if (optionText.includes(searchText)) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            }
+        });
+    
+        // Agregar evento de cambio al select para actualizar el campo de entrada de texto
+        selectElement.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            inputElement.value = selectedOption.text;
+        });
+
+
+        var promocionId = "{{ promocion.id }}";
+        $(document).ready(function () {
+        $('#edit-promo').on('submit', function (event) {
+            event.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/editpromo/' + promocionId,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.status === 'error') {
+                        Swal.fire({
+                            "title": "Falló",
+                            "text": response.message,
+                            "icon": "warning"
+                        })
+                    } else if (response.status === 'success') {
+                        Swal.fire({
+                            "title": "¿Desea guardar los cambios de esta promoción?",
+                            "text": "Esta acción no se puede deshacer",
+                            "icon": "question",
+                            "showCancelButton": true,
+                            "cancelButtonText": "Cancelar",
+                            "confirmButtonText": "Si, guardar",
+                            "confirmButtonColor": "red",
+                            "cancelButtonColor": "blue"
+                        }).then(function (result) {
+                            if (result.isConfirmed) {
+                                window.location.href = '/promociones/'
+                            }
+                        })
+
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    Swal.fire('Error', 'Ocurrió un error al procesar la solicitud.', 'error');
+                }
+            });
+        });
+    });
+    </script>
+</body>
+
+</html>
+
+{% endblock %}

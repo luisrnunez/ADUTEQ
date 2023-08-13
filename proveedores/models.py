@@ -23,6 +23,7 @@ class detallesCupos(models.Model):
     socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
     proveedor=models.ForeignKey(Proveedor, on_delete=models.CASCADE)
     cupo=models.DecimalField(max_digits = 8, decimal_places = 2)
+    permanente=models.BooleanField(default=True)
     fechaccupo=models.DateField(null=True)
 
 #SE ACTIVA AL CREAR UN PROVEEDOR CON EL FIN DE ASIGNAR EL CUPO A CADA SOCIO YA EXISTENTE

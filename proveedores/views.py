@@ -255,9 +255,18 @@ def editarcupos(request):
     nuevocupo=request.POST.get('cupo')
     nuevafecha=date.today()
     
-    detallecupo.cupo=nuevocupo
-    detallecupo.fechaccupo=nuevafecha
+    restaurar_cupo_original = request.POST.get('restaurar_cupo') == 'on'
+
     if (request.method == 'POST'):
+        if(restaurar_cupo_original):
+            detallecupo.cupo=nuevocupo
+            detallecupo.fechaccupo=nuevafecha
+            detallecupo.permanente=True
+        else:
+            detallecupo.cupo=nuevocupo
+            detallecupo.fechaccupo=nuevafecha
+            detallecupo.permanente=False
+
         detallecupo.save()
         response = {
             'status': 'success',

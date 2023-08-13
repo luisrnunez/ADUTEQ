@@ -164,14 +164,14 @@
         console.log(criterio)
         console.log(query)
         $.ajax({
-            url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
+            url: '{% url "buscar_socios" %}',
             type: "POST",
             data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                csrfmiddlewaretoken: '{{ csrf_token }}',
                 query: query,
                 criterio: criterio
             },
-            success: function(data) {  // Verifica los datos devueltos por el servidor
+            success: function(data) { 
                 $("#socios-body").html(data.rendered_table); 
             }
         });
