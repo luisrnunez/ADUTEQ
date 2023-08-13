@@ -20,6 +20,14 @@
         display: block;
         margin: 0 auto;
     }
+
+    .square-image {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto;
+        }
 </style>
 
 
@@ -74,7 +82,7 @@
                     <td>{{ promocion.proveedor.nombre }}</td>
                     <td>
                         {% if promocion.imagen %}
-                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="rounded-image">
+                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image">
                         {% else %}
                         No hay foto disponible.
                         {% endif %}
