@@ -18,7 +18,7 @@ class AyudasEconomicas(models.Model):
     motivo=models.ForeignKey(AyudasMot, on_delete=models.CASCADE)
     descripcion=models.TextField(max_length=200)
     valorsocio=models.DecimalField(max_digits = 8, decimal_places = 2)
-    fecha=models.DateTimeField()
+    fecha=models.DateField()
     total=models.DecimalField(max_digits = 8, decimal_places = 2)
     evidencia=models.FileField(null=True)
 
@@ -28,7 +28,7 @@ class DetallesAyuda(models.Model):
     socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
     valor=models.DecimalField(max_digits = 8, decimal_places = 2)
     evidencia=models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
-    fecha=models.DateTimeField(null=True)
+    fecha=models.DateField(null=True)
     cancelado = models.BooleanField(default=False)
 
 @receiver(post_save, sender=DetallesAyuda)

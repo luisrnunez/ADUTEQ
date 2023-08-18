@@ -159,7 +159,7 @@ def registro_ayuda(request, detalle_id, valor):
         messages.success(request, 'Ups, ocurrio un error en la transaccion')
     return redirect('/detalleayuda/'+str(detalleayuda.ayuda.id))
 
-def presagregar_pdf(request, det_id): 
+def presagregar_pdf2(request, det_id): 
     registro_pago = DetallesAyuda.objects.get(id=det_id)
     if request.method == 'GET':
         return render(request,'editar_detalles_prestamo.html', {'pago_men': registro_pago}) 

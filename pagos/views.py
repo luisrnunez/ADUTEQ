@@ -122,7 +122,9 @@ def agregar_pagos_cuotas(request):
                 detalle_cuatas = Detalle_cuotas(
                     pago_cuota=pagoscuotas,
                     numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago
+                    fecha_descuento=fecha_pago,
+                    valor_cuota=valor_cuo,
+                    socio=socios, proveedor=proveedores
                 )
                 detalle_cuatas.save()
 
@@ -459,3 +461,56 @@ def generar_reporte_pdf(request):
     doc.build(story)
 
     return response
+
+def convertir_cuotas(request, pago_id):
+    if request.method == 'GET':
+        pagos = Pagos.objects.get(id=pago_id)
+        # form = PagosForm(instance=pagos)
+        return render(request, 'convertir_cuotas.html', {'pagos': pagos})
+    else:
+            socio_id = request.POST.get('socio')
+            socios = Socios.objects.get(id=socio_id)
+
+            proveedor_id = request.POST.get('proveedor')
+            proveedores = Proveedor.objects.get(id=proveedor_id)
+
+            cantidad = request.POST.get('consumo_total')
+            
+
+            # fecha = request.POST.get('fecha_descuento')
+            numero_cuoa = request.POST.get('numero_cuotas')
+
+            fecha = str(request.POST.get('fecha_descuento'))
+            fecha_actual = datetime.strptime(fecha, "%Y-%m-%d")
+            fechas_pago = [
+                fecha_actual + timedelta(days=(30 * (i+1))) for i in range(int(numero_cuoa))]
+
+            cantidadval = float(cantidad)
+            n_cuota = float(numero_cuoa)
+            valor_cuo = cantidadval / n_cuota
+
+            # if(str(cantidad)>cupo):
+            #     messages.warning(request, 'El valor que desea ingrear es superior al cupo brindado por el proveedor')
+
+            pagoscuotas = Pagos_cuotas.objects.create(
+                socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha,
+                numero_cuotas=numero_cuoa, cuota_actual=0, valor_cuota=valor_cuo
+            )
+            pagoscuotas.save()
+
+            for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                detalle_cuatas = Detalle_cuotas(
+                    pago_cuota=pagoscuotas,
+                    numero_cuota=numero_cuota,
+                    fecha_descuento=fecha_pago,
+                    valor_cuota=valor_cuo,
+                    socio=socios, proveedor=proveedores
+                )
+                detalle_cuatas.save()
+            
+            pagox = request.POST.get('id_pago')
+            print(pagox)
+            eliminar_pago(request,pagox)
+
+            messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
+            return redirect('/lista_pagos_cuotas/')
