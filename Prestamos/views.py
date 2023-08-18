@@ -1,4 +1,5 @@
 from datetime import date
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Prestamo,Socios, PagoMensual
 from django.contrib import messages
@@ -6,6 +7,8 @@ from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from django.db import transaction
 from django.core.paginator import Paginator, PageNotAnInteger
+from .models import Periodo
+from django.template.loader import render_to_string
 
 def guardar_prestamo(request):
     if request.method == 'POST':
@@ -77,16 +80,71 @@ def editar_prestamo(request, prestamo_id):
         return redirect('mostrar_prestamo')
     
 def mostrar_prestamo(request):
-    prestamos = Prestamo.objects.all().order_by('cancelado')
-    items_por_pagina = 8
-    paginator = Paginator(prestamos, items_por_pagina)
-    numero_pagina = request.GET.get('page')
-    try:
-        prestamos_paginados = paginator.get_page(numero_pagina)
-    except PageNotAnInteger:
-        prestamos_paginados = paginator.get_page(1)
     socios =  Socios.objects.select_related('user').all()
-    return render(request, 'mostrar_prestamo.html', {'prestamos': prestamos_paginados,'socios' : socios })
+
+    periodos = Periodo.objects.all()  # Obtener todos los períodos
+    anos = periodos.values_list('anio', flat=True).distinct()
+    #listar periodo por el select
+    periodoid = request.POST.get('periodoid')
+    fechas_periodo = {}
+    if periodoid:
+        periodo_seleccionado = Periodo.objects.filter(id=periodoid).first()
+        if periodo_seleccionado:
+            fechas_periodo = {
+                'fecha_inicio': periodo_seleccionado.fecha_inicio,
+                'fecha_fin': periodo_seleccionado.fecha_fin
+            }
+            prestamos = Prestamo.objects.filter(fecha_prestamo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-fecha_prestamo", "socio")
+            context = {
+                'prestamos': prestamos,
+                'socios' : socios ,
+                'periodos': periodos,
+                'anos': anos,
+                'fechas_periodo': fechas_periodo,
+                'periodo_seleccionado': periodo_seleccionado,
+            }
+            rendered_table = render_to_string("mostrar_prestamo_partial.html",context)
+            return JsonResponse({"rendered_table": rendered_table})
+    
+    #listar periodo actual
+    periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+    if periodo_seleccionado:
+        fechas_periodo = {
+            'fecha_inicio': periodo_seleccionado.fecha_inicio,
+            'fecha_fin': periodo_seleccionado.fecha_fin
+        }
+        prestamos = Prestamo.objects.filter(fecha_prestamo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-fecha_prestamo", "socio")
+        items_por_pagina = 8
+        paginator = Paginator(prestamos, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            prestamos = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            prestamos = paginator.get_page(1)
+    else:
+        prestamos = {}
+    context = {
+                'prestamos': prestamos,
+                'socios' : socios ,
+                'periodos': periodos,
+                'anos': anos,
+                'fechas_periodo': fechas_periodo,
+                'periodo_seleccionado': periodo_seleccionado,
+            }
+    return render(request, 'mostrar_prestamo.html', context)
+
+
+
+    # prestamos = Prestamo.objects.all().order_by('cancelado')
+    # items_por_pagina = 8
+    # paginator = Paginator(prestamos, items_por_pagina)
+    # numero_pagina = request.GET.get('page')
+    # try:
+    #     prestamos_paginados = paginator.get_page(numero_pagina)
+    # except PageNotAnInteger:
+    #     prestamos_paginados = paginator.get_page(1)
+    # socios =  Socios.objects.select_related('user').all()
+    # return render(request, 'mostrar_prestamo.html', {'prestamos': prestamos_paginados,'socios' : socios })
 
 
 def aplicar_pago(request, prestamo_id, valor):

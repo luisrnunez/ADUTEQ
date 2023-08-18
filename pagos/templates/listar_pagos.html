@@ -2,14 +2,8 @@
 {% load static %}
 {% block content %}
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-<style>
-    .pagination-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 
 <body>
 
@@ -20,73 +14,154 @@
         </div>
         <div class="socios-content ">
             <div class="botones-sup">
-                <a href="/agregar_pago/"> <button class="add-socio-btn"> Agregar descuento</button></a>
-                <a style="margin-left: 10px;" href="/extraer_descuentos/"> <button class="add-socio-btn"> Agregar descuentos desde archivo</button></a>
-                <a style="margin-left: 10px;" href="/lista_pagos_cuotas/"> <button class="add-socio-btn"> Descuentos por cuotas</button></a>
-                <a style="margin-left: 10px;" href="/generar_reporte/"> <button class="add-socio-btn"> Generar Reporte</button></a>
+                <div style="height: min-content;">
+                    <a href="/agregar_pago/"> <button class="add-socio-btn"> Agregar descuento</button></a>
+                    <a style="margin-left: 10px;" href="/extraer_descuentos/"> <button class="add-socio-btn"> Agregar
+                            descuentos desde archivo</button></a>
+                    <a style="margin-left: 10px;" href="/lista_pagos_cuotas/"> <button class="add-socio-btn"> Descuentos por
+                            cuotas</button></a>
+                    <a style="margin-left: 10px;" href="/generar_reporte/"> <button class="add-socio-btn"> Generar
+                            Reporte</button></a>    
+                </div>
+       
+                <div style="display: flex; justify-content: center; width: min-content;">
+                    <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
+                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
+                        aria-placeholder="Asño" required>
+                        {% for anio in anos %}
+                        <option value="{{ anio }}">{{ anio }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
+                        aria-placeholder="Periodo" required>
+                        {% for periodo in periodos %}
+                        {% if periodo.anio == anos.0 %}
+                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                            {{ periodo.nombre }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
             </div>
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Socio</th>
-                        <th scope="col">Proveedor</th>
-                        <th scope="col">Descuento</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Editar</th>
-                        <th scope="col">Eliminar</th>
-                        <th scope="col">Convertir a Cuotas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pago in pagos %}
-                    <tr>
-                        <td>{{pago.id}}</td>
-                        <td>{{ pago.socio.user.first_name }}</td>
-                        <td>{{pago.proveedor.nombre}}</td>
-                        <td>{{pago.consumo_total}}$</td>
-                        <td>{{ pago.fecha_consumo|date:"j - n - Y" }}</td>
-
-                        <td>
-                            <form action="{% url 'editarpago' pago.id %}">
-                                <button class="edit-btn">Editar</button>
-                            </form>
-                        </td>
-
-                        <td>
-                            <form action="{% url 'eliminarpago' pago.id %}">
-                                <button class="delete-btn">Eliminar</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{% url 'convertir_cuotas' pago.id %}"">
-                                <button class="delete-btn">Convertir</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="pagination-container">
-                <nav aria-label="...">
-                    <ul class="pagination">
-                        {% if pagos.has_previous %}
+            <div  id="lista-pagos">
+                <table class="socios-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Socio</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Descuento</th>
+                            <th scope="col">Fecha</th>
+                            {% if periodo_seleccionado.activo == True %}
+                                <th scope="col">Editar</th>
+                                <th scope="col">Eliminar</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in pagos %}
+                        <tr>
+                            <td>{{pago.id}}</td>
+                            <td>{{ pago.socio.user.first_name }}</td>
+                            <td>{{pago.proveedor.nombre}}</td>
+                            <td>{{pago.consumo_total}}$</td>
+                            <td>{{ pago.fecha_consumo|date:"j - n - Y"}}</td>
+    
+                            {% if periodo_seleccionado.activo %}
+                            <td>
+                                <form action="{% url 'editarpago' pago.id %}">
+                                    <button class="edit-btn">Editar</button>
+                                </form>
+                            </td>
+    
+                            <td>
+                                <form action="{% url 'eliminarpago' pago.id %}">
+                                    <button class="delete-btn">Eliminar</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    
+                <div class="pagination-container">
+                    <nav aria-label="...">
+                        <ul class="pagination">
+                            {% if pagos.has_previous %}
                             <li class="page-item">
                                 <a class="page-link" href="?page={{ pagos.previous_page_number }}">anterior</a>
                             </li>
-                        {% endif %}
-                        <li class="pagination-item active">
-                            <span style="border-radius: 5px;" class="page-link">{{ pagos.number }}</span>
-                        </li>
-                        {% if pagos.has_next %}
+                            {% endif %}
+                            <li class="pagination-item active">
+                                <span style="border-radius: 5px;" class="page-link">{{ pagos.number }}</span>
+                            </li>
+                            {% if pagos.has_next %}
                             <li class="page-item">
                                 <a class="page-link" href="?page={{ pagos.next_page_number }}">siguiente</a>
                             </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
             </div>
+         
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const selectAnio = document.getElementById('select-anio');
+                    const selectPeriodo = document.getElementById('select-periodo');
+
+                    selectAnio.addEventListener('change', function () {
+                        const selectedAnio = selectAnio.value;
+
+                        // Realizar una solicitud AJAX para obtener los períodos del año seleccionado
+                        $.ajax({
+                            type: 'GET',
+                            url: `/obtener_periodos/${selectedAnio}/`,  // Ruta para obtener los períodos por año
+                            success: function (data) {
+                                selectPeriodo.innerHTML = '';  // Limpiar las opciones actuales
+
+                                // Agregar las nuevas opciones basadas en la respuesta AJAX
+                                data.periodos.forEach(function (periodo) {
+                                    const option = document.createElement('option');
+                                    option.value = periodo.id;
+                                    option.textContent = periodo.nombre;
+                                    selectPeriodo.appendChild(option);
+                                });
+                            },
+                            error: function (error) {
+                                console.error(error);
+                            }
+                        });
+                    });
+                });
+
+            </script>
+            <script>
+                $(document).ready(function () {
+                    $("#select-periodo").on("click", function () {
+                        console.log('ENTRAR AL SELECT')
+                        var periodoid = $(this).val();
+                        $.ajax({
+                            url: '{% url "listar_pagos" %}',
+                            type: "POST",
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                periodoid: periodoid
+                            },
+                            success: function (data) {
+                                $("#lista-pagos").html(data.rendered_table);
+                            }
+                        });
+                    });
+                });
+            </script>
 
         </div>
+
+
+
         {% endblock %}

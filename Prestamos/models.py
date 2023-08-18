@@ -3,6 +3,7 @@ from socios.models import Socios
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date
+from Periodo.models import Periodo
 import os
 
 class Prestamo(models.Model):

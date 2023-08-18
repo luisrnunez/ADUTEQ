@@ -1,0 +1,60 @@
+<table class="socios-table">
+    <thead>
+        <tr>
+            <th>Beneficiario</th>
+            <th style="white-space: normal; word-wrap: break-word;">descripcion</th>
+            <th>fecha</th>
+            <th>motivo</th>
+            <th>Valor-Socio</th>
+            <th>Total</th>
+            <!-- <th>Editar</th> -->
+            {% if periodo_seleccionado.activo == True %}
+            <th>Eliminar</th>
+            {% endif %}
+            <th>Detalles</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ayuda in ayudas %}
+        <tr>
+            {% if ayuda.socio.user.first_name %}
+                <td>{{ayuda.socio.user.first_name}}</td>
+            {% else %}
+                <td>OTRO</td>
+            {% endif %}
+            <td style="white-space: normal; word-wrap: break-word;">{{ayuda.descripcion}}</td>
+            <td>{{ayuda.fecha}}</td>
+            <td>{{ayuda.motivo}}</td>
+            <td>{{ayuda.valorsocio}}</td>
+            <td>{{ayuda.total}}</td>
+
+            <!--{% if proveedor.estado == False %}
+            <td>Desabilitado</td>
+            {% else %}
+            <td>Habilitado</td>
+
+            {% endif %}-->
+         
+                <!--<button class="edit-btn">Editar</button>
+                <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
+
+                <!-- <a style="text-decoration: none;" class="edit-btn"
+                    href="/formeditarayuda/{{ayuda.id}}">Editar</a> -->
+
+                <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
+
+            {% if periodo_seleccionado.activo == True %}
+            <td>
+                <a style="text-decoration: none;" class="delete-btn" href="#"
+                    onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/', 'Ayuda economica')">Eliminar</a>
+            </td>
+            {% endif %}
+            <td>
+                <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Detalles Ayuda</a>
+            </td>
+            <!--<td>{{proveedor.id}}</td>-->
+        </tr>
+        {% endfor %}
+        <!-- Agrega más filas con información de socios aquí -->
+    </tbody>
+</table>

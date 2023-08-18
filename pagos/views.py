@@ -27,21 +27,69 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, KeepInFrame, Image
 from reportlab.lib.styles import getSampleStyleSheet
-
-
-
+from django.contrib.auth.decorators import login_required
+from Periodo.models import Periodo
+from django.template.loader import render_to_string
 # Create your views here. 
-def lista_pagos(request):
-    pagos = Pagos.objects.all().order_by("-id")
-    items_por_pagina = 8
-    paginator = Paginator(pagos, items_por_pagina)
-    numero_pagina = request.GET.get('page')
-    try:
-        pagos=paginator.get_page(numero_pagina)
-    except PageNotAnInteger:
-        pagos=paginator.get_page(1)
-    return render(request, 'listar_pagos.html', {'pagos': pagos})
 
+@login_required
+def lista_pagos(request):
+
+    periodos = Periodo.objects.all()  # Obtener todos los períodos
+    anos = periodos.values_list('anio', flat=True).distinct()
+    #listar periodo por el select
+    periodoid = request.POST.get('periodoid')
+    fechas_periodo = {}
+    if periodoid:
+        periodo_seleccionado = Periodo.objects.filter(id=periodoid).first()
+        print(periodo_seleccionado)
+        if periodo_seleccionado:
+            fechas_periodo = {
+                'fecha_inicio': periodo_seleccionado.fecha_inicio,
+                'fecha_fin': periodo_seleccionado.fecha_fin
+            }
+           
+            print(periodo_seleccionado)
+            pagos = Pagos.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("socio","proveedor")
+            context = {
+                'pagos': pagos,
+                'periodos': periodos,
+                'anos': anos,
+                'fechas_periodo': fechas_periodo,
+                'periodo_seleccionado': periodo_seleccionado,
+            }
+            rendered_table = render_to_string("lista_pagos_partial.html",context)
+            return JsonResponse({"rendered_table": rendered_table})
+    
+    #listar periodo actual
+    periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+    if periodo_seleccionado:
+        fechas_periodo = {
+            'fecha_inicio': periodo_seleccionado.fecha_inicio,
+            'fecha_fin': periodo_seleccionado.fecha_fin
+        }
+        pagos = Pagos.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-fecha_consumo", "proveedor")
+        items_por_pagina = 10
+        paginator = Paginator(pagos, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            pagos = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            pagos = paginator.get_page(1)
+    else:
+        pagos = {}
+    context = {
+        'pagos': pagos,
+        'periodos': periodos,
+        'anos': anos,
+        'fechas_periodo': fechas_periodo,
+        'periodo_seleccionado': periodo_seleccionado,
+    }
+    return render(request, 'listar_pagos.html', context)
+
+def obtener_periodos_por_anio(request, anio):
+    periodos = Periodo.objects.filter(anio=anio).values('id', 'nombre')
+    return JsonResponse({'periodos': list(periodos)})
 
 def lista_pagos_cuotas(request):
     pago_cuotas = Pagos_cuotas.objects.all().order_by("estado")
@@ -371,12 +419,11 @@ def guardar_descuentos_prov(request, id, fecha):
 def verificar_registros(request):
     if request.method == 'POST':
         registros_formulario = request.POST
-
         campos = list(registros_formulario.keys())
         campos.remove('csrfmiddlewaretoken')
         registros_con_estilo = []
         cant_registros = len(registros_formulario.getlist(campos[0]))
-      
+        cant_errores = 0
         for i in range(cant_registros):
             valor = 1
             valor1 = 1
@@ -384,13 +431,13 @@ def verificar_registros(request):
             for campo in campos:
                 datos[campo] = registros_formulario.getlist(campo)[i]  # Obtenemos el valor del campo para el registro actual
             datos['estilo_color'] = 'normal'  # Agregamos la nueva columna 'estilo_color' con valor 'normal'
-            
             ide = registros_formulario.getlist('ide')
             if ide[i].isdigit():
                 if Socios.objects.filter(cedula=ide[i]).exists():
+                    valor=0
                     datos['estilo_color'] = 'normal'
                 else:
-                    valor=0
+                    cant_errores = cant_errores + 1
                     datos['estilo_color'] = 'rojo'
             else:
                 usuarios = User.objects.filter(is_staff=False)
@@ -401,22 +448,29 @@ def verificar_registros(request):
                         break
                 if usuario_existe:
                     valor = 0
-                registros_con_estilo.append(datos)
+                # registros_con_estilo.append(datos)
+
             des = registros_formulario.getlist('des')
             des[i] = des[i].replace(',', '').replace('.', '')
             if des[i].isdigit():
                 valor1 = 0
                 print('es digito')
+            else:
+                cant_errores = cant_errores + 1
             print(des[i])
             #cambio color
             if valor == 0 and valor1 == 0:
                 datos['estilo_color'] = 'normal'
             else:
+                cant_errores = cant_errores + 1
                 datos['estilo_color'] = 'rojo'
+            registros_con_estilo.append(datos)
 
         print(registros_con_estilo)
+        print(valor,'  ',valor1)
+        print(cant_errores)
         proveedores = Proveedor.objects.filter(estado=True)
-        if valor == 0 and valor1 == 0:
+        if cant_errores > 0:
             response = {
                 'status': False,
                 'message': 'Se han encontrado errores en los registros. Por favor, verifíquelos.',
