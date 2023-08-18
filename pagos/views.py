@@ -1,3 +1,6 @@
+from django.shortcuts import render
+
+# Create your views here.
 import datetime
 from decimal import Decimal
 from gettext import translation
@@ -123,9 +126,7 @@ def agregar_pagos_cuotas(request):
                 detalle_cuatas = Detalle_cuotas(
                     pago_cuota=pagoscuotas,
                     numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago,
-                    valor_cuota=valor_cuo,
-                    socio=socios, proveedor=proveedores
+                    fecha_descuento=fecha_pago
                 )
                 detalle_cuatas.save()
 
