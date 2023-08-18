@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import lista_pagos,agrefar_pagos,editar_pago,eliminar_pago,extraer_datos_pdf,extraer_descuentos,guardar_descuentos_prov
-from .views import lista_pagos_cuotas,agregar_pagos_cuotas,detalles_cuota,registra_pago_cuota,eliminar_pago_cuota,agregar_pdf, verificar_registros
+from .views import lista_pagos_cuotas,agregar_pagos_cuotas,detalles_cuota,registra_pago_cuota,eliminar_pago_cuota,agregar_pdf, verificar_registros,convertir_cuotas
 from .views import generar_reporte_pdf
 
 urlpatterns = [
@@ -21,4 +21,6 @@ urlpatterns = [
     path('extraer_pdf/', extraer_datos_pdf, name='extraer_pdf'),
     path('extraer_descuentos/', extraer_descuentos, name='extraer_descuentos'),
     path('guardar_descuentos_prov/<int:id>/<str:fecha>/', guardar_descuentos_prov, name='guardar_descuentos_prov'),
+
+    path('convertir_cuotas/<int:pago_id>/', convertir_cuotas, name='convertir_cuotas'),
 ]

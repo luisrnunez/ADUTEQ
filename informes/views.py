@@ -1,4 +1,5 @@
-from django.shortcuts import redirect
+from multiprocessing import context
+from django.shortcuts import redirect,render
 from Pagos.models import Pagos
 from django.contrib import messages
 from socios.models import Socios, Aportaciones, datos_para_el_pdf, obtener_datos_socioss
@@ -24,6 +25,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Image
 from django.http import JsonResponse
+from django.db import connection
 
 
 
@@ -329,3 +331,148 @@ def enviar_correo_todoss(request):
         response = {'status': 'error', 'message': 'Ups. algo salío mal'}
 
     return JsonResponse(response)
+
+def reportes(request):
+    return render(request, "reportes.html")
+
+def obtener_consumo_total_func(mes, anio):
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT * FROM obtener_consumo_total_func({mes}, {anio});"
+        )
+        result = cursor.fetchall()
+    return result
+
+def generar_reporte_pdf_total_usuarios(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_consumo.pdf"'
+
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    resultados = obtener_consumo_total_func(mes, anio)
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(letter))
+    elements = []
+
+    imagen = cargar_imagen('informes/static/img/aduteq.png')  # Ruta relativa desde la ubicación de la función
+    elements.append(imagen)
+
+
+    data = [['Nombre', 'Cédula', 'Cuota préstamos', 'Cuota descuentos','Aportación', 'Descuento Proveedores', 'Aportación Ayudas', 'Consumo total']]
+    data.extend(resultados)
+
+    table = Table(data, colWidths=[120, 70, 100, 100, 70, 120, 100, 80], repeatRows=1)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+    ]))
+
+    elements.append(Spacer(1, 20))
+    elements.append(table)
+    doc.build(elements)
+    return response
+
+def cargar_imagen(path):
+    imagen = Image(path)
+    imagen.drawHeight = 50  # Ajusta la altura de la imagen
+    imagen.drawWidth = 50   # Ajusta el ancho de la imagen
+    return imagen
+
+def cerrar_periodo(request):
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    if request.method == 'GET':
+        consumos_proveedores = obtener_consumos_proveedores_func(mes, anio)
+        suma_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio)
+        prestamos_cuotas=obtener_cuota_prestamos_func(mes,anio)
+        suma_prestamos=obtener_suma_prestamo_total_func(mes,anio)
+        descuento_cuotas=obtener_cuota_descuentos_func(mes,anio)
+        suma_des_cuot=obtener_suma_descuento_cuotas_func(mes,anio)
+        ayudas_des=obtener_ayudas_func(mes,anio)
+        suma_ayudas=obtener_suma_ayudas_func(mes,anio)
+        return render(request, "cerrar_periodo.html", 
+                      {'consumos_proveedores': consumos_proveedores, 'suma_consumo': suma_consumo,
+                       'prestamos_cuotas': prestamos_cuotas, 'suma_prestamos': suma_prestamos,
+                       'descuento_cuotas': descuento_cuotas, 'suma_des_cuot': suma_des_cuot,
+                       'ayudas_des': ayudas_des, 'suma_ayudas': suma_ayudas})
+    else:
+        return render(request, 'login.html')
+    
+def obtener_consumos_proveedores_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM obtener_consumos_proveedores_func(%s, %s);", [mes, anio])
+        results = cursor.fetchall()
+    return results
+
+def obtener_cuota_prestamos_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM obtener_cuota_prestamos_func(%s, %s);", [mes, anio])
+        results = cursor.fetchall()
+    return results
+
+def obtener_cuota_descuentos_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM obtener_cuota_descuentos_func(%s, %s);", [mes, anio])
+        results = cursor.fetchall()
+    return results
+
+def obtener_ayudas_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM obtener_ayudas_func(%s, %s);", [mes, anio])
+        results = cursor.fetchall()
+    return results
+
+def actualizar_cancelados(request):
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM actualizar_cancelados(%s, %s);", [mes, anio])
+    return redirect(cerrar_periodo)
+
+def actualizar_estados(request):
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM actualizar_estados(%s, %s);", [mes, anio])
+    return redirect(cerrar_periodo)
+
+def obtener_suma_consumo_total_descuentos_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT obtener_suma_consumo_total_descuentos_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def obtener_suma_prestamo_total_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT obtener_suma_prestamo_total_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def obtener_suma_descuento_cuotas_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT obtener_suma_descuento_cuotas_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def obtener_suma_ayudas_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT obtener_suma_ayudas_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def llamar_cancelados(request):
+    with connection.cursor() as cursor:
+        cursor.callproc('actualizar_cancelados', [3, 8, 2023])

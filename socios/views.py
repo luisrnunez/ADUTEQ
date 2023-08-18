@@ -99,7 +99,11 @@ def guardar_socio(request):
         dedicacion_academica = request.POST.get('dedicacion_academica')
         titulo = request.POST.get('titulo')
         aporte = request.POST.get('aporte')
-        foto = request.FILES['foto']
+
+        if 'foto' in request.FILES:
+                foto = request.FILES['foto']
+        else:
+             foto=""
 
         if 'foto' in request.FILES:
             foto = request.FILES['foto']

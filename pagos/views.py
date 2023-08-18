@@ -29,8 +29,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 # Create your views here. 
 def lista_pagos(request):
-    pagos = Pagos.objects.all().order_by("-fecha_consumo", "proveedor")
-    items_por_pagina = 10
+    pagos = Pagos.objects.all().order_by("-id")
+    items_por_pagina = 8
     paginator = Paginator(pagos, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
@@ -123,7 +123,9 @@ def agregar_pagos_cuotas(request):
                 detalle_cuatas = Detalle_cuotas(
                     pago_cuota=pagoscuotas,
                     numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago
+                    fecha_descuento=fecha_pago,
+                    valor_cuota=valor_cuo,
+                    socio=socios, proveedor=proveedores
                 )
                 detalle_cuatas.save()
 
@@ -431,8 +433,9 @@ def verificar_registros(request):
 
 
 def generar_reporte_pdf(request):
-    mes = 7
-    anio = 2023
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
 
     # Llamar al procedimiento almacenado en la base de datos y pasarle los parámetros
     with connection.cursor() as cursor:
@@ -459,12 +462,12 @@ def generar_reporte_pdf(request):
     doc = SimpleDocTemplate(response, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
 
     # Crear una lista con los datos del reporte
-    data = [['Nombre Socio'] + [proveedor.nombre for proveedor in proveedores]]
+    data = [['Cedula'] + [proveedor.nombre for proveedor in proveedores]]
     data.extend([row for row in datos_reporte])
 
 
     # Crear una tabla con los datos y aplicar estilos
-    table = Table(data)
+    table = Table(data,colWidths=[100, 100, 100, 100, 100, 100, 100], repeatRows=1)
     style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -492,3 +495,56 @@ def generar_reporte_pdf(request):
     doc.build(story)
 
     return response
+
+def convertir_cuotas(request, pago_id):
+    if request.method == 'GET':
+        pagos = Pagos.objects.get(id=pago_id)
+        # form = PagosForm(instance=pagos)
+        return render(request, 'convertir_cuotas.html', {'pagos': pagos})
+    else:
+            socio_id = request.POST.get('socio')
+            socios = Socios.objects.get(id=socio_id)
+
+            proveedor_id = request.POST.get('proveedor')
+            proveedores = Proveedor.objects.get(id=proveedor_id)
+
+            cantidad = request.POST.get('consumo_total')
+            
+
+            # fecha = request.POST.get('fecha_descuento')
+            numero_cuoa = request.POST.get('numero_cuotas')
+
+            fecha = str(request.POST.get('fecha_descuento'))
+            fecha_actual = datetime.strptime(fecha, "%Y-%m-%d")
+            fechas_pago = [
+                fecha_actual + timedelta(days=(30 * (i+1))) for i in range(int(numero_cuoa))]
+
+            cantidadval = float(cantidad)
+            n_cuota = float(numero_cuoa)
+            valor_cuo = cantidadval / n_cuota
+
+            # if(str(cantidad)>cupo):
+            #     messages.warning(request, 'El valor que desea ingrear es superior al cupo brindado por el proveedor')
+
+            pagoscuotas = Pagos_cuotas.objects.create(
+                socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha,
+                numero_cuotas=numero_cuoa, cuota_actual=0, valor_cuota=valor_cuo
+            )
+            pagoscuotas.save()
+
+            for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                detalle_cuatas = Detalle_cuotas(
+                    pago_cuota=pagoscuotas,
+                    numero_cuota=numero_cuota,
+                    fecha_descuento=fecha_pago,
+                    valor_cuota=valor_cuo,
+                    socio=socios, proveedor=proveedores
+                )
+                detalle_cuatas.save()
+            
+            pagox = request.POST.get('id_pago')
+            print(pagox)
+            eliminar_pago(request,pagox)
+
+            messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
+            return redirect('/lista_pagos_cuotas/')

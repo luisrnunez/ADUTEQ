@@ -35,6 +35,7 @@
                         <th scope="col">Fecha</th>
                         <th scope="col">Editar</th>
                         <th scope="col">Eliminar</th>
+                        <th scope="col">Convertir a Cuotas</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,6 +56,11 @@
                         <td>
                             <form action="{% url 'eliminarpago' pago.id %}">
                                 <button class="delete-btn">Eliminar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="{% url 'convertir_cuotas' pago.id %}"">
+                                <button class="delete-btn">Convertir</button>
                             </form>
                         </td>
                     </tr>
