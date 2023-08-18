@@ -354,6 +354,407 @@ def actualizar_cancelados(apps, schema_editor):
                 """
             )
 
+def actualizar_estados(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'actualizar_estados')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.actualizar_estados(
+                    mes integer,
+                    anio integer)
+                    RETURNS void
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                BEGIN
+                    UPDATE public."Pagos_detalle_cuotas"
+                    SET estado = True
+                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_ayudas_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_ayudas_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_ayudas_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS TABLE(nombre text, cedula character varying, fecha_ayuda date, aportacion_ayudaseco numeric) 
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                    ROWS 1000
+
+                AS $BODY$
+                BEGIN
+                    RETURN QUERY
+                    SELECT
+                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
+                        s.cedula AS cedula,
+                        ae.fecha AS fecha,
+                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco
+                    FROM
+                        public.socios_socios s
+                    INNER JOIN
+                        public.auth_user u ON s.user_id = u.id
+                    LEFT JOIN (
+                        SELECT socio_id, fecha, SUM(valor) AS valor
+                        FROM public.ayudas_econ_detallesayuda
+                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                        GROUP BY socio_id, fecha
+                    ) ae ON s.id = ae.socio_id
+                    GROUP BY
+                        u.first_name, u.last_name, s.cedula, ae.fecha
+                    HAVING SUM(COALESCE(ae.valor, 0)) > 0;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_consumo_total_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_consumo_total_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_consumo_total_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS TABLE(nombre text, cedula character varying, cuota_prestamos numeric, cuota_descuento numeric, aportacion numeric, descuento_proveedores numeric, aportacion_ayudaseco numeric, total numeric) 
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                    ROWS 1000
+
+                AS $BODY$
+                BEGIN
+                    RETURN QUERY
+                    SELECT
+                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
+                        s.cedula AS cedula,
+                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
+                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
+                        SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
+                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
+                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
+                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) 
+                            + COALESCE(ae.valor, 0)) AS consumo_total
+                    FROM
+                        public.socios_socios s
+                    INNER JOIN
+                        public.auth_user u ON s.user_id = u.id
+                    LEFT JOIN (
+                        SELECT socio_id, SUM(monto) AS aportacion_total
+                        FROM public.socios_aportaciones
+                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                        GROUP BY socio_id
+                    ) sa ON s.id = sa.socio_id
+                    LEFT JOIN (
+                        SELECT socio_id, SUM(consumo_total) AS consumo_total
+                        FROM public."Pagos_pagos"
+                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                        GROUP BY socio_id
+                    ) p ON s.id = p.socio_id
+                    LEFT JOIN (
+                        SELECT socio_id, SUM(monto_pago) AS monto_pago
+                        FROM public."Prestamos_pagomensual"
+                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
+                        and cancelado = False
+                        GROUP BY socio_id
+                    ) pm ON s.id = pm.socio_id
+                    
+                    LEFT JOIN (
+                        SELECT socio_id, SUM(valor_cuota) AS valor_cuota
+                        FROM public."Pagos_detalle_cuotas"
+                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
+                        and estado = False
+                        GROUP BY socio_id
+                    ) pd ON s.id = pd.socio_id
+                    
+                    LEFT JOIN (
+                        SELECT socio_id, SUM(valor) AS valor
+                        FROM public.ayudas_econ_detallesayuda
+                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                        GROUP BY socio_id
+                    ) ae ON s.id = ae.socio_id
+                    GROUP BY
+                        u.first_name, u.last_name, s.cedula;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_consumos_proveedores_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_consumos_proveedores_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_consumos_proveedores_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS TABLE(nombre text, cedula character varying, fecha date, descuento_proveedores numeric) 
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                    ROWS 1000
+
+                AS $BODY$
+                BEGIN
+                    RETURN QUERY
+                    SELECT
+                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
+                        s.cedula AS cedula,
+                        p.fecha_consumo,
+                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores
+                    FROM
+                        public.socios_socios s
+                    INNER JOIN
+                        public.auth_user u ON s.user_id = u.id
+                    LEFT JOIN (
+                        SELECT socio_id, fecha_consumo,SUM(consumo_total) AS consumo_total
+                        FROM public."Pagos_pagos"
+                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                        GROUP BY socio_id, fecha_consumo
+                    ) p ON s.id = p.socio_id
+                    GROUP BY
+                        u.first_name, u.last_name, s.cedula, p.fecha_consumo
+                    HAVING SUM(COALESCE(p.consumo_total, 0)) > 0;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_cuota_descuentos_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_cuota_descuentos_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_cuota_descuentos_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS TABLE(nombre text, cedula character varying, fecha date, cuota_descuento numeric) 
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                    ROWS 1000
+
+                AS $BODY$
+                BEGIN
+                    RETURN QUERY
+                    SELECT
+                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
+                        s.cedula AS cedula,
+                        pd.fecha_descuento,
+                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento
+                    FROM
+                        public.socios_socios s
+                    INNER JOIN
+                        public.auth_user u ON s.user_id = u.id
+                    LEFT JOIN (
+                        SELECT socio_id, fecha_descuento, SUM(valor_cuota) AS valor_cuota
+                        FROM public."Pagos_detalle_cuotas"
+                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
+                        AND estado = False
+                        GROUP BY socio_id, fecha_descuento
+                    ) pd ON s.id = pd.socio_id
+                    GROUP BY
+                        u.first_name, u.last_name, s.cedula, pd.fecha_descuento
+                    HAVING SUM(COALESCE(pd.valor_cuota, 0)) > 0;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_cuota_prestamos_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_cuota_prestamos_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_cuota_prestamos_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS TABLE(nombre text, cedula character varying, fecha date, cuota_prestamos numeric, id_socio bigint) 
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                    ROWS 1000
+
+                AS $BODY$
+                BEGIN
+                    RETURN QUERY
+                    SELECT
+                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
+                        s.cedula AS cedula,
+                        pm.fecha_pago,
+                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
+                        s.id
+                    FROM
+                        public.socios_socios s
+                    INNER JOIN
+                        public.auth_user u ON s.user_id = u.id
+                    LEFT JOIN (
+                        SELECT socio_id, fecha_pago, SUM(monto_pago) AS monto_pago
+                        FROM public."Prestamos_pagomensual"
+                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
+                        AND cancelado = False
+                        GROUP BY socio_id, fecha_pago
+                    ) pm ON s.id = pm.socio_id
+                    GROUP BY
+                        u.first_name, u.last_name, s.cedula, pm.fecha_pago,s.id
+                    HAVING SUM(COALESCE(pm.monto_pago, 0)) > 0;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_suma_ayudas_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_suma_ayudas_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_suma_ayudas_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                DECLARE
+                    total_pago numeric;
+                BEGIN
+                    SELECT SUM(valor) INTO total_pago
+                    FROM public.ayudas_econ_detallesayuda
+                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
+                    RETURN total_pago;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_suma_consumo_total_descuentos_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_suma_consumo_total_descuentos_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_suma_consumo_total_descuentos_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                DECLARE
+                    suma_consumo numeric;
+                BEGIN
+                    SELECT SUM(consumo_total) INTO suma_consumo
+                    FROM public."Pagos_pagos"
+                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio;
+
+                    RETURN suma_consumo;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_suma_descuento_cuotas_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_suma_descuento_cuotas_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_suma_descuento_cuotas_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                DECLARE
+                    total_pago numeric;
+                BEGIN
+                    SELECT SUM(valor_cuota) INTO total_pago
+                    FROM public."Pagos_detalle_cuotas"
+                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio
+                    and estado=False;
+
+                    RETURN total_pago;
+                END;
+                $BODY$;
+                """
+            )
+
+def obtener_suma_prestamo_total_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_suma_prestamo_total_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_suma_prestamo_total_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                DECLARE
+                    total_pago numeric;
+                BEGIN
+                    SELECT SUM(monto_pago) INTO total_pago
+                    FROM public."Prestamos_pagomensual"
+                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio
+                    and cancelado=False;
+
+                    RETURN total_pago;
+                END;
+                $BODY$;
+                """
+            )
 
 class Migration(migrations.Migration):
 
@@ -369,4 +770,14 @@ class Migration(migrations.Migration):
         migrations.RunPython(verifica_y_crea_funcion_ayudas),
         migrations.RunPython(verifica_y_crea_funcion_generar_pdf),
         migrations.RunPython(actualizar_cancelados),
+        migrations.RunPython(actualizar_estados),
+        migrations.RunPython(obtener_ayudas_func),
+        migrations.RunPython(obtener_consumo_total_func),
+        migrations.RunPython(obtener_consumos_proveedores_func),
+        migrations.RunPython(obtener_cuota_descuentos_func),
+        migrations.RunPython(obtener_cuota_prestamos_func),
+        migrations.RunPython(obtener_suma_ayudas_func),
+        migrations.RunPython(obtener_suma_consumo_total_descuentos_func),
+        migrations.RunPython(obtener_suma_descuento_cuotas_func),
+        migrations.RunPython(obtener_suma_prestamo_total_func),
     ]
