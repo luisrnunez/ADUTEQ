@@ -9,15 +9,15 @@ def verifica_y_crea_funcion_informe(apps, schema_editor):
         if not function_exists:
             cursor.execute(
                 """
-                CREATE OR REPLACE FUNCTION public.obtener_datos_socios(
+                CREATE OR REPLACE FUNCTION public.nuevo_obtener_datos(
                     socio integer,
                     mes integer,
                     anio integer)
-                    RETURNS TABLE(nombre text, cedula character varying, cuota_prestamos numeric, aportacion numeric, descuento_proveedores numeric, aportacion_ayudaseco numeric, total numeric) 
-                    LANGUAGE 'plpgsql'
-                    COST 100
-                    VOLATILE PARALLEL UNSAFE
-                    ROWS 1000
+                RETURNS TABLE(nombre text, cedula character varying, cuota_prestamos numeric, aportacion numeric, descuento_proveedores numeric, aportacion_ayudaseco numeric, total numeric) 
+                LANGUAGE 'plpgsql'
+                COST 100
+                VOLATILE PARALLEL UNSAFE
+                ROWS 1000
 
                 AS $BODY$
                 BEGIN
@@ -25,28 +25,15 @@ def verifica_y_crea_funcion_informe(apps, schema_editor):
                     SELECT
                         CONCAT(u.first_name, ' ', u.last_name) AS nombre,
                         s.cedula AS cedula,
-                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
+                        SUM(COALESCE(dc.valor_cuota, 0)) AS cuota_prestamos,
                         SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
                         SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
                         SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
-                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) 
-                            + COALESCE(ae.valor, 0)) AS total
+                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) + COALESCE(ae.valor, 0) + COALESCE(dc.valor_cuota, 0)) AS total
                     FROM
                         public.socios_socios s
                     INNER JOIN
                         public.auth_user u ON s.user_id = u.id
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(monto) AS aportacion_total
-                        FROM public.socios_aportaciones
-                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio AND socio_id = socio
-                        GROUP BY socio_id
-                    ) sa ON s.id = sa.socio_id
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(consumo_total) AS consumo_total
-                        FROM public."Pagos_pagos"
-                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio AND socio_id = socio
-                        GROUP BY socio_id
-                    ) p ON s.id = p.socio_id
                     LEFT JOIN (
                         SELECT socio_id, SUM(monto_pago) AS monto_pago
                         FROM public."Prestamos_pagomensual"
@@ -54,12 +41,31 @@ def verifica_y_crea_funcion_informe(apps, schema_editor):
                         GROUP BY socio_id
                     ) pm ON s.id = pm.socio_id
                     LEFT JOIN (
+                        SELECT socio_id, SUM(monto) AS aportacion_total
+                        FROM public.socios_aportaciones
+                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio AND socio_id = socio
+                        GROUP BY socio_id
+                    ) sa ON s.id = sa.socio_id
+                    LEFT JOIN (
+                        SELECT pa.socio_id, SUM(pa.consumo_total) AS consumo_total
+                        FROM public."Pagos_pagos" pa
+                        WHERE EXTRACT(MONTH FROM pa.fecha_consumo) = mes AND EXTRACT(YEAR FROM pa.fecha_consumo) = anio AND pa.socio_id = socio
+                        GROUP BY pa.socio_id
+                    ) p ON s.id = p.socio_id
+                    LEFT JOIN (
+                        SELECT pc.socio_id, SUM(pc.valor_cuota) AS valor_cuota
+                        FROM public."Pagos_pagos_cuotas" pc
+                        INNER JOIN public."Pagos_detalle_cuotas" dc ON pc.id = dc.pago_cuota_id
+                        WHERE EXTRACT(MONTH FROM dc.fecha_descuento) = mes AND EXTRACT(YEAR FROM dc.fecha_descuento) = anio AND pc.socio_id = socio
+                        GROUP BY pc.socio_id
+                    ) dc ON s.id = dc.socio_id
+                    LEFT JOIN (
                         SELECT socio_id, SUM(valor) AS valor
                         FROM public.ayudas_econ_detallesayuda
                         WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio AND socio_id = socio
                         GROUP BY socio_id
                     ) ae ON s.id = ae.socio_id
-                    WHERE s.id = socio
+                    WHERE s.id = socio  -- Filtrar por el socio específico
                     GROUP BY
                         CONCAT(u.first_name, ' ', u.last_name),
                         s.cedula
@@ -189,12 +195,16 @@ def verifica_y_crea_funcion_ayudas(apps, schema_editor):
         if not function_exists:
             cursor.execute(
                 """
-                CREATE OR REPLACE FUNCTION obtener_info_ayuda_economica(id_socio bigint, numero_mes integer, anio integer)
-                RETURNS TABLE (
-                    descripcion text,
-                    valor_aportado numeric
-                )
-                AS $$
+                CREATE OR REPLACE FUNCTION public.obtener_info_ayuda_economica(
+                    id_socio bigint,
+                    numero_mes integer,
+                    anio integer)
+                RETURNS TABLE(descripcion text, valor_aportado numeric) 
+                LANGUAGE 'plpgsql'
+                COST 100
+                VOLATILE PARALLEL UNSAFE
+                ROWS 1000
+                AS $BODY$
                 BEGIN
                     RETURN QUERY
                     SELECT ae.descripcion, da.valor
@@ -202,18 +212,22 @@ def verifica_y_crea_funcion_ayudas(apps, schema_editor):
                     INNER JOIN public.ayudas_econ_detallesayuda da ON ae.id = da.ayuda_id
                     WHERE da.socio_id = id_socio
                         AND EXTRACT(MONTH FROM ae.fecha) = numero_mes
-                        AND EXTRACT(YEAR FROM ae.fecha) = anio;
+                        AND EXTRACT(YEAR FROM ae.fecha) = anio
+                        AND EXTRACT(MONTH FROM da.fecha) = numero_mes
+                        AND EXTRACT(YEAR FROM da.fecha) = anio;
 
                     -- Agregar fila "total"
                     RETURN QUERY
-                    SELECT 'Total' AS descripcion, SUM(da.valor) AS montoa
+                    SELECT 'Total' AS descripcion, SUM(da.valor) AS monto
                     FROM public.ayudas_econ_detallesayuda da
                     WHERE da.socio_id = id_socio
                         AND EXTRACT(MONTH FROM (SELECT fecha FROM public.ayudas_econ_ayudaseconomicas WHERE id = da.ayuda_id)) = numero_mes
                         AND EXTRACT(YEAR FROM (SELECT fecha FROM public.ayudas_econ_ayudaseconomicas WHERE id = da.ayuda_id)) = anio
+                        AND EXTRACT(MONTH FROM da.fecha) = numero_mes
+                        AND EXTRACT(YEAR FROM da.fecha) = anio
                         AND da.cancelado = true;
                 END;
-                $$ LANGUAGE plpgsql;
+                $BODY$;
                 """
             )
 
@@ -225,15 +239,20 @@ def verifica_y_crea_funcion_generar_pdf(apps, schema_editor):
         if not function_exists:
             cursor.execute(
                 """
-                CREATE OR REPLACE FUNCTION obtener_informe_mensual(id_socio bigint, numero_mes integer, anio integer)
-                RETURNS TABLE (
-                    columna1 character varying,
-                    columna2 numeric
-                )
-                AS $$
+                CREATE OR REPLACE FUNCTION public.obtener_informe_mensual(
+                    id_socio bigint,
+                    numero_mes integer,
+                    anio integer)
+                RETURNS TABLE(columna1 character varying, columna2 numeric) 
+                LANGUAGE 'plpgsql'
+                COST 100
+                VOLATILE PARALLEL UNSAFE
+                ROWS 1000
+                AS $BODY$
                 DECLARE
                     total numeric := 0;
                 BEGIN
+                    -- Crear tabla temporal para almacenar los resultados de la subconsulta
                     CREATE TEMP TABLE temp_result AS
                     SELECT proveedor_nombre, valor, orden FROM (
                         SELECT proveedor_nombre, consumo_total as valor, 1 as orden FROM (
@@ -271,22 +290,28 @@ def verifica_y_crea_funcion_generar_pdf(apps, schema_editor):
                             WHERE da.socio_id = id_socio
                                 AND EXTRACT(MONTH FROM ae.fecha) = numero_mes
                                 AND EXTRACT(YEAR FROM ae.fecha) = anio
+                                AND EXTRACT(MONTH FROM da.fecha) = numero_mes
+                                AND EXTRACT(YEAR FROM da.fecha) = anio
                                 AND da.cancelado = true
                         ) ae
                     ) AS subquery;
 
+                    -- Calcular la suma total desde la tabla temporal
                     SELECT SUM(valor) INTO total FROM temp_result;
 
+                    -- Devolver los resultados de la subconsulta
                     RETURN QUERY
                     SELECT proveedor_nombre, valor FROM temp_result
                     ORDER BY orden, proveedor_nombre;
 
+                    -- Agregar fila "Total"
                     RETURN QUERY
                     SELECT 'Total'::character varying as columna1, total as columna2;
-
+                    
+                    -- Eliminar la tabla temporal al finalizar
                     DROP TABLE IF EXISTS temp_result;
                 END;
-                $$ LANGUAGE plpgsql;
+                $BODY$;
                 """
             )
 

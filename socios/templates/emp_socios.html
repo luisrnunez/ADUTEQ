@@ -50,8 +50,8 @@
 
 
             <!-- </form> -->
-            <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
-                <button class="add-socio-btn">Enviar correo a todos</button>
+            <a style="margin-left: 15px; margin-top: 2px;">
+                <button class="add-socio-btn notify">Enviar correo a todos</button>
             </a>
             <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
                 <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
@@ -117,7 +117,7 @@
                     </td>
                     <td>
                         <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
-                            class="edit-btn" style="text-decoration: none;"> Notificar
+                            class="edit-btn notify-socio" style="text-decoration: none;"> Notificar
                         </a>
                     </td>
                     <td>
@@ -157,6 +157,62 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
 <script>
+
+$(document).ready(function () {
+    $('.notify').on('click', function () {
+        const promoId = $(this).data('promo-id');
+
+        // mostrar un cuadro de confirmación con SweetAlert2
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: '¿Desea enviar correos a todos los socios?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // mostrar el mensaje flotante con imagen y texto de carga
+                Swal.fire({
+                    title: 'Enviando correos...',
+                    html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                        '<p style="margin-top: 10px;">Enviando correos a todos los socios...</p>',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        // realizar la acción de enviar correo mediante AJAX
+                        $.ajax({
+                            url: `/enviar_gastos_todos/`,
+                            type: 'POST',
+                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                            dataType: 'json',
+                            success: function (response) {
+                                Swal.fire({
+                                    title: response.status === 'success' ? 'Éxito' : 'Error',
+                                    text: response.message,
+                                    icon: response.status === 'success' ? 'success' : 'error',
+                                });
+                            },
+                            error: function (xhr, errmsg, err) {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al enviar los correos',
+                                    icon: 'error',
+                                });
+                            },
+                        });
+                    },
+                });
+            }
+        });
+    });
+});
+
+
+
     $(document).ready(function() {
     $("#buscador_input").on("input", function() {
         var query = $(this).val();
@@ -271,24 +327,56 @@ $(document).ready(function() {
 </script>
 
 <script>
-    function confirmarEnvioCorreo(socioId, socioNombre, socioApellido) {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: 'Deseas enviar correo al soci@ ' + socioNombre + ' ' + socioApellido,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí',
-            cancelButtonText: 'Cancelar',
-            dangerMode: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // El usuario ha confirmado la edición, redirigir a la página de edición
-                window.location.href = '/enviar_gastos/' + socioId + '/';
-            }
-        });
-    }
+    function confirmarEnvioCorreo(socio_id, firstName, lastName) {
+    // Mostrar un cuadro de confirmación con SweetAlert2
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: `¿Desea enviar correos a ${firstName} ${lastName}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí',
+        cancelButtonText: 'Cancelar',
+        dangerMode: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mostrar el mensaje flotante con imagen y texto de carga
+            Swal.fire({
+                title: 'Enviando correos...',
+                html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                    `<p style="margin-top: 10px;">Enviando correo a ${firstName} ${lastName}...</p>`,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                didOpen: () => {
+                    // Realizar la acción de enviar correo mediante AJAX
+                    $.ajax({
+                        url: `/enviar_gastos/`+socio_id+'/',
+                        type: 'POST',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        dataType: 'json',
+                        success: function (response) {
+                            Swal.fire({
+                                title: response.status === 'success' ? 'Éxito' : 'Error',
+                                text: response.message,
+                                icon: response.status === 'success' ? 'success' : 'error',
+                            });
+                        },
+                        error: function (xhr, errmsg, err) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ocurrió un error al enviar eñ correo',
+                                icon: 'error',
+                            });
+                        },
+                    });
+                },
+            });
+        }
+    });
+}
 </script>
-<script>
+<!-- <script>
     function confirmarEnvioCorreoTodos() {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -305,7 +393,7 @@ $(document).ready(function() {
             }
         });
     }
-</script>
+</script> -->
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 

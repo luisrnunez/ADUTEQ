@@ -101,6 +101,11 @@ def guardar_socio(request):
         aporte = request.POST.get('aporte')
         foto = request.FILES['foto']
 
+        if 'foto' in request.FILES:
+            foto = request.FILES['foto']
+        else:
+            foto=""
+
         user = User(username=username,password=password, email=email, first_name=first_name, last_name=last_name)
         
         valor = False;   
@@ -331,7 +336,7 @@ def Recuperar_cuenta(request):
 
 @login_required
 def ListaSocios(request):
-    usuarios_activos_ids = User.objects.filter(is_staff=False).values_list('id', flat=True)
+    usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
     socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
     
     items_por_pagina = 10

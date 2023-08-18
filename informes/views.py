@@ -17,11 +17,13 @@ from django.http import HttpResponse
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, PageBreak
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
+from reportlab.platypus import Image
+from django.http import JsonResponse
 
 
 
@@ -98,6 +100,11 @@ def enviar_datos_pdf(socio_id):
     socio = Socios.objects.get(id=socio_id)
     hoy = datetime.today()
 
+    image_path = r'ADUTEQ\static\img\aduteq.png'
+    img = Image(image_path, width=100, height=100)  # Ajusta el tamaño de la imagen según tus necesidades
+    img.hAlign = 'LEFT'
+    img.vAlign = 'TOP'
+
     numero_mes = hoy.month
     anio = hoy.year
     consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumos_totales = datos_para_el_pdf(socio.id, numero_mes-1, anio)
@@ -152,7 +159,19 @@ def enviar_datos_pdf(socio_id):
         fontName='Helvetica-Bold',
     )
 
-    elements.append(Paragraph("Informe Mensual ADUTEQ", title_style))
+    title=Paragraph("Informe Mensual ADUTEQ", title_style)
+
+    image_and_title = Table(
+        [[img, title]],
+        colWidths=[100, '*'], 
+        style=[
+            ('ALIGN', (0, 0), (0, 0), 'LEFT'), 
+            ('ALIGN', (1, 0), (1, 0), 'CENTER'),  
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]
+    )
+
+    elements.append(image_and_title)
     elements.append(Spacer(1, 20))
 
     table_style = TableStyle([
@@ -161,8 +180,8 @@ def enviar_datos_pdf(socio_id):
     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
     ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-    ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+    ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ])
 
     data_tables = [
@@ -176,31 +195,48 @@ def enviar_datos_pdf(socio_id):
     for title, data in data_tables:
         # Obtener el índice de la columna de montos en función del título de la tabla
         monto_column_index = 1 if title != 'Consumos de Cuotas' else 3
+        if title != 'Tabla General':
+            # Verificar si al menos un monto en la tabla es diferente de 0 y no es nulo
+            if any(row[monto_column_index] and row[monto_column_index] != 'None' and float(row[monto_column_index]) != 0 for row in data[monto_column_index:]):
+                table_data = [[Paragraph(cell, ParagraphStyle('Normal')) for cell in row] for row in data]
+                table = Table(table_data, colWidths='*')
 
-        # Verificar si al menos un monto en la tabla es diferente de 0 y no es nulo
-        if any(row[monto_column_index] and row[monto_column_index] != 'None' and float(row[monto_column_index]) != 0 for row in data[monto_column_index:]):
-            table_data = [[Paragraph(cell, ParagraphStyle('Normal')) for cell in row] for row in data]
-            table = Table(table_data, colWidths='*')
+                max_heights = []
+                for row in table_data:
+                    row_heights = []
+                    for cell in row:
+                        cell_paragraph = Paragraph(cell.getPlainText(), ParagraphStyle('Normal'))
+                        avail_width, avail_height = cell_paragraph.wrapOn(doc, A4[0], A4[1])
+                        cell_paragraph.wrap(avail_width, avail_height)
+                        cell_height = cell_paragraph.height
+                        row_heights.append(cell_height)
+                    max_heights.append(max(row_heights))
 
-            max_heights = []
-            for row in table_data:
-                row_heights = []
-                for cell in row:
-                    cell_paragraph = Paragraph(cell.getPlainText(), ParagraphStyle('Normal'))
-                    avail_width, avail_height = cell_paragraph.wrapOn(doc, A4[0], A4[1])
-                    cell_paragraph.wrap(avail_width, avail_height)
-                    cell_height = cell_paragraph.height
-                    row_heights.append(cell_height)
-                max_heights.append(max(row_heights))
+                for row, max_height in zip(table_data, max_heights):
+                    for cell in row:
+                        cell._textValign = 'middle'
+                        cell.height = max_height
 
-            for row, max_height in zip(table_data, max_heights):
-                for cell in row:
-                    cell._textValign = 'middle'
-                    cell.height = max_height
-
-            table.setStyle(table_style)
+                table.setStyle(table_style)
+                elements.append(Paragraph(title, title_style))
+                elements.append(Spacer(1, 12))
+                elements.append(table)
+                elements.append(Spacer(1, 20))
+        else:
+            elements.append(PageBreak())
+            
+            # Agregar el título de la tabla "Tabla General"
             elements.append(Paragraph(title, title_style))
             elements.append(Spacer(1, 12))
+
+            # Crear la tabla y aplicar estilos
+            table_data = [[Paragraph(cell, ParagraphStyle('Normal')) for cell in row] for row in data]
+            table = Table(table_data, colWidths='*')
+            table.setStyle(table_style)
+
+            # ... (ajustar alturas de celdas y aplicar estilos de tabla)
+
+            # Agregar la tabla "Tabla General" a los elementos del PDF
             elements.append(table)
             elements.append(Spacer(1, 20))
 
@@ -223,11 +259,11 @@ def nuevo_enviar_correo(request, socio_id):
     informe_data = enviar_datos_pdf(socio_id)
 
     if enviarGastoEmail(socio_id, resultados, informe_data):
-        messages.success(request, 'El correo se envió correctamente.')
+        response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
     else:
-        messages.info(request, 'El socio no se encuentra activo actualmente.')
+        response = {'status': 'error', 'message': 'Ups. algo salío mal'}
 
-    return redirect('/socios')
+    return JsonResponse(response)
 
 
 
@@ -288,8 +324,8 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
 def enviar_correo_todoss(request):
 
     if enviar_correo_todos():
-        messages.success(request, 'Correos enviados correctamente.')
+        response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
     else:
-        messages.info(request, 'Ups, ah ocurrido un error.')
+        response = {'status': 'error', 'message': 'Ups. algo salío mal'}
 
-    return redirect('/socios')
+    return JsonResponse(response)

@@ -47,7 +47,7 @@ class Aportaciones(models.Model):
 def obtener_datos_socioss(socio_id, mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
-            f"SELECT * FROM obtener_datos_socios({socio_id}, {mes}, {anio});"
+            f"SELECT * FROM nuevo_obtener_datos({socio_id}, {mes}, {anio});"
         )
         resultados = cursor.fetchall()
     

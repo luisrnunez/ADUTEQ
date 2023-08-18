@@ -157,7 +157,7 @@ $(document).ready(function () {
     $('.notify').on('click', function () {
         const promoId = $(this).data('promo-id');
 
-        // Mostrar un cuadro de confirmación con SweetAlert2
+        // mostrar un cuadro de confirmación con SweetAlert2
         Swal.fire({
             title: '¿Estás seguro?',
             text: '¿Desea enviar esta promoción a todos los socios?',
@@ -168,22 +168,38 @@ $(document).ready(function () {
             dangerMode: true,
         }).then((result) => {
             if (result.isConfirmed) {
-                // Realizar la acción de enviar correo mediante AJAX
-                $.ajax({
-                    url: `/enviar_promocion_a_todos/${promoId}/`,
-                    type: 'POST',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                    dataType: 'json',
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            Swal.fire('Éxito', response.message, 'success');
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
+                // mostrar el mensaje flotante con imagen y texto de carga
+                Swal.fire({
+                    title: 'Enviando correos...',
+                    html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                        '<p style="margin-top: 10px;">Enviando correos a todos los socios...</p>',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        // realizar la acción de enviar correo mediante AJAX
+                        $.ajax({
+                            url: `/enviar_promocion_a_todos/${promoId}/`,
+                            type: 'POST',
+                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                            dataType: 'json',
+                            success: function (response) {
+                                Swal.fire({
+                                    title: response.status === 'success' ? 'Éxito' : 'Error',
+                                    text: response.message,
+                                    icon: response.status === 'success' ? 'success' : 'error',
+                                });
+                            },
+                            error: function (xhr, errmsg, err) {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al enviar la promoción',
+                                    icon: 'error',
+                                });
+                            },
+                        });
                     },
-                    error: function (xhr, errmsg, err) {
-                        Swal.fire('Error', 'Ocurrió un error al enviar la promoción', 'error');
-                    }
                 });
             }
         });

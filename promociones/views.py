@@ -182,8 +182,8 @@ def enviar_promocion_a_todos(request, promo_id):
             
             # redimensionar la imagen y convertirla a formato JPEG
             imagen = Image.open(promocion.imagen)
-            imagen = imagen.convert("RGB")  # Convertir a modo RGB
-            imagen = imagen.resize((800, 600))  # Cambia las dimensiones según lo necesites
+            imagen = imagen.convert("RGB")  # convertir a modo RGB
+            imagen = imagen.resize((800, 600))  # cambia las dimensiones
             imagen_io = BytesIO()
             imagen.save(imagen_io, format='JPEG')
             
