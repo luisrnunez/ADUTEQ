@@ -34,7 +34,15 @@
                 Detalles Cupo
             </button></a>
         </a>
-    </td> 
+    </td>
+    <td>
+
+        <a href='{% url "agregarCuenta" proveedor.id %}'>
+            <button class="edit-btn">
+                Cuentas
+            </button></a>
+        </a>
+    </td>  
 </tr>
 {% empty %}
 <tr>

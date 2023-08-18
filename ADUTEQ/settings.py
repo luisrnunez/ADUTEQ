@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'informes',
     'Prestamos',
     'promociones',
+    'Periodo',
 ]
 CRONJOBS = [
     ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
@@ -97,7 +98,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "dbaduteq",
         "USER": "postgres",
-        "PASSWORD": "root",
+        "PASSWORD": "123",
         "HOST": "127.0.0.1",
         "PORT":"5432",
     }
@@ -130,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
 TIME_ZONE = 'UTC'
 

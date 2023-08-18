@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <style>
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 10px 0;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .card-header {
+            background-color: #f2f2f2;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .card-content {
+            display: flex;
+            justify-content: space-between;
+
+        }
+
+        .periodo-actual,
+        .agregar-periodo {
+            flex: 1;
+            width: 40%;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content-menu" style="padding-top: 0%;">
+        <div class="header">
+            <h1>AJUSTES DEL SISTEMA</h1>
+        </div>
+    </div>
+    <div class="content">
+
+        <div class="form-container" style="width: 70%; align-items: center;">
+            <!-- Sección: Agregar Nuevo Período -->
+            <div class="card-container">
+                <!-- Sección: Periodo Actual y Agregar Nuevo Periodo -->
+                <div class="card">
+                    <div class="header">
+                        <h1>PERIODO</h1>
+                    </div>
+                    <div class="card-content">
+                        <div class="periodo-actual" style="width: 40%;">
+                            <h3>Periodo Actual: {{periodo.nombre}}</h3>
+                            <p>Fecha de Inicio: {{periodo.fecha_inicio|date:"d F Y"}} </p>
+                            <p>Fecha de Fin: {{periodo.fecha_fin|date:"d F Y"}}</p>
+                            {% if periodo.activo == True %}
+                            <p style="color: green;">Período Activo</p>
+                            {% else %}
+                            <p style="color: red;">Período Inactivo</p>
+                            {% endif %}
+                            <p>Dias restantes:
+                                {% if dias_restantes <= 0 %} 
+                                <span style="color: red;">Periodo caducado</span>
+                                    {% else %}
+                                    {{ dias_restantes }}
+                                    {% endif %}
+                            </p>
+                            {% if periodo.descripcion %} 
+                            <p>Descripcion: </p>
+                            <p>{{periodo.descripcion}}</p>
+                            {% endif %}
+
+                            {% if periodo.activo == True %}
+                            <button style="width: 80%;" id="cerrar-periodo">Cerrar Período</button>
+                            {% else %}
+                            <button style="width: 80%;" id="cerrar-periodo" disabled>Cerrar Período</button>
+                            {% endif %}
+                            <br><br>
+                            <br><br>
+                            <br><br>
+                            <div style="display: inline-flex; justify-content: space-between; width: 80%;">
+                                <h3 style="width: 80%;">Cierre Automático:</h3>
+                                <select style="border-color: red;" name="cierre_automatico" id="cierre_automatico">
+                                    <option value="si" {% if ajustes.periodoAutomatico %}selected{% endif %}>Sí</option>
+                                    <option value="no" {% if not ajustes.periodoAutomatico %}selected{% endif %}>No
+                                    </option>
+                                </select>
+                            </div>
+
+
+                        </div>
+                        <div class="agregar-periodo">
+                            <h3>Agregar Nuevo Periodo</h3>
+                            <form id="nuevo-periodo-form">
+                                <label for="anio">Año:</label>
+                                <input type="text" id="anio" name="anio" disabled maxlength="4" pattern="[0-9]{4}"
+                                    title="Ingrese un año válido" required>
+
+                                <label for="Nombre">Nombre del periodo (mes):</label>
+                                <input type="text" id="Nombre" name="Nombre" disabled required>
+
+                                <label for="fecha-inicio">Fecha de Inicio:</label>
+                                <input type="date" id="fecha-inicio" name="fecha-inicio" required>
+
+                                <label for="fecha-fin">Fecha Final:</label>
+                                <input type="date" id="fecha-fin" name="fecha-fin" required>
+
+                                <label for="descripcion">Descripción:</label>
+                                <textarea id="descripcion" name="descripcion" rows="2"></textarea>
+
+                                {% if periodo.activo == True %}
+                                <button type="submit" id="guardar-periodo" disabled>Guardar Período</button>
+                                {% else %}
+                                <button type="submit" id="guardar-periodo">Guardar Período</button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br>
+            <!-- Sección: Período Activo -->
+            
+            <div class="card-container">
+                <div class="card">
+                    <div class="header" style="margin-bottom: 20px;">
+                        <h1>AJUSTES GENERALES</h1>
+                    </div>
+                    <div class="card-content">
+                        <div class="periodo-actual" style="width: min-content; ">
+                            <label for="Correo">Correo aduteq:</label>
+                            <input type="email" id="Correo" name="Correo" >
+
+                        </div>
+                        <div class="agregar-periodo">
+                            <label for="Correo">Correo aduteq:</label>
+                            <input type="email" id="Correo" name="Correo" >
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+
+        </div>
+
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#cierre_automatico').change(function () {
+                var cierreAutomatico = $(this).val();
+                $.ajax({
+                    url: '{% url "guardar_cierre_automatico" %}',
+                    type: 'POST',
+                    data: {
+                        'cierre_automatico': cierreAutomatico,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.periodoAutomatico) {
+                            Swal.fire({
+                                title: 'Cierre automatico activado',
+                                icon: 'success'
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                title: 'Cierre automatico desactivado',
+                                icon: 'success'
+                            })
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const guardarPeriodoBtn = document.getElementById('guardar-periodo');
+            const nuevoPeriodoForm = document.getElementById('nuevo-periodo-form');
+
+            guardarPeriodoBtn.addEventListener('click', function (event) {
+                event.preventDefault(); // Evitar el envío por defecto del formulario
+
+                const anio = document.getElementById('anio').value;
+                const nombre = document.getElementById('Nombre').value;
+                const fechaInicio = document.getElementById('fecha-inicio').value;
+                const fechaFin = document.getElementById('fecha-fin').value;
+                const descripcion = document.getElementById('descripcion').value;
+
+                const mensaje = `\n\nAño: ${anio}\n\nNombre: ${nombre}\n\nFecha de Inicio: ${fechaInicio}\n\nFecha Final: ${fechaFin}\n\nDescripción: ${descripcion}`;
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: `¿Deseas crear este período?\n\n${mensaje}`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, crear período',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviar los datos al servidor usando AJAX
+                        const data = {
+                            anio: anio,
+                            nombre: nombre,
+                            fecha_inicio: fechaInicio,
+                            fecha_fin: fechaFin,
+                            descripcion: descripcion,
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        };
+
+                        $.ajax({
+                            type: 'POST',
+                            url: '{% url "agregar_periodo" %}',
+                            data: data,
+                            success: function (response) {
+                                Swal.fire({
+                                    title: 'Éxito',
+                                    text: 'El período se agregó exitosamente.',
+                                    icon: 'success'
+                                }).then(() => {
+                                    window.location.href = '/ajustes';
+                                });
+                            },
+                            error: function (error) {
+                                console.error(error);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al agregar el período.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fechaInicioInput = document.getElementById('fecha-inicio');
+            const fechaFinInput = document.getElementById('fecha-fin');
+            const anioInput = document.getElementById('anio');
+
+            fechaInicioInput.addEventListener('change', function () {
+                const fechaInicio = new Date(fechaInicioInput.value);
+                const fechaFinal = new Date(fechaFinInput.value);
+
+                //ubicar año
+                const anio = fechaInicio.getFullYear();
+                anioInput.value = anio;
+
+
+                // Sumar 30 días a la fecha de inicio y actualizar la fecha final
+
+                const fechaFin = new Date(fechaInicio);
+                fechaFin.setDate(fechaFin.getDate() + 30);
+                const mes = fechaFin.getMonth() + 1;
+                const dia = fechaFin.getDate();
+                const fechaFinFormatted = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+                fechaFinInput.value = fechaFinFormatted;
+
+
+                //poner el nombre al periodo
+                const opcionesNombre = { month: 'long' };
+                const nombreFin = fechaFin.toLocaleDateString('es-ES', opcionesNombre).toUpperCase();
+
+
+                document.getElementById('Nombre').value = `${nombreFin}`;
+
+            });
+
+            fechaFinInput.addEventListener('change', function () {
+                const fechaFin = new Date(fechaFinInput.value);
+                const fechaInicio = new Date(fechaInicioInput.value);
+                const anio = fechaFin.getFullYear();
+                anioInput.value = anio;
+
+                //poner el nombre al periodo
+                const opcionesNombre = { month: 'long' };
+                const nombreInicio = fechaInicio.toLocaleDateString('es-ES', opcionesNombre);
+                const nombreFin = fechaFin.toLocaleDateString('es-ES', opcionesNombre);
+                const fechaIni = new Date(fechaInicio);
+                const feFin = new Date(fechaFin);
+                const dia1 = fechaIni.getDate();
+                const dia2 = feFin.getDate();
+
+                document.getElementById('Nombre').value = `${nombreInicio} ${dia1 + 1} - ${nombreFin} ${dia2}`;
+
+
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cerrarPeriodoBtn = document.getElementById('cerrar-periodo');
+            const periodoActualContainer = document.querySelector('.periodo-actual');
+
+            cerrarPeriodoBtn.addEventListener('click', function () {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: '¿Deseas cerrar el período? ',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cerrar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Cerrar período con AJAX
+                        $.ajax({
+                            type: 'POST',
+                            url: '{% url "cerrar_periodo" %}',
+                            data: {
+                                codigo: '{{ periodo.id }}',
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Período cerrado',
+                                        text: 'El período se cerró exitosamente.',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        // Recargar la página para reflejar los cambios
+                                        const periodoNombre = periodoActualContainer.querySelector('h3');
+                                        const fechaInicio = periodoActualContainer.querySelector('p:nth-child(2)');
+                                        const fechaFin = periodoActualContainer.querySelector('p:nth-child(3)');
+                                        const cantidadRestante = periodoActualContainer.querySelector('p:nth-child(5)');
+
+                                        periodoNombre.textContent = 'Periodo Actual: ';
+                                        fechaInicio.textContent = 'Fecha de Inicio: ';
+                                        fechaFin.textContent = 'Fecha de Fin: ';
+                                        cantidadRestante.textContent = 'Cantidad Restante: ';
+
+                                        document.getElementById('guardar-periodo').removeAttribute('disabled');
+                                        document.getElementById('cerrar-periodo').setAttribute('disabled', true);
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: 'Hubo un problema al cerrar el período.',
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            // ...
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+
+</body>
+
+
+{% endblock %}

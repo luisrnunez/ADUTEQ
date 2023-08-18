@@ -30,10 +30,23 @@
     </div>
     <div class="socios-content ">
         <div class="botones-sup">
-            <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
-            <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
+            <div>
+                <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
+                <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
+                 
+    
+    
+                <!-- </form> -->
+                <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
+                    <button class="add-socio-btn">Enviar correo a todos</button>
+                </a>
+                <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
+                    <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
+                </a>
+            </div>
+            <div style="display: inline-flex; justify-content: end; width: max-content;">
                 <div class="search-form">
-
+    
                     <select id="criterio" name="criterio">
                         <option value="nombres">Nombre</option>
                         <option value="apellidos">Apellido</option>
@@ -47,15 +60,8 @@
                     <!-- <button type="submit">Buscar</button> -->
 
                 </div>
-
-
-            <!-- </form> -->
-            <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
-                <button class="add-socio-btn">Enviar correo a todos</button>
-            </a>
-            <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
-                <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
-            </a>
+            </div>
+            
         </div>
 
 
