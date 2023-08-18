@@ -25,10 +25,6 @@ urlpatterns = [
     #detallesayuda
     path('detalleayuda/<int:ayuda_id>', views.detallesAyuda),
     path('registrarayuda/<int:detalle_id>/<int:valor>/', views.registro_ayuda),
-<<<<<<< HEAD
-    # path('prestamo/presagregar_pdf/<int:det_id>/',views.presagregar_pdf2, name = 'presagregar_pdf2'),
-=======
     path('prestamo2/presagregar_pdf/<int:det_id>/',views.presagregar_pdf2, name = 'presagregar_pdf'),
->>>>>>> cde3a68da602feccd3bf8b767d51768a5c9531d0
 
 ]
