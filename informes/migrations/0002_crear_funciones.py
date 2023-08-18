@@ -1,11 +1,13 @@
 from django.db import connection
 from django.db import migrations
 
+
 def verifica_y_crea_funcion_informe(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_datos_socios')")
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_datos_socios')")
         function_exists = cursor.fetchone()[0]
-        
+
         if not function_exists:
             cursor.execute(
                 """
@@ -77,11 +79,13 @@ def verifica_y_crea_funcion_informe(apps, schema_editor):
                 """
             )
 
+
 def verifica_y_crea_funcion_comsumos_proveedor(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_consumos_por_proveedor')")
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_consumos_por_proveedor')")
         function_exists = cursor.fetchone()[0]
-        
+
         if not function_exists:
             cursor.execute(
                 """
@@ -113,11 +117,13 @@ def verifica_y_crea_funcion_comsumos_proveedor(apps, schema_editor):
                 """
             )
 
+
 def verifica_y_crea_funcion_comsumos_cuotas(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_cuotas_pagadas')")
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_cuotas_pagadas')")
         function_exists = cursor.fetchone()[0]
-        
+
         if not function_exists:
             cursor.execute(
                 """
@@ -152,11 +158,13 @@ def verifica_y_crea_funcion_comsumos_cuotas(apps, schema_editor):
                 """
             )
 
+
 def verifica_y_crea_funcion_aportaciones(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_aportacion_socio')")
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_aportacion_socio')")
         function_exists = cursor.fetchone()[0]
-        
+
         if not function_exists:
             cursor.execute(
                 """
@@ -187,11 +195,13 @@ def verifica_y_crea_funcion_aportaciones(apps, schema_editor):
                 """
             )
 
+
 def verifica_y_crea_funcion_ayudas(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_info_ayuda_economica')")
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_info_ayuda_economica')")
         function_exists = cursor.fetchone()[0]
-        
+
         if not function_exists:
             cursor.execute(
                 """
@@ -231,11 +241,13 @@ def verifica_y_crea_funcion_ayudas(apps, schema_editor):
                 """
             )
 
+
 def verifica_y_crea_funcion_generar_pdf(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_informe_mensual')")
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_informe_mensual')")
         function_exists = cursor.fetchone()[0]
-        
+
         if not function_exists:
             cursor.execute(
                 """
@@ -316,6 +328,32 @@ def verifica_y_crea_funcion_generar_pdf(apps, schema_editor):
             )
 
 
+def actualizar_cancelados(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'actualizar_cancelados')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.actualizar_cancelados(
+                    mes integer,
+                    anio integer)
+                    RETURNS void
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                BEGIN
+                    UPDATE public."Prestamos_pagomensual"
+                    SET cancelado = True
+                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio;
+                END;
+                $BODY$;
+                """
+            )
+
 
 class Migration(migrations.Migration):
 
@@ -330,4 +368,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(verifica_y_crea_funcion_aportaciones),
         migrations.RunPython(verifica_y_crea_funcion_ayudas),
         migrations.RunPython(verifica_y_crea_funcion_generar_pdf),
+        migrations.RunPython(actualizar_cancelados),
     ]
