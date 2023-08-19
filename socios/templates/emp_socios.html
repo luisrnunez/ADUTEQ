@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .rounded-image {
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+
+
+<div class="content-menu">
+
+    <div class="header">
+        <h1>Socios</h1>
+    </div>
+    <div class="socios-content ">
+        <div class="botones-sup">
+            <div>
+                <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
+                <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
+                 
+    
+    
+                <!-- </form> -->
+                <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
+                    <button class="add-socio-btn">Enviar correo a todos</button>
+                </a>
+                <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
+                    <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
+                </a>
+            </div>
+            <div style="display: inline-flex; justify-content: end; width: max-content;">
+                <div class="search-form">
+    
+                    <select id="criterio" name="criterio">
+                        <option value="nombres">Nombre</option>
+                        <option value="apellidos">Apellido</option>
+                        <option value="categoria">Categoría</option>
+                        <option value="facultad">Facultad</option>
+                        <option value="cedula">Cédula</option>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
+                    <!-- <button type="submit">Buscar</button> -->
+
+                </div>
+            </div>
+            
+        </div>
+
+
+        <table id="tablaSocios" class="socios-table">
+            <thead>
+                <tr>
+                    <th>Cedula</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Foto</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Correo Electrónico</th>
+                    <!-- <th>Categoria</th> -->
+                    <th>Estado</th>
+                    <th>Editar</th>
+                    <th>Enviar Correo</th>
+                    <th>Aportaciones</th>
+                </tr>
+            </thead>
+            <tbody id="socios-body">
+                <!-- {% include 'tabla_parcialSocios.html' %} -->
+                {% for socio in socios %}
+                <tr>
+                    <td>{{ socio.cedula }}</td>
+                    <td>{{ socio.user.first_name }}</td>
+                    <td>{{ socio.user.last_name }}</td>
+                    <td>
+                        {% if socio.foto %}
+                        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image">
+                        {% else %}
+                        No hay foto disponible.
+                        {% endif %}
+                    </td>
+                    <td>{{ socio.direccion_domiciliaria }}</td>
+                    <td>{{ socio.numero_telefonico }}</td>
+                    <td>{{ socio.user.email }}</td>
+                    <!-- <td>{{ socio.categoria }}</td> -->
+                    <td>
+                        {% if socio.user.is_active %}
+                        <button class="green-button"
+                            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
+                            <span class="visto-icon"></span>
+                            Activo
+                        </button>
+                        {% else %}
+                        <button class="red-button"
+                            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
+                            <span class="no-visto-icon"></span> Inactivo
+                        </button>
+                        {% endif %}
+
+                    </td>
+                    <td>
+                        <button class="edit-btn"
+                            onclick="confirmarEdicion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+                            Editar
+                        </button>
+                    </td>
+                    <td>
+                        <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
+                            class="edit-btn notify-socio" style="text-decoration: none;"> Notificar
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/aportaciones_socio/{{socio.id}}"
+                            class="edit-btn" style="text-decoration: none;"> Aportación
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination-container">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    {% if socios.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ socios.previous_page_number }}">anterior</a>
+                    </li>
+                    {% endif %}
+                    <li class="pagination-item active">
+                        <span style="border-radius: 5px;" class="page-link">{{ socios.number }}</span>
+                    </li>
+                    {% if socios.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ socios.next_page_number }}">siguiente</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+    <!-- Resto del contenido de la página -->
+</div>
+{% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+<script>
+
+$(document).ready(function () {
+    $('.notify').on('click', function () {
+        const promoId = $(this).data('promo-id');
+
+        // mostrar un cuadro de confirmación con SweetAlert2
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: '¿Desea enviar correos a todos los socios?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // mostrar el mensaje flotante con imagen y texto de carga
+                Swal.fire({
+                    title: 'Enviando correos...',
+                    html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                        '<p style="margin-top: 10px;">Enviando correos a todos los socios...</p>',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        // realizar la acción de enviar correo mediante AJAX
+                        $.ajax({
+                            url: `/enviar_gastos_todos/`,
+                            type: 'POST',
+                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                            dataType: 'json',
+                            success: function (response) {
+                                Swal.fire({
+                                    title: response.status === 'success' ? 'Éxito' : 'Error',
+                                    text: response.message,
+                                    icon: response.status === 'success' ? 'success' : 'error',
+                                });
+                            },
+                            error: function (xhr, errmsg, err) {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al enviar los correos',
+                                    icon: 'error',
+                                });
+                            },
+                        });
+                    },
+                });
+            }
+        });
+    });
+});
+
+
+
+    $(document).ready(function() {
+    $("#buscador_input").on("input", function() {
+        var query = $(this).val();
+        var criterio = document.getElementById('criterio').value; 
+        console.log(criterio)
+        console.log(query)
+        $.ajax({
+            url: '{% url "buscar_socios" %}',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                query: query,
+                criterio: criterio
+            },
+            success: function(data) { 
+                $("#socios-body").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+$(document).ready(function() {
+    $("#criterio").on("change", function() {
+        var criterio = $(this).val();
+       
+        $.ajax({
+            url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                query: "",
+                criterio: criterio
+            },
+            success: function(data) {  // Verifica los datos devueltos por el servidor
+                $("#socios-body").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+
+
+</script>
+{% endblock %}
+
+<script>
+    function confirmarEdicion(socioId, socioNombre, socioApellido) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas editar al soci@ ' + socioNombre + ' ' + socioApellido,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/editar_socio/' + socioId + '/';
+            }
+        });
+    }
+</script>
+
+<script>
+    function confirmarEliminacion(socioId, socioNombre, socioApellido, socioActivo) {
+
+        var valor;
+
+        if (socioActivo == 'True') {
+            valor = 1;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Dar de baja de Aduteq al soci@ ' + socioNombre + ' ' + socioApellido,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // El usuario ha confirmado la edición, redirigir a la página de edición
+                    window.location.href = '/eliminar_socio/' + socioId + '/' + valor + '/';
+                    print(valor)
+                }
+            });
+
+        }
+        else {
+            valor = 0;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Habilitar al soci@ ' + socioNombre + ' ' + socioApellido,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // El usuario ha confirmado la edición, redirigir a la página de edición
+                    window.location.href = '/eliminar_socio/' + socioId + '/' + valor + '/';
+                    print(valor)
+                }
+            });
+        }
+
+
+
+
+    }
+</script>
+
+<script>
+    function confirmarEnvioCorreo(socio_id, firstName, lastName) {
+    // Mostrar un cuadro de confirmación con SweetAlert2
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: `¿Desea enviar correos a ${firstName} ${lastName}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí',
+        cancelButtonText: 'Cancelar',
+        dangerMode: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Mostrar el mensaje flotante con imagen y texto de carga
+            Swal.fire({
+                title: 'Enviando correos...',
+                html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                    `<p style="margin-top: 10px;">Enviando correo a ${firstName} ${lastName}...</p>`,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                didOpen: () => {
+                    // Realizar la acción de enviar correo mediante AJAX
+                    $.ajax({
+                        url: `/enviar_gastos/`+socio_id+'/',
+                        type: 'POST',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        dataType: 'json',
+                        success: function (response) {
+                            Swal.fire({
+                                title: response.status === 'success' ? 'Éxito' : 'Error',
+                                text: response.message,
+                                icon: response.status === 'success' ? 'success' : 'error',
+                            });
+                        },
+                        error: function (xhr, errmsg, err) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ocurrió un error al enviar eñ correo',
+                                icon: 'error',
+                            });
+                        },
+                    });
+                },
+            });
+        }
+    });
+}
+</script>
+<!-- <script>
+    function confirmarEnvioCorreoTodos() {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas enviar correo a todos los soci@s',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Se confirma el envio de correo a todos los soci@s
+                window.location.href = '/enviar_gastos_todos';
+            }
+        });
+    }
+</script> -->
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+{% endblock %}

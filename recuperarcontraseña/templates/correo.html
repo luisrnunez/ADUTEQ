@@ -1,0 +1,17 @@
+{% load i18n %}
+{% autoescape off %}
+    {% blocktrans %}
+        <p>Recibiste este mensaje porque has solicitado restablecer tu contraseña en nuestro sitio.</p>
+
+        Por favor, haz clic en el siguiente enlace para continuar:
+        {% endblocktrans %}
+<<<<<<< HEAD
+        {{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+=======
+        {{ protocol }}://{{ domain }}{% url 'password_reset' uidb64=uid token=token %}
+>>>>>>> 00284f665914716187bb4d0faae4c854e7394e42
+        {% blocktrans %}
+        <p>Si no solicitaste restablecer tu contraseña, ignora este mensaje.</p>
+        {% endblocktrans %}
+    
+{% endautoescape %}
