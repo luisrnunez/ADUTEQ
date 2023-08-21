@@ -109,7 +109,7 @@ def enviar_datos_pdf(socio_id):
 
     numero_mes = hoy.month
     anio = hoy.year
-    consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumos_totales = datos_para_el_pdf(socio.id, numero_mes-1, anio)
+    consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumos_totales = datos_para_el_pdf(socio.id, numero_mes, anio)
 
     # Procesar datos
     data = [
@@ -188,7 +188,7 @@ def enviar_datos_pdf(socio_id):
 
     data_tables = [
         ('Consumos por Proveedor', data),
-        ('Consumos de Cuotas', data_cuotas),
+        ('Consumos-de-Cuotas', data_cuotas),
         ('Aportaciones del Socio', data_aportaciones),
         ('Ayudas Económicas', data_ayuda),
         ('Tabla General', data_general)
@@ -196,7 +196,8 @@ def enviar_datos_pdf(socio_id):
 
     for title, data in data_tables:
         # Obtener el índice de la columna de montos en función del título de la tabla
-        monto_column_index = 1 if title != 'Consumos de Cuotas' else 3
+        print(data_cuotas)
+        monto_column_index = 1 if title != 'Consumos-de-Cuotas' else 3
         if title != 'Tabla General':
             # Verificar si al menos un monto en la tabla es diferente de 0 y no es nulo
             if any(row[monto_column_index] and row[monto_column_index] != 'None' and float(row[monto_column_index]) != 0 for row in data[monto_column_index:]):
@@ -256,7 +257,7 @@ def nuevo_enviar_correo(request, socio_id):
     anio = hoy.year
     
     socio = Socios.objects.get(id=socio_id)
-    resultados = obtener_datos_socioss(socio_id, numero_mes-1, anio)
+    resultados = obtener_datos_socioss(socio_id, numero_mes, anio)
 
     informe_data = enviar_datos_pdf(socio_id)
 
@@ -278,7 +279,7 @@ def enviar_correo_todos():
             try:
                 numero_mes = hoy.month
                 anio = hoy.year
-                resultados = obtener_datos_socioss(socio.id, numero_mes-1, anio)
+                resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
                 informe_data = enviar_datos_pdf(socio.id)
                 context={'gastos':resultados}
 
@@ -326,7 +327,7 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
 def enviar_correo_todoss(request):
 
     if enviar_correo_todos():
-        response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
+        response = {'status': 'success', 'message': 'Correo enviado a todos los socios'}
     else:
         response = {'status': 'error', 'message': 'Ups. algo salío mal'}
 

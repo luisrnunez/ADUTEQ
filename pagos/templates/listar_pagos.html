@@ -6,6 +6,13 @@
     integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 
 <body>
+    <style>
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
 
     <div class="content-menu" style="padding-top: 0%;">
 
@@ -55,10 +62,9 @@
                             <th scope="col">Proveedor</th>
                             <th scope="col">Descuento</th>
                             <th scope="col">Fecha</th>
-                            {% if periodo_seleccionado.activo == True %}
-                                <th scope="col">Editar</th>
-                                <th scope="col">Eliminar</th>
-                            {% endif %}
+                            <th scope="col">Editar</th>
+                            <th scope="col">Eliminar</th>
+                            <th scope="col">Convertir a Cuotas</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,9 +74,8 @@
                             <td>{{ pago.socio.user.first_name }}</td>
                             <td>{{pago.proveedor.nombre}}</td>
                             <td>{{pago.consumo_total}}$</td>
-                            <td>{{ pago.fecha_consumo|date:"j - n - Y"}}</td>
+                            <td>{{ pago.fecha_consumo|date:"j - n - Y" }}</td>
     
-                            {% if periodo_seleccionado.activo %}
                             <td>
                                 <form action="{% url 'editarpago' pago.id %}">
                                     <button class="edit-btn">Editar</button>
@@ -82,7 +87,11 @@
                                     <button class="delete-btn">Eliminar</button>
                                 </form>
                             </td>
-                            {% endif %}
+                            <td>
+                                <form action="{% url 'convertir_cuotas' pago.id %}"">
+                                    <button class="delete-btn">Convertir</button>
+                                </form>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

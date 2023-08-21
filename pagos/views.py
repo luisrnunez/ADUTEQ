@@ -174,7 +174,9 @@ def agregar_pagos_cuotas(request):
                 detalle_cuatas = Detalle_cuotas(
                     pago_cuota=pagoscuotas,
                     numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago
+                    fecha_descuento=fecha_pago,
+                    valor_cuota=valor_cuo,
+                    socio=socios, proveedor=proveedores
                 )
                 detalle_cuatas.save()
 
