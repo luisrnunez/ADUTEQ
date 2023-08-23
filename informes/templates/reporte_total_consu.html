@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: landscape;
+            margin: 20mm 10mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            /* Añadido para espaciar los elementos */
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
+        .fecha {
+            display: flex;
+            align-items: flex-start;
+            text-align: center;
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{{ image_path }}" alt="Logo" width="150" height="150">
+        </div>
+        <div class="fecha">
+            <h1>Reporte de Consumo Total de Socios - {{ mes }}/{{ anio }}</h1>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Cédula</th>
+                <th>Cuota préstamos</th>
+                <th>Cuota descuentos</th>
+                <th>Aportación</th>
+                <th>Descuento Proveedores</th>
+                <th>Aportación Ayudas</th>
+                <th>Consumo total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in resultados %}
+            <tr>
+                <td>{{ row.0 }}</td>
+                <td>{{ row.1 }}</td>
+                <td>{{ row.2 }}</td>
+                <td>{{ row.3 }}</td>
+                <td>{{ row.4 }}</td>
+                <td>{{ row.5 }}</td>
+                <td>{{ row.6 }}</td>
+                <td>{{ row.7 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>
