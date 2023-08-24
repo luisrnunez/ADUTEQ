@@ -26,6 +26,12 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import Image
 from django.http import JsonResponse
 from django.db import connection
+from xhtml2pdf import pisa
+from io import BytesIO
+from datetime import datetime
+from django.template.loader import get_template
+from django.template import Context
+import os
 
 
 
@@ -344,12 +350,6 @@ def obtener_consumo_total_func(mes, anio):
         result = cursor.fetchall()
     return result
 
-from xhtml2pdf import pisa
-from io import BytesIO
-from datetime import datetime
-from django.template.loader import get_template
-from django.template import Context
-import os
 def generar_reporte_pdf_total_usuarios(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_consumo.pdf"'
@@ -359,12 +359,21 @@ def generar_reporte_pdf_total_usuarios(request):
     anio = fecha_actual.year
     resultados = obtener_consumo_total_func(mes, anio)
     image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+    total_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio) or 0
+    total_prestamo = obtener_suma_prestamo_total_func(mes, anio) or 0
+    total_descuento_cuotas = obtener_suma_descuento_cuotas_func(mes, anio) or 0
+    total_ayudas = obtener_suma_ayudas_func(mes, anio) or 0
+
+    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas
+
+
 
     template = get_template('reporte_total_consu.html') 
     context = {'resultados': resultados,
                'mes': mes,
                'image_path': image_path,
-                'anio': anio
+                'anio': anio,
+                'total': total
                 } 
 
     html = template.render(context)
