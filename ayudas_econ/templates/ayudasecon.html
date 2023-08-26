@@ -80,8 +80,13 @@
                             <td style="white-space: normal; word-wrap: break-word;">{{ayuda.descripcion}}</td>
                             <td>{{ayuda.fecha}}</td>
                             <td>{{ayuda.motivo}}</td>
-                            <td>{{ayuda.valorsocio}}</td>
-                            <td>{{ayuda.total}}</td>
+
+                            {% if ayuda.valorsocio|floatformat:2 == "0,00" %}
+                                <td>Voluntario</td>
+                            {% else %}
+                                <td>{{ ayuda.valorsocio }}</td>
+                            {% endif %}
+                            <td>{{ ayuda.total }}</td>
     
                             <!--{% if proveedor.estado == False %}
                             <td>Desabilitado</td>

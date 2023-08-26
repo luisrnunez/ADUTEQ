@@ -22,6 +22,9 @@ urlpatterns = [
     path('formeditarayuda/<int:codigo>', views.feditAyuda),
 
     path('eliminarayuda/<int:codigo>', views.eliminar_ayuda),
+
+    path('guardar_aportacion/<int:detalle_id>/', views.guardar_aportacion, name='guardar_aportacion'),
+    path('verificar_socio/<int:detalle_id>/', views.verificar_socio, name='verificar_socio'),
     #detallesayuda
     path('detalleayuda/<int:ayuda_id>', views.detallesAyuda),
     path('registrarayuda/<int:detalle_id>/<int:valor>/', views.registro_ayuda),

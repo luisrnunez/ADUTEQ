@@ -9,6 +9,7 @@ class Pagos(models.Model):
     proveedor=models.ForeignKey(Proveedor, on_delete=models.CASCADE)
     consumo_total=models.DecimalField(max_digits=8,decimal_places=2)
     fecha_consumo=models.DateField()
+    estado = models.BooleanField(default=False)
 
 class Pagos_cuotas(models.Model):
     socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
@@ -35,11 +36,11 @@ def upload_to_evidencia(instance, filename):
     return os.path.join('evidencias', nuevo_nombre)
 
 class Detalle_cuotas(models.Model):
-    socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
-    proveedor=models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    socio=models.ForeignKey(Socios, on_delete=models.CASCADE, default=1)
+    proveedor=models.ForeignKey(Proveedor, on_delete=models.CASCADE, default=1)
     pago_cuota=models.ForeignKey(Pagos_cuotas, on_delete=models.CASCADE)
     numero_cuota=models.IntegerField()
     estado = models.BooleanField(default=False)
     fecha_descuento=models.DateField()
     evidencia = models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
-    valor_cuota=models.DecimalField(max_digits=8,decimal_places=2)
+    valor_cuota=models.DecimalField(max_digits=8,decimal_places=2, default=120)

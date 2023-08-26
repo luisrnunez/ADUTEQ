@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Reporte PDF</title>
+    <style>
+        @page {
+            size: landscape;
+            margin: 20mm 10mm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            /* Añadido para espaciar los elementos */
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
+        .fecha {
+            display: flex;
+            align-items: flex-start;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="{{ image_path }}" alt="Logo" width="150" height="150">
+        </div>
+        <div class="fecha">
+            <h1>Reporte de Consumo de Proveedores - {{ mes }}/{{ anio }}</h1>
+        </div>
+    </div>
+
+    <table>
+        <tr>
+            <th>Cedula</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            {% for proveedor in proveedores %}
+            <th>{{ proveedor.nombre }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in datos_reporte %}
+        <tr>
+            {% for value in row %}
+            <td>
+                {% if value %}
+                {{ value }}
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>

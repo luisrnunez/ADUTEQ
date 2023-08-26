@@ -223,7 +223,7 @@ def eliminar_ayuda(request, codigo):
             ayuda = get_object_or_404(AyudasEconomicas, id=codigo)
             detalles = DetallesAyuda.objects.filter(ayuda=ayuda, cancelado=True)
             if detalles.exists():
-                messages.warning(request, 'No se puede eliminar el descuento. Hay registros de aportaciones asociadas a esta ayuda.')
+                messages.warning(request, 'No se puede eliminar la ayuda. Hay registros de aportaciones asociadas a esta ayuda.')
                 return redirect('/verayudas')
 
             # Obtenemos el préstamo
@@ -240,4 +240,27 @@ def eliminar_ayuda(request, codigo):
         # Si ocurre algún error durante la transacción, la transacción se revierte automáticamente
         messages.warning(request,'Ups, ha ocurrido un problema')
     return redirect('/verayudas')
+
+from django.http import JsonResponse
+
+def guardar_aportacion(request, detalle_id):
+    if request.method == 'POST':
+        detalleayuda = get_object_or_404(DetallesAyuda, id=detalle_id)
+        valor = request.POST.get('valor')
+        print(valor)
+        
+        if valor is not None:
+            detalleayuda.cancelado=True
+            detalleayuda.fecha=date.today()
+            detalleayuda.valor = valor
+            detalleayuda.save()
+            return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False})
+
+def verificar_socio(request, detalle_id):
+    detalle = DetallesAyuda.objects.get(id=detalle_id)
+    socio_id_null = detalle.ayuda.socio_id is None
+    return JsonResponse({'socio_id_null': socio_id_null})
+
         

@@ -70,102 +70,178 @@
 </head>
 
 <body style="width: 80%; margin: auto;">
-    <div class="tabla-container">
-        <h2>Descuento Proveedores</h2>
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Fecha</th>
-                    <th>Descuento de Proveedores</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for consumo in consumos_proveedores %}
-                <tr>
-                    <td>{{consumo.0}}</td>
-                    <td>{{consumo.1}}</td>
-                    <td>{{consumo.2}}</td>
-                    <td>{{consumo.3}}</td>
-                </tr>
-                {% endfor %}
-                <th>total</th>
-                <th></th>
-                <th></th>
-                <th>{{suma_consumo}}</th>
-            </tbody>
-        </table>
-    </div>
 
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h2>Descuento de Prestamos</h2>
-            {% if suma_prestamos > 0 %}
-            <a style="text-decoration: none;" href="/actualizar_cancelados" class="tabla-button" type="submit">Registrar Descuento</a>
-            {% endif %}
-        </div>
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Fecha</th>
-                    <th>Cuota Prestamo</th>
-                    <!-- <th>Marcar</th> -->
-                </tr>
-            </thead>
-            <tbody>
-                {% for prestamo in prestamos_cuotas %}
-                <tr>
-                    <td>{{prestamo.0}}</td>
-                    <td>{{prestamo.1}}</td>
-                    <td>{{prestamo.2}}</td>
-                    <td>{{prestamo.3}}</td>
-                    <!-- <td><input type="checkbox" name="prestamo_id" value="{{ prestamo.4 }}"></td> -->
-                </tr>
-                {% endfor %}
-                <th>total</th>
-                <th></th>
-                <th></th>
-                <th>{{suma_prestamos}}</th>
-                <!-- <th></th> -->
-            </tbody>
-        </table>
-    </div>
+    <form method="post" action="{% url 'actualizar_descuentos' %}">
+        {% csrf_token %}
+        <div class="tabla-container">
+            <div class="tabla-header">
+                <h2>Descuento Proveedores</h2>
+                {% if suma_consumo > 0 %}
+                <button class="tabla-button" type="submit">Registrar Descuento</button>
+                {% endif %}
+            </div>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Fecha</th>
+                        <th>Descuento de Proveedores</th>
+                        <th>
+                            <label><input type="checkbox" id="marcar-todop"> Marcar Todo</label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for consumo in consumos_proveedores %}
+                    <tr>
+                        <td>{{consumo.0}}</td>
+                        <td>{{consumo.1}}</td>
+                        <td>{{consumo.2}}</td>
+                        <td>{{consumo.3}}</td>
+                        <td><input type="checkbox" name="pago_id[]" value="{{ consumo.4 }}"></td>
+                    </tr>
+                    {% endfor %}
+                    <th>total</th>
+                    <th></th>
+                    <th></th>
+                    <th>{{suma_consumo}}</th>
+                    <th></th>
+                </tbody>
+            </table>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var marcarTodoCheckbox = document.getElementById("marcar-todop");
+                    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="pago_id[]"]');
 
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h2>Descuento por Cuotas</h2>
-            {% if suma_des_cuot > 0 %}
-            <a style="text-decoration: none;" href="/actualizar_estados" class="tabla-button">Registrar Descuento</a>
-            {% endif %}
+                    marcarTodoCheckbox.addEventListener("change", function () {
+                        var isChecked = marcarTodoCheckbox.checked;
+
+                        checkboxes.forEach(function (checkbox) {
+                            checkbox.checked = isChecked;
+                        });
+                    });
+
+                    // Resto del código para enviar el formulario...
+                });
+            </script>
         </div>
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Fecha</th>
-                    <th>Cuota Descuento</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for descuento in descuento_cuotas %}
-                <tr>
-                    <td>{{descuento.0}}</td>
-                    <td>{{descuento.1}}</td>
-                    <td>{{descuento.2}}</td>
-                    <td>{{descuento.3}}</td>
-                </tr>
-                {% endfor %}
-                <th>total</th>
-                <th></th>
-                <th></th>
-                <th>{{suma_des_cuot}}</th>
-            </tbody>
-        </table>
-    </div>
+    </form>
+
+    <form id="formulario-prestamos" method="post" action="{% url 'actualizar_cancelados' %}">
+        {% csrf_token %}
+        <div class="tabla-container">
+            <div class="tabla-header">
+                <h2>Descuento de Prestamos</h2>
+                {% if suma_prestamos > 0 %}
+                <button class="tabla-button" type="submit">Registrar Descuento</button>
+                <!-- <a style="text-decoration: none;" href="/actualizar_cancelados" class="tabla-button" type="submit">Registrar Descuento</a> -->
+                {% endif %}
+            </div>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Fecha</th>
+                        <th>Cuota Prestamo</th>
+                        <th>
+                            <label><input type="checkbox" id="marcar-todo"> Marcar Todo</label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos_cuotas %}
+                    <tr>
+                        <td>{{prestamo.0}}</td>
+                        <td>{{prestamo.1}}</td>
+                        <td>{{prestamo.2}}</td>
+                        <td>{{prestamo.3}}</td>
+                        <td><input type="checkbox" name="socio_id[]" value="{{ prestamo.4 }}"></td>
+                    </tr>
+                    {% endfor %}
+                    <th>total</th>
+                    <th></th>
+                    <th></th>
+                    <th>{{suma_prestamos}}</th>
+                    <th></th>
+                </tbody>
+            </table>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var marcarTodoCheckbox = document.getElementById("marcar-todo");
+                    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="socio_id[]"]');
+
+                    marcarTodoCheckbox.addEventListener("change", function () {
+                        var isChecked = marcarTodoCheckbox.checked;
+
+                        checkboxes.forEach(function (checkbox) {
+                            checkbox.checked = isChecked;
+                        });
+                    });
+
+                    // Resto del código para enviar el formulario...
+                });
+            </script>
+        </div>
+    </form>
+
+    <form method="post" action="{% url 'actualizar_estados' %}">
+        {% csrf_token %}
+        <div class="tabla-container">
+            <div class="tabla-header">
+                <h2>Descuento por Cuotas</h2>
+                {% if suma_des_cuot > 0 %}
+                <button class="tabla-button" type="submit">Registrar Descuento</button>
+                {% endif %}
+            </div>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Fecha</th>
+                        <th>Cuota Descuento</th>
+                        <th>
+                            <label><input type="checkbox" id="marcar-todo1"> Marcar Todo</label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for descuento in descuento_cuotas %}
+                    <tr>
+                        <td>{{descuento.0}}</td>
+                        <td>{{descuento.1}}</td>
+                        <td>{{descuento.2}}</td>
+                        <td>{{descuento.3}}</td>
+                        <td><input type="checkbox" name="socio_id[]1" value="{{ descuento.4 }}"></td>
+                    </tr>
+                    {% endfor %}
+                    <th>total</th>
+                    <th></th>
+                    <th></th>
+                    <th>{{suma_des_cuot}}</th>
+                    <th></th>
+                </tbody>
+            </table>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var marcarTodoCheckbox = document.getElementById("marcar-todo1");
+                    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="socio_id[]1"]');
+
+                    marcarTodoCheckbox.addEventListener("change", function () {
+                        var isChecked = marcarTodoCheckbox.checked;
+
+                        checkboxes.forEach(function (checkbox) {
+                            checkbox.checked = isChecked;
+                        });
+                    });
+
+                    // Resto del código para enviar el formulario...
+                });
+            </script>
+        </div>
+    </form>
 
     <div class="tabla-container">
         <h2>Ayudas Externas</h2>

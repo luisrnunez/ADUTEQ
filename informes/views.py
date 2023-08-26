@@ -26,6 +26,12 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import Image
 from django.http import JsonResponse
 from django.db import connection
+from xhtml2pdf import pisa
+from io import BytesIO
+from datetime import datetime
+from django.template.loader import get_template
+from django.template import Context
+import os
 
 
 
@@ -353,35 +359,34 @@ def generar_reporte_pdf_total_usuarios(request):
     mes = fecha_actual.month
     anio = fecha_actual.year
     resultados = obtener_consumo_total_func(mes, anio)
+    image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+    total_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio) or 0
+    total_prestamo = obtener_suma_prestamo_total_func(mes, anio) or 0
+    total_descuento_cuotas = obtener_suma_descuento_cuotas_func(mes, anio) or 0
+    total_ayudas = obtener_suma_ayudas_func(mes, anio) or 0
 
-    doc = SimpleDocTemplate(response, pagesize=landscape(letter))
-    elements = []
-
-    imagen = cargar_imagen('informes/static/img/aduteq.png')  # Ruta relativa desde la ubicación de la función
-    elements.append(imagen)
+    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas
 
 
-    data = [['Nombre', 'Cédula', 'Cuota préstamos', 'Cuota descuentos','Aportación', 'Descuento Proveedores', 'Aportación Ayudas', 'Consumo total']]
-    data.extend(resultados)
 
-    table = Table(data, colWidths=[120, 70, 100, 100, 70, 120, 100, 80], repeatRows=1)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-    ]))
+    template = get_template('reporte_total_consu.html') 
+    context = {'resultados': resultados,
+               'mes': mes,
+               'image_path': image_path,
+                'anio': anio,
+                'total': total
+                } 
 
-    elements.append(Spacer(1, 20))
-    elements.append(table)
-    doc.build(elements)
-    return response
+    html = template.render(context)
+    result = BytesIO()
+
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+
+    if not pdf.err:
+        response.write(result.getvalue())
+        return response
+
+    return HttpResponse("Error al generar el PDF", status=500)
 
 def cargar_imagen(path):
     imagen = Image(path)
@@ -435,21 +440,49 @@ def obtener_ayudas_func(mes, anio):
     return results
 
 def actualizar_cancelados(request):
+    checks=request.POST.getlist('socio_id[]')
     fecha_actual = datetime.now()
     mes = fecha_actual.month
     anio = fecha_actual.year
     with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM actualizar_cancelados(%s, %s);", [mes, anio])
+        for id_socio in checks:
+            cursor.execute("SELECT * FROM actualizar_cancelados(%s, %s, %s);", [mes, anio, id_socio])
     return redirect(cerrar_periodo)
+
+# def actualizar_cancelados(request):
+#     fecha_actual = datetime.now()
+#     mes = fecha_actual.month
+#     anio = fecha_actual.year
+    
+#     prestamos_seleccionados = request.POST.getlist('prestamosSeleccionados[]')
+#     print("Prestamos seleccionados:", prestamos_seleccionados)
+#     with connection.cursor() as cursor:
+#         for prestamo_id in prestamos_seleccionados:
+#             cursor.execute("SELECT * FROM actualizar_cancelados(%s, %s, %s);", [mes, anio, prestamo_id])
+    
+#     return redirect(cerrar_periodo)
 
 def actualizar_estados(request):
+    checks=request.POST.getlist('socio_id[]1')
     fecha_actual = datetime.now()
     mes = fecha_actual.month
     anio = fecha_actual.year
     with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM actualizar_estados(%s, %s);", [mes, anio])
+        for id_socio in checks:
+            cursor.execute("SELECT * FROM actualizar_estados(%s, %s, %s);", [mes, anio, id_socio])
     return redirect(cerrar_periodo)
 
+def actualizar_descuentos(request):
+    checks=request.POST.getlist('pago_id[]')
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    with connection.cursor() as cursor:
+        for id_pago in checks:
+            cursor.execute("SELECT * FROM actualizar_descuentos(%s, %s, %s);", [mes, anio, id_pago])
+    return redirect(cerrar_periodo)
+    
+    
 def obtener_suma_consumo_total_descuentos_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute("SELECT obtener_suma_consumo_total_descuentos_func(%s, %s);", [mes, anio])
