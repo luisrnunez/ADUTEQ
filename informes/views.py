@@ -104,153 +104,45 @@ def obtener_gastos_socio(socio_id):
 
 
 
-def enviar_datos_pdf(socio_id):
-    socio = Socios.objects.get(id=socio_id)
-    hoy = datetime.today()
+def generar_pdf(context):
+    template_path = 'info_detalle_pdf.html'
+    template = get_template(template_path)
+    html = template.render(context)
 
-    image_path = r'ADUTEQ\static\img\aduteq.png'
-    img = Image(image_path, width=100, height=100)  # Ajusta el tamaño de la imagen según tus necesidades
-    img.hAlign = 'LEFT'
-    img.vAlign = 'TOP'
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
 
-    numero_mes = hoy.month
-    anio = hoy.year
-    consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumos_totales = datos_para_el_pdf(socio.id, numero_mes, anio)
+    if not pdf.err:
+        return result.getvalue()
+    
+def datospdf(socio_id, mes, anio):
+    data = datos_para_el_pdf(socio_id, mes, anio)
+    consumos_proveedor = data[0]
+    consumos_cuotas = data[1]
+    aportaciones_socio = data[2]
+    aportaciones_ayuda = data[3]
+    consumos_totales = data[4]
 
-    # Procesar datos
-    data = [
-        ['Proveedor', 'Monto'],
-    ] + [[str(proveedor), str(monto)] for proveedor, monto in consumos_proveedor]
+    hide_consumos_proveedor = any(consumo_total == 0 or consumo_total is None for _, consumo_total in consumos_proveedor)
+    hide_consumos_cuotas = any(valor_cuota == 0 or valor_cuota is None for _, _, _, valor_cuota in consumos_cuotas)
+    hide_aportaciones_socio = any(montoa == 0 or montoa is None for _, montoa in aportaciones_socio)
+    hide_aportaciones_ayuda = any(valor_aportado == 0 or valor_aportado is None for _, valor_aportado  in aportaciones_ayuda)
+    hide_consumos_totales = any(columna2 == 0 or columna2 is None for _, columna2 in consumos_totales)
 
-    data_cuotas = [
-        ['Fecha', 'Nombre', 'Cuota Actual', 'Valor'],
-    ] + [[fecha.strftime("%Y-%m-%d"), str(proveedor), str(cuota), str(monto)] for fecha, proveedor, cuota, monto in consumos_cuotas]
+    context = {
+        'hide_consumos_proveedor': hide_consumos_proveedor,
+        'hide_consumos_cuotas': hide_consumos_cuotas,
+        'hide_aportaciones_socio': hide_aportaciones_socio,
+        'hide_aportaciones_ayuda': hide_aportaciones_ayuda,
+        'hide_consumos_totales': hide_consumos_totales,
+        'consumos_proveedor': consumos_proveedor,
+        'consumos_cuotas': consumos_cuotas,
+        'aportaciones_socio': aportaciones_socio,
+        'aportaciones_ayuda': aportaciones_ayuda,
+        'consumos_totales': consumos_totales
+    }
 
-    data_aportaciones = [
-        ['Tipo', 'Monto'],
-    ]
-    for tipo, monto in aportaciones_socio:
-        if tipo == 'AE':
-            tipo = 'Ayuda Permanente'
-        elif tipo == 'CO':
-            tipo = 'Cuota Ordinaria'
-        else:
-            tipo = 'Total'
-        data_aportaciones.append([str(tipo), str(monto)])
-
-    data_ayuda = [
-        ['Descripción', 'Monto'],
-    ] + [[str(descripcion), str(monto)] for descripcion, monto in aportaciones_ayuda]
-
-    data_general=[
-        ['Motivo','Monto']
-    ]
-    for motivo, monto in consumos_totales:
-        if motivo == 'AE':
-            motivo = 'Ayuda Permanente'
-        elif motivo == 'CO':
-            motivo = 'Cuota Ordinaria'
-        data_general.append([str(motivo), str(monto)])
-
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="informe.pdf"+{socio.user.first_name}'
-    doc = SimpleDocTemplate(response, pagesize=A4)
-
-    elements = []
-
-    title_style = ParagraphStyle(
-        name='INFORME MENSUAL ADUTEQ',
-        fontSize=14,
-        alignment=TA_CENTER,
-        spaceAfter=12,
-        fontName='Helvetica-Bold',
-    )
-
-    title=Paragraph("Informe Mensual ADUTEQ", title_style)
-
-    image_and_title = Table(
-        [[img, title]],
-        colWidths=[100, '*'], 
-        style=[
-            ('ALIGN', (0, 0), (0, 0), 'LEFT'), 
-            ('ALIGN', (1, 0), (1, 0), 'CENTER'),  
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]
-    )
-
-    elements.append(image_and_title)
-    elements.append(Spacer(1, 20))
-
-    table_style = TableStyle([
-    ('BACKGROUND', (0, 0), (-1, 0), '#82F698'),  # Fondo verde pastel
-    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Texto blanco
-    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-    ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ])
-
-    data_tables = [
-        ('Consumos por Proveedor', data),
-        ('Consumos-de-Cuotas', data_cuotas),
-        ('Aportaciones del Socio', data_aportaciones),
-        ('Ayudas Económicas', data_ayuda),
-        ('Tabla General', data_general)
-    ]
-
-    for title, data in data_tables:
-        # Obtener el índice de la columna de montos en función del título de la tabla
-        print(data_cuotas)
-        monto_column_index = 1 if title != 'Consumos-de-Cuotas' else 3
-        if title != 'Tabla General':
-            # Verificar si al menos un monto en la tabla es diferente de 0 y no es nulo
-            if any(row[monto_column_index] and row[monto_column_index] != 'None' and float(row[monto_column_index]) != 0 for row in data[monto_column_index:]):
-                table_data = [[Paragraph(cell, ParagraphStyle('Normal')) for cell in row] for row in data]
-                table = Table(table_data, colWidths='*')
-
-                max_heights = []
-                for row in table_data:
-                    row_heights = []
-                    for cell in row:
-                        cell_paragraph = Paragraph(cell.getPlainText(), ParagraphStyle('Normal'))
-                        avail_width, avail_height = cell_paragraph.wrapOn(doc, A4[0], A4[1])
-                        cell_paragraph.wrap(avail_width, avail_height)
-                        cell_height = cell_paragraph.height
-                        row_heights.append(cell_height)
-                    max_heights.append(max(row_heights))
-
-                for row, max_height in zip(table_data, max_heights):
-                    for cell in row:
-                        cell._textValign = 'middle'
-                        cell.height = max_height
-
-                table.setStyle(table_style)
-                elements.append(Paragraph(title, title_style))
-                elements.append(Spacer(1, 12))
-                elements.append(table)
-                elements.append(Spacer(1, 20))
-        else:
-            elements.append(PageBreak())
-            
-            # Agregar el título de la tabla "Tabla General"
-            elements.append(Paragraph(title, title_style))
-            elements.append(Spacer(1, 12))
-
-            # Crear la tabla y aplicar estilos
-            table_data = [[Paragraph(cell, ParagraphStyle('Normal')) for cell in row] for row in data]
-            table = Table(table_data, colWidths='*')
-            table.setStyle(table_style)
-
-            # ... (ajustar alturas de celdas y aplicar estilos de tabla)
-
-            # Agregar la tabla "Tabla General" a los elementos del PDF
-            elements.append(table)
-            elements.append(Spacer(1, 20))
-
-    doc.build(elements)
-    return response
+    return context
 
 
 ##########################-------NUEVO ENVIAR CORREO------##############################
@@ -265,9 +157,10 @@ def nuevo_enviar_correo(request, socio_id):
     socio = Socios.objects.get(id=socio_id)
     resultados = obtener_datos_socioss(socio_id, numero_mes, anio)
 
-    informe_data = enviar_datos_pdf(socio_id)
+    informe_data = generar_pdf(datospdf(socio_id, numero_mes, anio))
 
     if enviarGastoEmail(socio_id, resultados, informe_data):
+        print(resultados)
         response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
     else:
         response = {'status': 'error', 'message': 'Ups. algo salío mal'}
@@ -278,28 +171,31 @@ def nuevo_enviar_correo(request, socio_id):
 
 ###################################---ENVIAR CORREO TODOS----############################
 def enviar_correo_todos():
-    socios=Socios.objects.all()
+    socios = Socios.objects.all()
     hoy = datetime.today()
+
     for socio in socios:
-        if(socio.user.is_active):
+        if socio.user.is_active:
             try:
                 numero_mes = hoy.month
                 anio = hoy.year
-                resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
-                informe_data = enviar_datos_pdf(socio.id)
-                context={'gastos':resultados}
 
                 template = get_template('gastosmensual.html')
+                resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
+                context={'gastos':resultados}
                 content = template.render(context)
                 
-                email = EmailMultiAlternatives(
-                    'Informe mensual ADUTEQ',
-                    'Gastos',
-                    settings.EMAIL_HOST_USER,
-                    [socio.user.email])
-                email.attach_alternative(content, 'text/html')
-                email.attach('informe.pdf', informe_data.getvalue(), 'application/pdf')
-                email.send()
+                pdf_buffer = generar_pdf(datospdf(socio.id, numero_mes, anio))
+                if pdf_buffer:
+                    email = EmailMultiAlternatives(
+                        'Informe mensual ADUTEQ',
+                        'Gastos',
+                        settings.EMAIL_HOST_USER,
+                        [socio.user.email]
+                    )
+                    email.attach_alternative(content, 'text/html')
+                    email.attach('informe.pdf', pdf_buffer, 'application/pdf')
+                    email.send()
             except Exception as e:
                 print(str(e))
     return True
@@ -321,7 +217,7 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
     )
     # email.attach_file("ADUTEQ\static\img\logo.png")
     email.attach_alternative(content, 'text/html')
-    email.attach('informe.pdf', pdf_buffer.getvalue(), 'application/pdf')
+    email.attach('informe.pdf', pdf_buffer, 'application/pdf')
 
     if sociop.user.is_active:
         email.send()

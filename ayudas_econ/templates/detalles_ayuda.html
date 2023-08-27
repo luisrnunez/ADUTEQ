@@ -1,17 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<<<<<<< HEAD
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-=======
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
->>>>>>> a888eea682766359adb8b847609275a6a3b227f3
 
 <body>
     <style>
@@ -24,11 +19,7 @@
     <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
-<<<<<<< HEAD
             <h1>Detalles de aportaciones</b></h1>
-=======
-            <h1>Detalles de pago de <b>{{ socio.user.first_name }}</b> <b>{{ socio.user.last_name }}</b></h1>
->>>>>>> a888eea682766359adb8b847609275a6a3b227f3
         </div>
         <div class="socios-content ">
             <div class="botones-sup">
@@ -52,16 +43,12 @@
                     {% for detalle in detalles %}
                     <tr>
                         <td>{{ detalle.ayuda.motivo }}</td>
-<<<<<<< HEAD
                         <!-- <td>{{ detalle.valor}}</td> -->
                         {% if detalle.valor|floatformat:2 == "0,00" %}
                             <td>Voluntario</td>
                         {% else %}
                             <td>{{ detalle.valor }}</td>
                         {% endif %}
-=======
-                        <td>{{ detalle.valor}}</td>
->>>>>>> a888eea682766359adb8b847609275a6a3b227f3
                         <td>
 
                             {% if detalle.evidencia %}

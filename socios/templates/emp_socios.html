@@ -72,11 +72,7 @@
                     <th>Nombres</th>
                     <th>Apellidos</th>
                     <th>Foto</th>
-<<<<<<< HEAD
                     <!-- <th>Dirección</th> -->
-=======
-                    <th>Dirección</th>
->>>>>>> a888eea682766359adb8b847609275a6a3b227f3
                     <th>Teléfono</th>
                     <th>Correo Electrónico</th>
                     <!-- <th>Categoria</th> -->
@@ -100,11 +96,7 @@
                         No hay foto disponible.
                         {% endif %}
                     </td>
-<<<<<<< HEAD
                     <!-- <td>{{ socio.direccion_domiciliaria }}</td> -->
-=======
-                    <td>{{ socio.direccion_domiciliaria }}</td>
->>>>>>> a888eea682766359adb8b847609275a6a3b227f3
                     <td>{{ socio.numero_telefonico }}</td>
                     <td>{{ socio.user.email }}</td>
                     <!-- <td>{{ socio.categoria }}</td> -->
@@ -172,59 +164,51 @@
     
 <script>
 
-$(document).ready(function () {
-    $('.notify').on('click', function () {
-        const promoId = $(this).data('promo-id');
-
-        // mostrar un cuadro de confirmación con SweetAlert2
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: '¿Desea enviar correos a todos los socios?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí',
-            cancelButtonText: 'Cancelar',
-            dangerMode: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // mostrar el mensaje flotante con imagen y texto de carga
-                Swal.fire({
-                    title: 'Enviando correos...',
-                    html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
-                        '<p style="margin-top: 10px;">Enviando correos a todos los socios...</p>',
-                    showConfirmButton: false,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    allowEnterKey: false,
-                    didOpen: () => {
-                        // realizar la acción de enviar correo mediante AJAX
-                        $.ajax({
-                            url: `/enviar_gastos_todos/`,
-                            type: 'POST',
-                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                            dataType: 'json',
-                            success: function (response) {
-                                Swal.fire({
-                                    title: response.status === 'success' ? 'Éxito' : 'Error',
-                                    text: response.message,
-                                    icon: response.status === 'success' ? 'success' : 'error',
-                                });
-                            },
-                            error: function (xhr, errmsg, err) {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Ocurrió un error al enviar los correos',
-                                    icon: 'error',
-                                });
-                            },
-                        });
-                    },
-                });
-            }
-        });
+function confirmarEnvioCorreoTodos() {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Deseas enviar correo a todos los soci@s',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí',
+        cancelButtonText: 'Cancelar',
+        dangerMode: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Enviando correos...',
+                html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                    '<p style="margin-top: 10px;">Enviando correos a todos los soci@s...</p>',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                didOpen: () => {
+                    $.ajax({
+                        url: '/enviar_gastos_todos/',
+                        type: 'POST',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        dataType: 'json',
+                        success: function (response) {
+                            Swal.fire({
+                                title: response.status === 'success' ? 'Éxito' : 'Error',
+                                text: response.message,
+                                icon: response.status === 'success' ? 'success' : 'error',
+                            });
+                        },
+                        error: function (xhr, errmsg, err) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ocurrió un error al enviar los correos',
+                                icon: 'error',
+                            });
+                        },
+                    });
+                },
+            });
+        }
     });
-});
-
+}
 
 
     $(document).ready(function() {
@@ -379,11 +363,7 @@ $(document).ready(function() {
                         error: function (xhr, errmsg, err) {
                             Swal.fire({
                                 title: 'Error',
-<<<<<<< HEAD
                                 text: 'Ocurrió un error al enviar el correo',
-=======
-                                text: 'Ocurrió un error al enviar eñ correo',
->>>>>>> a888eea682766359adb8b847609275a6a3b227f3
                                 icon: 'error',
                             });
                         },
