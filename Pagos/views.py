@@ -25,8 +25,13 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, KeepInFrame, Image
 from reportlab.lib.styles import getSampleStyleSheet
 from django.contrib.auth.decorators import login_required
-from .models import Periodo
+from Periodo.models import Periodo
 from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from io import BytesIO
+from django.template.loader import get_template
+from xhtml2pdf.default import DEFAULT_FONT
+from reportlab.lib.units import inch
 
 
 # Create your views here. 
@@ -474,12 +479,11 @@ def guardar_descuentos_prov(request, id, fecha):
 def verificar_registros(request):
     if request.method == 'POST':
         registros_formulario = request.POST
-
         campos = list(registros_formulario.keys())
         campos.remove('csrfmiddlewaretoken')
         registros_con_estilo = []
         cant_registros = len(registros_formulario.getlist(campos[0]))
-      
+        cant_errores = 0
         for i in range(cant_registros):
             valor = 1
             valor1 = 1
@@ -487,13 +491,13 @@ def verificar_registros(request):
             for campo in campos:
                 datos[campo] = registros_formulario.getlist(campo)[i]  # Obtenemos el valor del campo para el registro actual
             datos['estilo_color'] = 'normal'  # Agregamos la nueva columna 'estilo_color' con valor 'normal'
-            
             ide = registros_formulario.getlist('ide')
             if ide[i].isdigit():
                 if Socios.objects.filter(cedula=ide[i]).exists():
+                    valor=0
                     datos['estilo_color'] = 'normal'
                 else:
-                    valor=0
+                    cant_errores = cant_errores + 1
                     datos['estilo_color'] = 'rojo'
             else:
                 usuarios = User.objects.filter(is_staff=False)
@@ -504,22 +508,29 @@ def verificar_registros(request):
                         break
                 if usuario_existe:
                     valor = 0
-                registros_con_estilo.append(datos)
+                # registros_con_estilo.append(datos)
+
             des = registros_formulario.getlist('des')
             des[i] = des[i].replace(',', '').replace('.', '')
             if des[i].isdigit():
                 valor1 = 0
                 print('es digito')
+            else:
+                cant_errores = cant_errores + 1
             print(des[i])
             #cambio color
             if valor == 0 and valor1 == 0:
                 datos['estilo_color'] = 'normal'
             else:
+                cant_errores = cant_errores + 1
                 datos['estilo_color'] = 'rojo'
+            registros_con_estilo.append(datos)
 
         print(registros_con_estilo)
+        print(valor,'  ',valor1)
+        print(cant_errores)
         proveedores = Proveedor.objects.filter(estado=True)
-        if valor == 0 and valor1 == 0:
+        if cant_errores > 0:
             response = {
                 'status': False,
                 'message': 'Se han encontrado errores en los registros. Por favor, verifíquelos.',
@@ -550,55 +561,39 @@ def generar_reporte_pdf(request):
         cursor.execute('SELECT * FROM consumo_proveedores')
         datos_reporte = cursor.fetchall()
 
+
     # Obtener los proveedores para la cabecera de la tabla en el reporte
     proveedores = Proveedor.objects.all().order_by('nombre')
 
     image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
 
-    # Crear un objeto PDF utilizando ReportLab
+    # Renderizar el template HTML utilizando el contexto
+    template = get_template('reporte_proveedores.html')
+    context = {
+        'mes': mes,
+        'anio': anio,
+        'proveedores': proveedores,
+        'datos_reporte': datos_reporte,
+        'image_path': image_path,
+    }
+    html = template.render(context)
+
+    # Crear un objeto PDF utilizando xhtml2pdf
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="reporte_{mes}_{anio}.pdf"'
 
-    # Inicializar el documento PDF
-    PAGE_WIDTH, PAGE_HEIGHT = landscape(letter)
+    buffer = BytesIO()
+   
+    pisa.showLogging()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), buffer, pagesize=landscape((14*inch, 8.5*inch)))
 
-    # Inicializar el documento PDF con tamaño de página apaisada
-    doc = SimpleDocTemplate(response, pagesize=(PAGE_WIDTH, PAGE_HEIGHT))
+    if not pdf.err:
+        response.write(buffer.getvalue())
+        buffer.close()
+        return response
 
-    # Crear una lista con los datos del reporte
-    data = [['Cedula'] + [proveedor.nombre for proveedor in proveedores]]
-    data.extend([row for row in datos_reporte])
-
-
-    # Crear una tabla con los datos y aplicar estilos
-    table = Table(data,colWidths=[100, 100, 100, 100, 100, 100, 100], repeatRows=1)
-    style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(0x62/255, 0xc5/255, 0x62/255)),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ])
-    table.setStyle(style)
-
-    # Ajustar el ancho de las columnas automáticamente
-    table._argW[0] = 140  # Ancho de la primera columna (Nombre Socio)
-    for i in range(1, len(proveedores) + 1):
-        table._argW[i] = doc.width / (len(proveedores) + 1)
-
-
-    # Agregar la tabla al documento PDF
-    story = []
-    img_width = 100
-    img_height = 100
-    img = Image(image_path, width=img_width, height=img_height)
-    story.append(img)
-    story.append(table)
-    doc.build(story)
-
-    return response
+    buffer.close()
+    return HttpResponse("Error al generar el PDF", status=500)
 
 def convertir_cuotas(request, pago_id):
     if request.method == 'GET':
