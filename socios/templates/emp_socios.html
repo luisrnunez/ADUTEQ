@@ -177,7 +177,7 @@ function confirmarEnvioCorreoTodos() {
         if (result.isConfirmed) {
             Swal.fire({
                 title: 'Enviando correos...',
-                html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
                     '<p style="margin-top: 10px;">Enviando correos a todos los soci@s...</p>',
                 showConfirmButton: false,
                 allowOutsideClick: false,
@@ -340,7 +340,7 @@ $(document).ready(function() {
             // Mostrar el mensaje flotante con imagen y texto de carga
             Swal.fire({
                 title: 'Enviando correos...',
-                html: '<img src="../../ADUTEQ/static/img/mail-download.gif" alt="Cargando..." style="height: 100px;">' +
+                html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
                     `<p style="margin-top: 10px;">Enviando correo a ${firstName} ${lastName}...</p>`,
                 showConfirmButton: false,
                 allowOutsideClick: false,
