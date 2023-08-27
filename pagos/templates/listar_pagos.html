@@ -28,7 +28,6 @@
         </div>
         <div class="socios-content ">
             <div class="botones-sup">
-<<<<<<< HEAD
                 <div style="height: min-content;">
                     <a href="/agregar_pago/"> <button class="add-socio-btn"> Agregar descuento</button></a>
                     <a style="margin-left: 10px;" href="/extraer_descuentos/"> <button class="add-socio-btn"> Agregar
@@ -124,92 +123,6 @@
                         </ul>
                     </nav>
                 </div>
-=======
-                <a href="/agregar_pago/"> <button class="add-socio-btn"> Agregar descuento</button></a>
-                <a style="margin-left: 10px;" href="/extraer_descuentos/"> <button class="add-socio-btn"> Agregar
-                        descuentos desde archivo</button></a>
-                <a style="margin-left: 10px;" href="/lista_pagos_cuotas/"> <button class="add-socio-btn"> Descuentos por
-                        cuotas</button></a>
-                <a style="margin-left: 10px;" href="/generar_reporte/"> <button class="add-socio-btn"> Generar
-                        Reporte</button></a>
-            </div>
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Socio</th>
-                        <th scope="col">Proveedor</th>
-                        <th scope="col">Descuento</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Editar</th>
-                        <th scope="col">Eliminar</th>
-                        <th scope="col">Convertir a Cuotas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pago in pagos %}
-                    <tr>
-                        <td>{{pago.id}}</td>
-                        <td>{{ pago.socio.user.first_name }}</td>
-                        <td>{{pago.proveedor.nombre}}</td>
-                        <td>{{pago.consumo_total}}$</td>
-                        <td>{{ pago.fecha_consumo|date:"j - n - Y" }}</td>
-                        <td>
-                            {% if pago.estado %}
-                            <button class="green-button">
-                                Cancelado
-                            </button>
-                            {% else %}
-                            <button class="red-button">
-                                Pendiente
-                            </button>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            <form action="{% url 'editarpago' pago.id %}">
-                                <button class="edit-btn">Editar</button>
-                            </form>
-                        </td>
-
-                        <td>
-                            <form action="{% url 'eliminarpago' pago.id %}">
-                                <button class="delete-btn">Eliminar</button>
-                            </form>
-                        </td>
-                        <td>
-                            {% if pago.estado %}
-                            {% else %}
-                            <form action="{% url 'convertir_cuotas' pago.id %}"">
-                                <button class=" delete-btn">Convertir</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="pagination-container">
-                <nav aria-label="...">
-                    <ul class="pagination">
-                        {% if pagos.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ pagos.previous_page_number }}">anterior</a>
-                        </li>
-                        {% endif %}
-                        <li class="pagination-item active">
-                            <span style="border-radius: 5px;" class="page-link">{{ pagos.number }}</span>
-                        </li>
-                        {% if pagos.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ pagos.next_page_number }}">siguiente</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
->>>>>>> e95f9740487bbf0c865ef80320e5c41a05b24e03
             </div>
          
             <script>

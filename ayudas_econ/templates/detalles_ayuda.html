@@ -203,6 +203,7 @@ function mostrarModal(detalle_id) {
                     success: function(data) {
                         if (data.success) {
                             $('#exampleModal').modal('hide');
+                            location.reload();
                         } else {
                             Swal.fire({
                                 title: 'Error',
