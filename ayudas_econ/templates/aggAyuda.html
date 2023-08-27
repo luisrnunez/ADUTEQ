@@ -33,6 +33,7 @@
                         {% endfor %}
                     </select>
                     
+<<<<<<< HEAD
                     
                     <label for="beneficiario">Beneficiario:</label>
                     <select name="socio" id="beneficiarios" onchange="mostrarOcultarValor(this)">
@@ -44,13 +45,40 @@
                         <option value="null">Otro</option>
                     </select>
 
+=======
+                    <div id="opcionesb""">
+                        <label for="beneficiario">Beneficiario:</label>
+                        <select name="socio" id="beneficiarios">
+                            {% for opcion in opciones %}
+                                {% if opcion.user.is_active %}
+                                    <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                            <option value="null">Otro</option>
+                        </select>
+                    </div>
+
+                    <!-- <label for="socio">Beneficiario:</label>
+                    <input maxlength="200" type="socio" id="socio" name="socio" required> -->
+                    
+                    <!-- <input maxlength="200" type="text" id="descripcion" name="descripcion" required> -->
+>>>>>>> a888eea682766359adb8b847609275a6a3b227f3
 
                     <label for="descripcion">Descripción:</label>
                     <input maxlength="200" type="text" id="descripcion" name="descripcion" required>
 
+<<<<<<< HEAD
                     <label id="labelValorsocio" for="valorsocio">Valor por socio:</label>
                     <input type="number" step="any" id="valorsocio" name="valorsocio" placeholder="3.00-10.00" required>
 
+=======
+                    <label for="valorsocio">Valor por socio:</label>
+                    <input type="number" step="any" id="valorsocio" name="valorsocio" placeholder="3.00-10.00" required>
+
+                    <!-- <label for="total">Total:</label>
+                    <input type="number" step="any" id="total" name="total" placeholder="25.00" required> -->
+
+>>>>>>> a888eea682766359adb8b847609275a6a3b227f3
                     <label for="fecha">Fecha:</label>
                     <input type="date" id="fecha" name="fecha">
 
@@ -92,6 +120,7 @@
           });
         });
       </script> -->
+<<<<<<< HEAD
 
       <script>
         function mostrarOcultarValor(select) {
@@ -110,6 +139,8 @@
         }
         </script>
         
+=======
+>>>>>>> a888eea682766359adb8b847609275a6a3b227f3
     {% endblock %}
 </body>
 
