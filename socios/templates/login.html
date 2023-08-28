@@ -17,9 +17,10 @@
         </div>
         <h1 class="title">ADUTEQ</h1>
 
-       
+       <div class="card head">{{ mensaje }}</div>
 
         <form class="login-form" action="/login/" method="POST">
+            {% csrf_token %}
             {% if error_message %}
 
             <div class="popup-container" id="popupContainer" 4>
@@ -30,7 +31,6 @@
                 </div>
             </div>
             {% endif %}
-            {% csrf_token %}
             <input type="text" name="username" placeholder="Usuario" required>
             <input type="password" name="password" placeholder="Contraseña" required>
             <input type="submit" value="Iniciar sesión">
@@ -50,6 +50,16 @@
             popupContainer.style.display = 'none';
         }
     </script>
+    {% if message.tags == 'warning' %}
+    <script>
+        Swal.fire({
+            icon: "warning",
+            title: "Advertencia",
+            text: "{{ message }}"
+        });
+    </script>
+    {% endif %}
+
 </body>
 
 </html>

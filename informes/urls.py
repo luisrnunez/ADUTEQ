@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import enviar_correo_todoss, nuevo_enviar_correo,reportes, generar_reporte_pdf_total_usuarios,cerrar_periodo,actualizar_cancelados,actualizar_estados, actualizar_descuentos
+from .views import enviar_correo_todoss, nuevo_enviar_correo,reportes, generar_reporte_pdf_total_usuarios,cerrar_periodo,actualizar_cancelados,actualizar_estados, actualizar_descuentos,generar_reporte_consumo_todos, reportes_socios_general
 
 urlpatterns = [
 
@@ -12,4 +12,6 @@ urlpatterns = [
     path('actualizar_cancelados/', actualizar_cancelados, name='actualizar_cancelados'),
     path('actualizar_estados/', actualizar_estados, name='actualizar_estados'),
     path('actualizar_descuentos/', actualizar_descuentos, name='actualizar_descuentos'),
+    path('reportes_socios_todos/', generar_reporte_consumo_todos, name='reportes_socios_todos'),
+    path('reportes_socios_general/', reportes_socios_general, name='reportes_socios_general'),
 ]

@@ -350,9 +350,18 @@ def obtener_consumo_total_func(mes, anio):
         result = cursor.fetchall()
     return result
 
+def obtener_consumo_total_todos_func(mes, anio):
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT * FROM obtener_consumo_total_todos_func({mes}, {anio});"
+        )
+        result = cursor.fetchall()
+    return result
+
 def generar_reporte_pdf_total_usuarios(request):
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="reporte_consumo.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="reporte_consumo_pendientes.pdf"'
 
     fecha_actual = datetime.now()
     mes = fecha_actual.month
@@ -369,6 +378,37 @@ def generar_reporte_pdf_total_usuarios(request):
 
 
     template = get_template('reporte_total_consu.html') 
+    context = {'resultados': resultados,
+               'mes': mes,
+               'image_path': image_path,
+                'anio': anio,
+                'total': total
+                } 
+
+    html = template.render(context)
+    result = BytesIO()
+
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+
+    if not pdf.err:
+        response.write(result.getvalue())
+        return response
+
+    return HttpResponse("Error al generar el PDF", status=500)
+
+def generar_reporte_consumo_todos(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_consumo_todos.pdf"'
+
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    resultados = obtener_consumo_total_todos_func(mes, anio)
+    image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+    total = obtener_suma_total(mes, anio) or 0
+
+
+    template = get_template('reporte_consu_todos.html') 
     context = {'resultados': resultados,
                'mes': mes,
                'image_path': image_path,
@@ -509,3 +549,40 @@ def obtener_suma_ayudas_func(mes, anio):
 def llamar_cancelados(request):
     with connection.cursor() as cursor:
         cursor.callproc('actualizar_cancelados', [3, 8, 2023])
+
+def obtener_suma_total(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT obtener_suma_total(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def reportes_socios_general(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_general_socios.pdf"'
+
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    resultados = obtener_consumo_total_todos_func(mes, anio)
+    image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+    total = obtener_suma_total(mes, anio) or 0
+
+
+    template = get_template('reporte_general_socios.html') 
+    context = {'resultados': resultados,
+               'mes': mes,
+               'image_path': image_path,
+                'anio': anio,
+                'total': total
+                } 
+
+    html = template.render(context)
+    result = BytesIO()
+
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+
+    if not pdf.err:
+        response.write(result.getvalue())
+        return response
+
+    return HttpResponse("Error al generar el PDF", status=500)

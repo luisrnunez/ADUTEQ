@@ -20,65 +20,77 @@ from . import models
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
+from django.views.decorators.cache import cache_control
 
 from django.core.mail import send_mail
 
 from django.template.loader import render_to_string
 
 # Create your views here.
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def login_(request):
     return render(request, "login.html")
 
 def is_superuser_or_staff(user):
     return user.is_superuser or user.is_staff
 
+
 class SinAccesoView(View):
     def get(self, request):
         mensaje = "Lo siento, no tienes acceso."
+        # messages.warning(request, mensaje)
         return render(request, 'login.html', {'mensaje': mensaje})
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def cerrar_sesion(request):
     logout(request)
     return render(request, 'login.html')
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def cerrar_sesion(request):
     logout(request)
     return render(request, 'login.html')
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def Principal(request):
     return render(request, "base.html")
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def PanelActividades(request):
     return render(request, "emp_actividades.html")
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def Autenticacion_usuarios(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        print(username, password, user)
-        if user is not None:
-            login(request, user)
-            # redirige a la página de inicio después del inicio de sesión exitoso
-            return redirect('principal')
+    try:
+        if request.method == 'POST':
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            print(username, password, user)
+            if user is not None:
+                login(request, user)
+                # redirige a la página de inicio después del inicio de sesión exitoso
+                return redirect('principal')
+            else:
+            
+                return render(request, 'login.html',{'error_message': 'Usuario o contraseña incorrecto, porfavor ingrese de nuevo'})
         else:
-           
-            return render(request, 'login.html',{'error_message': 'Usuario o contraseña incorrecto, porfavor ingrese de nuevo'})
-    else:
-        return render(request, 'login.html')
+            return render(request, 'login.html')
+    except:
+            messages.warning(request, 'Actualiza la pagina por favor')
+            return redirect('login.html')
 
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def guardar_socio(request):
 
 
@@ -171,6 +183,7 @@ def enviar_email_nuevaSocio(username,password,email):
     send_mail(subject, message, from_email, [email], fail_silently=False)
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editar_socio(request, socio_id):
     socio = Socios.objects.get(id=socio_id)
     usuario = User.objects.get(id=socio.user_id)
@@ -260,6 +273,7 @@ def editar_socio(request, socio_id):
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def eliminar_socio(request, user_id, valor):
     socio = Socios.objects.get(id=user_id)
 
@@ -295,6 +309,8 @@ def eliminar_socio(request, user_id, valor):
 
 #     return render(request, 'emp_socios.html', {'socios': socios})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def buscar_socios(request):
     if request.method == "POST":
         criterio = request.POST.get('criterio')
@@ -339,6 +355,7 @@ def Recuperar_cuenta(request):
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def ListaSocios(request):
     usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
     socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
@@ -352,7 +369,7 @@ def ListaSocios(request):
          socios_pag=paginator.get_page(1)
     return render(request, "emp_socios.html", {'socios': socios_pag})
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def AggSocio(request):
     categorias = models.Categorias.objects.all()
     facultades = models.Facultades.objects.all()

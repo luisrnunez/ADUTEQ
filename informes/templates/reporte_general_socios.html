@@ -63,7 +63,7 @@
             <img src="{{ image_path }}" alt="Logo" width="150" height="150">
         </div>
         <div class="fecha">
-            <h1>Reporte Descuento Pendientes Socios - {{ mes }}/{{ anio }}</h1>
+            <h1>Reporte General Descuento Socio - {{ mes }}/{{ anio }}</h1>
             <h1>Total: {{total}}</h1>
         </div>
     </div>
@@ -72,11 +72,6 @@
             <tr>
                 <th>Nombre</th>
                 <th>Cédula</th>
-                <th>Cuota préstamos</th>
-                <th>Cuota descuentos</th>
-                <th>Aportación</th>
-                <th>Descuento Proveedores</th>
-                <th>Aportación Ayudas</th>
                 <th>Consumo total</th>
             </tr>
         </thead>
@@ -85,14 +80,12 @@
             <tr>
                 <td>{{ row.0 }}</td>
                 <td>{{ row.1 }}</td>
-                <td>{{ row.2 }}</td>
-                <td>{{ row.3 }}</td>
-                <td>{{ row.4 }}</td>
-                <td>{{ row.5 }}</td>
-                <td>{{ row.6 }}</td>
                 <td>{{ row.7 }}</td>
             </tr>
             {% endfor %}
+            <td>Total</td>
+            <td>------</td>
+            <td>{{total}}</td>
         </tbody>
     </table>
 </body>
