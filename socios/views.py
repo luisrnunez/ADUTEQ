@@ -20,12 +20,9 @@ from . import models
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
-<<<<<<< HEAD
 from django.utils import timezone
-=======
 from django.views.decorators.cache import cache_control
 
->>>>>>> 58f5e11ee584071913abaec7a69ce6c03bafc4b0
 from django.core.mail import send_mail
 from .models import AjustesSistema
 from django.template.loader import render_to_string
