@@ -19,72 +19,94 @@
         <div class="socios-content ">
             <div class="botones-sup">
                 <a href="/prestamo/guardar/"> <button class="add-socio-btn"> Agregar Prestamo</button></a>
+                <div style="display: flex; justify-content: center; width: min-content;">
+                    <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
+                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
+                        aria-placeholder="Asño" required>
+                        {% for anio in anos %}
+                        <option value="{{ anio }}">{{ anio }}</option>
+                        {% endfor %}
+                    </select>
 
+                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
+                        aria-placeholder="Periodo" required>
+                        {% for periodo in periodos %}
+                        {% if periodo.anio == anos.0 %}
+                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                            {{ periodo.nombre }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Socio</th>
-                        <th scope="col">Monto</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Plazo</th>
-                        <th scope="col">Tasa</th>
-                        <th scope="col">Total</th>
-                        <th scope="col">Fecha ultimo pago</th>
-                        <th scope="col">Estado</th>
-                        <!-- <th scope="col">Accion</th> -->
-                        <th scope="col">Editar</th>
-                        <th scope="col">Detalles</th>
-                        <!-- <th scope="col">Eliminar</th> -->
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prestamo in prestamos %}
-                    <tr>
-                        <td>{{ prestamo.socio.user.first_name }}</td>
-                        <td>{{ prestamo.monto }}$</td>
-                        <td>{{ prestamo.fecha_prestamo|date:"j - n - Y" }}</td>
-                        <td>{{ prestamo.plazo_meses }} meses</td>
-                        <td>{{ prestamo.tasa_interes|floatformat:0 }}%</td>
-                        <td>{{ prestamo.total }}$</td>
-                        <td>{{ prestamo.fecha_pago|date:"j - n - Y" }}</td>
-                        <td>
-                            {% if prestamo.cancelado %}
-                            <button class="green-button">
-                                Cancelado
-                            </button>
-                            {% else %}
-                            <button class="red-button">
-                                Pendiente
-                            </button>
-                            {% endif %}
-                        </td>
-                        <!-- <td>
-                            <button class="edit-btn"
-                                onclick="confirmarPago('{{ prestamo.id }}','{{ prestamo.socio.user.first_name }}','{{ prestamo.cancelado }}')">
-                                Registrar pago
-                            </button>
-                        </td> -->
-                        <!-- <td>
-                            <form action="{% url 'editar_prestamo' prestamo.id %}">
-                                <button class="edit-btn">Editar</button>
-                            </form>
-                        </td> -->
-
-                        <td>
-                            <form action="{% url 'mostrar_detalles_pago' prestamo.socio.id prestamo.id %}">
-                                <button class="edit-btn">Detalles Pago</button>
-                            </form>
-                        </td>
-
-                        <td>
-                            <button class="edit-btn" onclick="confirmarEliminacion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Eliminar</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-
-                </tbody>
-            </table>
+            <div  id="lista-pagos">
+                <table class="socios-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Socio</th>
+                            <th scope="col">Monto</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Plazo</th>
+                            <th scope="col">Tasa</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Fecha ultimo pago</th>
+                            <th scope="col">Estado</th>
+                            <!-- <th scope="col">Accion</th> -->
+                            <th scope="col">Editar</th>
+                            <th scope="col">Detalles</th>
+                            <!-- <th scope="col">Eliminar</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in prestamos %}
+                        <tr>
+                            <td>{{ prestamo.socio.user.first_name }}</td>
+                            <td>{{ prestamo.monto }}$</td>
+                            <td>{{ prestamo.fecha_prestamo|date:"j - n - Y" }}</td>
+                            <td>{{ prestamo.plazo_meses }} meses</td>
+                            <td>{{ prestamo.tasa_interes|floatformat:0 }}%</td>
+                            <td>{{ prestamo.total }}$</td>
+                            <td>{{ prestamo.fecha_pago|date:"j - n - Y" }}</td>
+                            <td>
+                                {% if prestamo.cancelado %}
+                                <button class="green-button">
+                                    Cancelado
+                                </button>
+                                {% else %}
+                                <button class="red-button">
+                                    Pendiente
+                                </button>
+                                {% endif %}
+                            </td>
+                            <!-- <td>
+                                <button class="edit-btn"
+                                    onclick="confirmarPago('{{ prestamo.id }}','{{ prestamo.socio.user.first_name }}','{{ prestamo.cancelado }}')">
+                                    Registrar pago
+                                </button>
+                            </td> -->
+                            <!-- <td>
+                                <form action="{% url 'editar_prestamo' prestamo.id %}">
+                                    <button class="edit-btn">Editar</button>
+                                </form>
+                            </td> -->
+    
+                            <td>
+                                <form action="{% url 'mostrar_detalles_pago' prestamo.socio.id prestamo.id %}">
+                                    <button class="edit-btn">Detalles Pago</button>
+                                </form>
+                            </td>
+    
+                            <td>
+                                <button class="edit-btn" onclick="confirmarEliminacion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Eliminar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+    
+                    </tbody>
+                </table>
+            </div>
+         
 
             <div class="pagination-container">
                 <nav aria-label="...">
@@ -107,6 +129,25 @@
             </div>
 
         </div>
+        <script>
+            $(document).ready(function () {
+                $("#select-periodo").on("click", function () {
+                    console.log('ENTRAR AL SELECT')
+                    var periodoid = $(this).val();
+                    $.ajax({
+                        url: '{% url "mostrar_prestamo" %}',
+                        type: "POST",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            periodoid: periodoid
+                        },
+                        success: function (data) {
+                            $("#lista-pagos").html(data.rendered_table);
+                        }
+                    });
+                });
+            });
+        </script>
         <script>
 
             function confirmarPago(socioId, socioNombre, cancelado) {

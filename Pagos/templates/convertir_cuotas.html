@@ -28,8 +28,8 @@
                         </div>
                         <div class="card-body">
                             <label class="fw-bold" for="socio">Socio:</label>
-                            <input  name="xv" id="xv" class="form-control mb-2" value="{{pagos.socio.user.first_name}} {{pagos.socio.user.last_name}}"  required>
-                            <input hidden  name="socio" id="socio" class="form-control mb-2" value="{{pagos.socio.id}}"  required>
+                            <input  name="socioNombre" id="socioNombre" class="form-control mb-2" value="{{pagos.socio.user.first_name}}"  required>
+                            <input type="hidden" name="socio" id="socio" class="form-control mb-2" value="{{pagos.socio.id}}"  required>
                             <!-- <select class="form-control mb-2" name="socio" required>
                                 {% for socio in socios %}
                                 <option value="{{ socio.id }}">{{ socio.user.first_name }}</option>
@@ -37,8 +37,8 @@
                             </select> -->
 
                             <label class="fw-bold" for="proveedor">Proveedor:</label>
-                            <input hidden name="proveedor" class="form-control mb-2" value="{{pagos.proveedor.id}}"  required>
-                            <input  name="vb" class="form-control mb-2" value="{{pagos.proveedor.nombre}}"  required>
+                            <input  name="proveedorNombre" class="form-control mb-2" value="{{pagos.proveedor.nombre}}"  required>
+                            <input type="hidden" name="proveedor" class="form-control mb-2" value="{{pagos.proveedor.id}}"  required>
                             <!-- <select class="form-control mb-2" name="proveedor" required>
                                 {% for proveedor in proveedores %}
                                 <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
@@ -48,8 +48,8 @@
                             <input name="numero_cuotas" class="form-control mb-2" type="number"  placeholder="Ingrese el numero de cuotas" required>
 
                             <label class="fw-bold" for="consumo_total">Valor Consumo:</label>
-                            <input  step="any" value="{{pagos.consumo_total}}" name="consumo_total" class="form-control mb-2" type="number" required>
-
+                            <input  step="any" value="{{ pagos.consumo_total }}" name="consumo_total" class="form-control mb-2" type="text"  required>
+                            
                             <label class="fw-bold" for="fecha_descuento">Fecha:</label>
                             <input  class="form-control mb-2" value="{{ pagos.fecha_consumo|date:'Y-m-d' }}" type="date" name="fecha_descuento" required>
                             

@@ -305,6 +305,13 @@ body {
 
 
 .botones-sup{
-    display:inline-flex;
+    display:flex;
     margin-bottom: 10px;
+    width: 100%;
+    justify-content: space-between; 
+}
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }

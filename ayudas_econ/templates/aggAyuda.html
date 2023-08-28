@@ -33,31 +33,23 @@
                         {% endfor %}
                     </select>
                     
-                    <div id="opcionesb""">
-                        <label for="beneficiario">Beneficiario:</label>
-                        <select name="socio" id="beneficiarios">
-                            {% for opcion in opciones %}
-                                {% if opcion.user.is_active %}
-                                    <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
-                                {% endif %}
-                            {% endfor %}
-                            <option value="null">Otro</option>
-                        </select>
-                    </div>
-
-                    <!-- <label for="socio">Beneficiario:</label>
-                    <input maxlength="200" type="socio" id="socio" name="socio" required> -->
                     
-                    <!-- <input maxlength="200" type="text" id="descripcion" name="descripcion" required> -->
+                    <label for="beneficiario">Beneficiario:</label>
+                    <select name="socio" id="beneficiarios" onchange="mostrarOcultarValor(this)">
+                        {% for opcion in opciones %}
+                            {% if opcion.user.is_active %}
+                                <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                        <option value="null">Otro</option>
+                    </select>
+
 
                     <label for="descripcion">Descripción:</label>
                     <input maxlength="200" type="text" id="descripcion" name="descripcion" required>
 
-                    <label for="valorsocio">Valor por socio:</label>
+                    <label id="labelValorsocio" for="valorsocio">Valor por socio:</label>
                     <input type="number" step="any" id="valorsocio" name="valorsocio" placeholder="3.00-10.00" required>
-
-                    <!-- <label for="total">Total:</label>
-                    <input type="number" step="any" id="total" name="total" placeholder="25.00" required> -->
 
                     <label for="fecha">Fecha:</label>
                     <input type="date" id="fecha" name="fecha">
@@ -100,6 +92,24 @@
           });
         });
       </script> -->
+
+      <script>
+        function mostrarOcultarValor(select) {
+            var valorsocioInput = document.getElementById("valorsocio");
+            var labelValorsocio = document.getElementById("labelValorsocio");
+            
+            if (select.value === "null") {
+                valorsocioInput.style.display = "none";
+                valorsocioInput.value = "0"; 
+                labelValorsocio.style.display = "none"; 
+            } else {
+                valorsocioInput.style.display = "block";
+                valorsocioInput.value = "";
+                labelValorsocio.style.display = "inline";
+            }
+        }
+        </script>
+        
     {% endblock %}
 </body>
 

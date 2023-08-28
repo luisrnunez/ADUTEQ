@@ -43,15 +43,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'socios',
     'proveedores',
-    'Pagos',
     'Categorias',
     'ayudas_econ',
     'PagosProveedor',
     'Empleados',
+    'Pagos',
     'recuperarcontraseña',
     'informes',
     'Prestamos',
     'promociones',
+    'Periodo',
 ]
 CRONJOBS = [
     ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
@@ -130,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
 TIME_ZONE = 'UTC'
 

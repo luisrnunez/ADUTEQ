@@ -4,7 +4,9 @@ from Prestamos.models import upload_to_evidencia
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from decimal import Decimal
-
+from Periodo.models import Periodo
+from .models import Periodo
+from django.template.loader import render_to_string
 # Create your models here.
 class AyudasMot(models.Model):
     motivo=models.CharField(max_length=50)

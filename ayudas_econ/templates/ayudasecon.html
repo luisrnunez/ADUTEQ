@@ -1,167 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>ADUTEQ - Ayudas</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-        }
-
-        .header {
-            background-color: #34b234;
-            color: #fff;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .socios-content {
-            margin: 20px;
-        }
-
-        .socios-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .socios-table th,
-        .socios-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .socios-table th {
-            background-color: #34b234;
-            color: #fff;
-        }
-
-        .socios-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .socios-table td.actions {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .socios-table .edit-btn,
-        .socios-table .delete-btn,
-        .add-socio-btn {
-            padding: 5px 10px;
-            background-color: #ECB932;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        .socios-table .edit-btn:hover,
-        .socios-table .delete-btn:hover,
-        .add-socio-btn:hover {
-            background-color: #62c562;
-        }
-
-        .add-socio-btn {
-            margin-bottom: 10px;
-        }
-
-        /* Estilos para el botón verde */
-        .green-button {
-            background-color: #62c562;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        /* Estilos para el botón rojo */
-        .red-button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            width: max-content;
-            border-radius: 4px;
-        }
-
-        /* Estilos para el icono de visto */
-        .visto-icon {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: white;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-
-        .no-visto-icon {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: white;
-            margin-right: 5px;
-        }
-
-        .search-form {
-            position: absolute;
-
-            display: block;
-            align-items: center;
-        }
-
-        .search-form label {
-            margin-right: 5px;
-        }
-
-        .search-form select,
-        .search-form input[type="text"],
-        .search-form button {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-left: 5px;
-        }
-
-        .search-form select {
-            margin-right: 5px;
-        }
-
-        .search-form button {
-            background-color: #ECB932;
-            color: #fff;
-
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .search-form button:hover {
-            background-color: #62c562;
-        }
-    </style>
-</head>
-
+{% block content %}
 <body>
 
 
-    {% block content %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    
     <!-- Aquí va el contenido de la página -->
     <div class="content-menu" style="padding-top: 0%;">
 
@@ -173,13 +18,32 @@
             <div class="botones-sup">
                 <div style="display:inline-flex; ">
                     <a href="/formAggAyuda"> <button class="add-socio-btn"> Agregar Ayuda</button></a>
-                    <div class="search-form" style="margin-left: 6px; margin-block-end:auto;">
+                    <!-- <div class="search-form" style="margin-left: 6px; margin-block-end:auto;">
                         <input type="text" id="barbusqueda" placeholder="Buscar">
                         <button class="add-socio-btn" type="submit">Buscar</button>
 
-                    </div>
+                    </div> -->
                 </div>
+                <div style="display: flex; justify-content: center; width: min-content;">
+                    <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
+                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
+                        aria-placeholder="Asño" required>
+                        {% for anio in anos %}
+                        <option value="{{ anio }}">{{ anio }}</option>
+                        {% endfor %}
+                    </select>
 
+                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
+                        aria-placeholder="Periodo" required>
+                        {% for periodo in periodos %}
+                        {% if periodo.anio == anos.0 %}
+                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                            {{ periodo.nombre }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
 
 
@@ -190,68 +54,93 @@
                     aria-describedby="search-addon" />
                 <button type="button" class="btn btn-outline-primary">search</button>
             </div>-->
+            <div  id="lista-pagos">
+                <table class="socios-table">
+                    <thead>
+                        <tr>
+                            <th>Beneficiario</th>
+                            <th style="white-space: normal; word-wrap: break-word;">descripcion</th>
+                            <th>fecha</th>
+                            <th>motivo</th>
+                            <th>Valor-Socio</th>
+                            <th>Total</th>
+                            <!-- <th>Editar</th> -->
+                            <th>Eliminar</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ayuda in ayudas %}
+                        <tr>
+                            {% if ayuda.socio.user.first_name %}
+                                <td>{{ayuda.socio.user.first_name}}</td>
+                            {% else %}
+                                <td>OTRO</td>
+                            {% endif %}
+                            <td style="white-space: normal; word-wrap: break-word;">{{ayuda.descripcion}}</td>
+                            <td>{{ayuda.fecha}}</td>
+                            <td>{{ayuda.motivo}}</td>
 
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th>Beneficiario</th>
-                        <th style="white-space: normal; word-wrap: break-word;">descripcion</th>
-                        <th>fecha</th>
-                        <th>motivo</th>
-                        <th>Valor-Socio</th>
-                        <th>Total</th>
-                        <!-- <th>Editar</th> -->
-                        <th>Eliminar</th>
-                        <th>Detalles</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ayuda in ayudas %}
-                    <tr>
-                        {% if ayuda.socio.user.first_name %}
-                            <td>{{ayuda.socio.user.first_name}}</td>
-                        {% else %}
-                            <td>OTRO</td>
-                        {% endif %}
-                        <td style="white-space: normal; word-wrap: break-word;">{{ayuda.descripcion}}</td>
-                        <td>{{ayuda.fecha}}</td>
-                        <td>{{ayuda.motivo}}</td>
-                        <td>{{ayuda.valorsocio}}</td>
-                        <td>{{ayuda.total}}</td>
-
-                        <!--{% if proveedor.estado == False %}
-                        <td>Desabilitado</td>
-                        {% else %}
-                        <td>Habilitado</td>
-
-                        {% endif %}-->
-                     
-                            <!--<button class="edit-btn">Editar</button>
-                            <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
-
-                            <!-- <a style="text-decoration: none;" class="edit-btn"
-                                href="/formeditarayuda/{{ayuda.id}}">Editar</a> -->
-
-                            <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
-
-                        
-                        <td>
-                            <a style="text-decoration: none;" class="delete-btn" href="#"
-                                onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/', 'Ayuda economica')">Eliminar</a>
-                        </td>
-                        <td>
-                            <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Detalles Ayuda</a>
-                        </td>
-                        <!--<td>{{proveedor.id}}</td>-->
-                    </tr>
-                    {% endfor %}
-                    <!-- Agrega más filas con información de socios aquí -->
-                </tbody>
-            </table>
+                            {% if ayuda.valorsocio|floatformat:2 == "0,00" %}
+                                <td>Voluntario</td>
+                            {% else %}
+                                <td>{{ ayuda.valorsocio }}</td>
+                            {% endif %}
+                            <td>{{ ayuda.total }}</td>
+    
+                            <!--{% if proveedor.estado == False %}
+                            <td>Desabilitado</td>
+                            {% else %}
+                            <td>Habilitado</td>
+    
+                            {% endif %}-->
+                         
+                                <!--<button class="edit-btn">Editar</button>
+                                <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
+    
+                                <!-- <a style="text-decoration: none;" class="edit-btn"
+                                    href="/formeditarayuda/{{ayuda.id}}">Editar</a> -->
+    
+                                <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
+    
+                            
+                            <td>
+                                <a style="text-decoration: none;" class="delete-btn" href="#"
+                                    onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/', 'Ayuda economica')">Eliminar</a>
+                            </td>
+                            <td>
+                                <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Detalles Ayuda</a>
+                            </td>
+                            <!--<td>{{proveedor.id}}</td>-->
+                        </tr>
+                        {% endfor %}
+                        <!-- Agrega más filas con información de socios aquí -->
+                    </tbody>
+                </table>
+            </div>
+           
         </div>
         <!-- Resto del contenido de la página -->
     </div>
-    {% endblock %}
-</body>
+    <script>
+        $(document).ready(function () {
+            $("#select-periodo").on("click", function () {
+                console.log('ENTRAR AL SELECT')
+                var periodoid = $(this).val();
+                $.ajax({
+                    url: '{% url "lista_ayudas" %}',
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        periodoid: periodoid
+                    },
+                    success: function (data) {
+                        $("#lista-pagos").html(data.rendered_table);
+                    }
+                });
+            });
+        });
+    </script>
 
-</html>
+</body>
+{% endblock %}

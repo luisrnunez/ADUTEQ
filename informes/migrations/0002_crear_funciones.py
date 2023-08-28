@@ -328,7 +328,6 @@ def verifica_y_crea_funcion_generar_pdf(apps, schema_editor):
             )
 
 
-
 def actualizar_cancelados(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(

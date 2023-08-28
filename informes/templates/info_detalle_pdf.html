@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Mensual</title>
+    <style>
+        h1,h2{
+            text-align: center;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .page-break {
+        page-break-before: always;
+    }
+
+    /* Estilo para la última tabla */
+    .last-table {
+        page-break-before: always;
+    }
+    .last-row {
+        font-weight: bold;
+    }
+
+    </style>
+</head>
+<body>
+    <h1>Informe Mensual</h1>
+    {% if not hide_consumos_proveedor %}
+        <h2>Consumos por proveedor</h2>
+        <table>
+            <tr>
+                <th>Proveedor</th>
+                <th>Monto</th>
+            </tr>
+            {% for consumo in consumos_proveedor %}
+            <tr {% if forloop.last %}class="last-row"{% endif %} >
+                <td>{{ consumo.0 }}</td>
+                <td>{{ consumo.1 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    {% if not hide_consumos_cuotas %}
+    <h2>Consumos por cuotas</h2>
+    <table>
+        <tr>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th>N° Cuota</th>
+            <th>Monto</th>
+        </tr>
+        {% for consumo in consumos_cuotas %}
+        <tr {% if forloop.last %}class="last-row"{% endif %} >
+            {% if forloop.last %}
+                <td>-----</td>
+                <td>-----</td>
+                <td>TOTAL</td>
+                <td>{{ consumo.3 }}</td>
+            {% else %}
+                <td>{{ consumo.0 }}</td>
+                <td>{{ consumo.1 }}</td>
+                <td>{{ consumo.2 }}</td>
+                <td>{{ consumo.3 }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if not hide_aportaciones_socio %}
+    <h2>Aportaciones del socio</h2>
+    <table>
+        <tr>
+            <th>Tipo</th>
+            <th>Monto</th>
+        </tr>
+        {% for consumo in aportaciones_socio %}
+        <tr {% if forloop.last %}class="last-row"{% endif %} >
+            {% if consumo.0 == "AE" %}
+                <td>Ayuda Permanente</td>
+            {% else %}
+                {% if consumo.0 == "CO" %}
+                    <td>Cuota Ordinaria</td>
+                {% else %}
+                    <td>Total</td>
+                {% endif %}
+            {% endif %}
+            <td>{{ consumo.1 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if not hide_aportaciones_ayuda %}
+    <h2>Aportaciones a ayudas economicas</h2>
+    <table>
+        <tr>
+            <th>Descripción ayuda</th>
+            <th>Valor</th>
+        </tr>
+        {% for consumo in aportaciones_ayuda %}
+        <tr {% if forloop.last %}class="last-row"{% endif %} >
+            <td>{{ consumo.0 }}</td>
+            <td>{{ consumo.1 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if not hide_consumos_totales %}
+    <div class="last-table">
+        <h2>Tabla general de gastos</h2>
+        <table>
+            <tr>
+                <th>Motivo</th>
+                <th>Valor</th>
+            </tr>
+            {% for consumo in consumos_totales %}
+            <tr {% if forloop.last %}class="last-row"{% endif %} >
+                <td>{{ consumo.0 }}</td>
+                <td>{{ consumo.1 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</body>
+</html>

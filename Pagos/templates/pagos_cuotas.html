@@ -18,67 +18,94 @@
     </div>
     <div class="socios-content ">
         <div class="botones-sup">
+            <div style="height: min-content;">
             <a href="/agregar_pagos_cuotas/"> <button class="add-socio-btn">Agregar Descuento Cuotas</button></a>
-        </div>
-        <div class="botones-sup">
             <a href="/listar_pagos/"> <button class="add-socio-btn">Lista de Descuentos</button></a>
         </div>
-        <table class="socios-table">
-            <thead>
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Socio</th>
-                    <th scope="col">Proveedor</th>
-                    <th scope="col">Numero Cuotas</th>
-                    <!-- <th scope="col">Cuota Actual</th> -->
-                    <th scope="col">Consumo Total</th>
-                    <!-- <th scope="col">Valor Cuota</th> -->
-                    <th scope="col">Estado</th>
-                    <th scope="col">Fecha Descuento</th>
-                    <th scope="col">Detalle</th>
-                    <th scope="col">Eliminar</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pago_cuota in pago_cuotas %}
-                <tr>
-                    <td>{{pago_cuota.id}}</td>
-                    <td>{{pago_cuota.socio.user.first_name }}</td>
-                    <td>{{pago_cuota.proveedor.nombre}}</td>
-                    <td>{{pago_cuota.numero_cuotas}}</td>
-                    <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
-                    <td>{{pago_cuota.consumo_total}}</td>
-                    <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
-                    <td>
-                        {% if pago_cuota.estado %}
-                        <button class="green-button">
-                            Cancelado
-                        </button>
-                        {% else %}
-                        <button class="red-button">
-                            Pendiente
-                        </button>
-                        {% endif %}
-                    </td>
-                    <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
-                    <td>
-                        <form action="{% url 'detalles_cuota' pago_cuota.id %}">
-                            <button class="edit-btn">Ver Detalle</button>
-                        </form>
-                    </td>
-                    <!-- <td>
-                        <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
-                            <button class="edit-btn">Eliminar</button>
-                        </form>
-                    </td> -->
-                    <td>
-                        <button class="edit-btn" onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
-                    </td>
+            <div style="display: flex; justify-content: center; width: min-content;">
+                <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
+                <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
+                    aria-placeholder="Asño" required>
+                    {% for anio in anos %}
+                    <option value="{{ anio }}">{{ anio }}</option>
+                    {% endfor %}
+                </select>
 
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
+                    aria-placeholder="Periodo" required>
+                    {% for periodo in periodos %}
+                    {% if periodo.anio == anos.0 %}
+                    <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                        {{ periodo.nombre }}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div  id="lista-pagos">
+            <table class="socios-table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Socio</th>
+                        <th scope="col">Proveedor</th>
+                        <th scope="col">Numero Cuotas</th>
+                        <!-- <th scope="col">Cuota Actual</th> -->
+                        <th scope="col">Consumo Total</th>
+                        <!-- <th scope="col">Valor Cuota</th> -->
+                        <th scope="col">Estado</th>
+                        <th scope="col">Fecha Descuento</th>
+                        <th scope="col">Detalle</th>
+                        {% if periodo_seleccionado.activo %}
+                        <th scope="col">Eliminar</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago_cuota in pago_cuotas %}
+                    <tr>
+                        <td>{{pago_cuota.id}}</td>
+                        <td>{{pago_cuota.socio.user.first_name }}</td>
+                        <td>{{pago_cuota.proveedor.nombre}}</td>
+                        <td>{{pago_cuota.numero_cuotas}}</td>
+                        <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
+                        <td>{{pago_cuota.consumo_total}}</td>
+                        <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
+                        <td>
+                            {% if pago_cuota.estado %}
+                            <button class="green-button">
+                                Cancelado
+                            </button>
+                            {% else %}
+                            <button class="red-button">
+                                Pendiente
+                            </button>
+                            {% endif %}
+                        </td>
+                        <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
+                        <td>
+                            <form action="{% url 'detalles_cuota' pago_cuota.id %}">
+                                <button class="edit-btn">Ver Detalle</button>
+                            </form>
+                        </td>
+                        <!-- <td>
+                            <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
+                                <button class="edit-btn">Eliminar</button>
+                            </form>
+                        </td> -->
+                        {% if periodo_seleccionado.activo %}
+                        <td>
+                            <button class="edit-btn" onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
+                        </td>
+                        {% endif %}
+    
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+      
 
         <div class="pagination-container">
             <nav aria-label="...">
@@ -119,5 +146,24 @@
                         }
                     });
             }
+    </script>
+     <script>
+        $(document).ready(function () {
+            $("#select-periodo").on("click", function () {
+                console.log('ENTRAR AL SELECT')
+                var periodoid = $(this).val();
+                $.ajax({
+                    url: '{% url "listar_pagos_cuotas" %}',
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        periodoid: periodoid
+                    },
+                    success: function (data) {
+                        $("#lista-pagos").html(data.rendered_table);
+                    }
+                });
+            });
+        });
     </script>
     {% endblock %}

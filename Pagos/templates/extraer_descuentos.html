@@ -153,85 +153,84 @@
     </div>
 
     <script>
-        function verificarRegistros() {
+             function verificarRegistros() {
 
-            const boton = document.getElementById('boton-validar');
-            const boton_guardar = document.getElementById('btn_guardar');
-            const icono = document.getElementById("icono-validacion");
-            const formulario = document.getElementById('miFormulario');
-            const textoBoton = document.getElementById("texto-boton");
-            // Si el checkbox no está marcado, obtener los datos del formulario y realizar la verificación
-            const formData = new FormData(formulario);
-            fetch('/verificar_registros/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'  // Agrega el token CSRF a la cabecera de la solicitud
+const boton = document.getElementById('boton-validar');
+const boton_guardar = document.getElementById('btn_guardar');
+const icono = document.getElementById("icono-validacion");
+const formulario = document.getElementById('miFormulario');
+const textoBoton = document.getElementById("texto-boton");
+// Si el checkbox no está marcado, obtener los datos del formulario y realizar la verificación
+const formData = new FormData(formulario);
+fetch('/verificar_registros/', {
+    method: 'POST',
+    body: formData,
+    headers: {
+        'X-CSRFToken': '{{ csrf_token }}'  // Agrega el token CSRF a la cabecera de la solicitud
+    }
+})
+    .then(response => response.json())
+    .then(data => {
+        if (data.status) {
+            // No se encontraron errores en los registros, puedes mostrar un mensaje o realizar otras acciones
+            //console.log(data.message);
+
+            // icono.classList.add("fas", "fa-check");
+            const filasErroneas = document.querySelectorAll('.socios-table tbody tr');
+            for (let i = 0; i < filasErroneas.length; i++) {
+                if (data.registros[i].estilo_color === 'normal') {
+                    filasErroneas[i].classList.remove('fila-roja');
+                    filasErroneas[i].classList.add('fila-normal');
                 }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status) {
-                        // No se encontraron errores en los registros, puedes mostrar un mensaje o realizar otras acciones
-                        //console.log(data.message);
-
-                        // icono.classList.add("fas", "fa-check");
-                        const filasErroneas = document.querySelectorAll('.socios-table tbody tr');
-                        for (let i = 0; i < filasErroneas.length; i++) {
-                            if (data.registros[i].estilo_color === 'normal') {
-                                filasErroneas[i].classList.remove('fila-roja');
-                                filasErroneas[i].classList.add('fila-normal');
-                            }
-                            if (data.registros[i].estilo_color === 'rojo') {
-                                filasErroneas[i].classList.remove('fila-normal');
-                                filasErroneas[i].classList.add('fila-roja');
-                            }
-                        }
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Éxito',
-                            text: data.message,
-                        });
-                        // Acciones adicionales con los registros, si es necesario
+                if (data.registros[i].estilo_color === 'rojo') {
+                    filasErroneas[i].classList.remove('fila-normal');
+                    filasErroneas[i].classList.add('fila-roja');
+                }
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: data.message,
+            });
+            // Acciones adicionales con los registros, si es necesario
 
 
-                        textoBoton.textContent = "REGISTROS SIN ERRORES";
-                        boton.style.backgroundColor = "#ECB932";
-                        icono.classList.remove("fas", "fa-times");
-                        icono.classList.add("fas", "fa-check");
-                        boton_guardar.disabled = False;
-                    } else {
+            textoBoton.textContent = "REGISTROS SIN ERRORES";
+            boton.style.backgroundColor = "#ECB932";
+            icono.classList.remove("fas", "fa-times");
+            icono.classList.add("fas", "fa-check");
+            boton_guardar.disabled = False;
+        } else {
 
-                        const filasErroneas = document.querySelectorAll('.socios-table tbody tr');
-                        for (let i = 0; i < filasErroneas.length; i++) {
-                            if (data.registros[i].estilo_color === 'rojo') {
-                                filasErroneas[i].classList.remove('fila-normal');
-                                filasErroneas[i].classList.add('fila-roja');
-                            }
-                            if (data.registros[i].estilo_color === 'normal') {
-                                filasErroneas[i].classList.remove('fila-roja');
-                                filasErroneas[i].classList.add('fila-normal');
-                            }
-                        }
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message,
-                        });
-                        textoBoton.textContent = "REGISTROS CON ERRORES";
-                        boton.style.backgroundColor = "red";
-                        icono.classList.remove("fas", "fa-check");
-                        icono.classList.add("fas", "fa-times");
-                        boton_guardar.disabled = True;
-
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la solicitud AJAX:', error);
-                });
+            const filasErroneas = document.querySelectorAll('.socios-table tbody tr');
+            for (let i = 0; i < filasErroneas.length; i++) {
+                if (data.registros[i].estilo_color === 'rojo') {
+                    filasErroneas[i].classList.remove('fila-normal');
+                    filasErroneas[i].classList.add('fila-roja');
+                }
+                if (data.registros[i].estilo_color === 'normal') {
+                    filasErroneas[i].classList.remove('fila-roja');
+                    filasErroneas[i].classList.add('fila-normal');
+                }
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+            });
+            textoBoton.textContent = "REGISTROS CON ERRORES";
+            boton.style.backgroundColor = "red";
+            icono.classList.remove("fas", "fa-check");
+            icono.classList.add("fas", "fa-times");
+            boton_guardar.disabled = True;
 
         }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+    });
 
+}
     </script>
     <script>
         function guardarTodoLosRegistros() {

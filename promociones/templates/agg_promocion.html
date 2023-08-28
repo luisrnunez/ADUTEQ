@@ -34,7 +34,7 @@
                     <input type="text" id="titulo" name="titulo" value="{{ socio.first_name }}"  required>
 
                     <label for="proveedor">Buscar o seleccionar proveedor:</label>
-                    <input type="text" id="proveedorInput" style="width:95%;" placeholder="Buscar proveedor...">
+                    <input autocomplete="off" type="text" id="proveedorInput" style="width:95%;" placeholder="Buscar proveedor...">
                     <select id="proveedorSelect" name="proveedor" style="width:95%;" size="4">
                         {% for proveedor in proveedores %}
                         <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>

@@ -5,6 +5,8 @@ from .models import AyudasMot,AyudasEconomicas, Socios, DetallesAyuda
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.contrib import messages
 from django.db import transaction
+from .models import Periodo
+from django.template.loader import render_to_string
 
 # Create your views here.
 def motivos(request):
@@ -87,10 +89,55 @@ def deleteMotivo(request, codigo):
 #     return render(request, 'aggAyuda.html', {'opciones': opciones})
 
 def viewayudas(request):
-    ayudas=AyudasEconomicas.objects.all()
-    return render(request,'ayudasecon.html', {
-        'ayudas': ayudas
-    })
+    periodos = Periodo.objects.all()  # Obtener todos los períodos
+    anos = periodos.values_list('anio', flat=True).distinct()
+    #listar periodo por el select
+    periodoid = request.POST.get('periodoid')
+    fechas_periodo = {}
+    if periodoid:
+        periodo_seleccionado = Periodo.objects.filter(id=periodoid).first()
+        print(periodo_seleccionado)
+        if periodo_seleccionado:
+            fechas_periodo = {
+                'fecha_inicio': periodo_seleccionado.fecha_inicio,
+                'fecha_fin': periodo_seleccionado.fecha_fin
+            }
+           
+            print(periodo_seleccionado)
+            ayudas = AyudasEconomicas.objects.filter(fecha__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("socio","fecha")
+            context = {
+                'ayudas': ayudas,
+                'periodos': periodos,
+                'anos': anos,
+                'fechas_periodo': fechas_periodo,
+                'periodo_seleccionado': periodo_seleccionado,
+            }
+            rendered_table = render_to_string("ayudasecon_partial.html",context)
+            return JsonResponse({"rendered_table": rendered_table})
+    
+    #listar periodo actual
+    periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+    if periodo_seleccionado:
+        fechas_periodo = {
+            'fecha_inicio': periodo_seleccionado.fecha_inicio,
+            'fecha_fin': periodo_seleccionado.fecha_fin
+        }
+        ayudas = AyudasEconomicas.objects.filter(fecha__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("socio","fecha")
+    else:
+        ayudas = {}
+    context = {
+        'ayudas': ayudas,
+        'periodos': periodos,
+        'anos': anos,
+        'fechas_periodo': fechas_periodo,
+        'periodo_seleccionado': periodo_seleccionado,
+    }
+    return render(request, 'ayudasecon.html', context)
+
+    # ayudas=AyudasEconomicas.objects.all()
+    # return render(request,'ayudasecon.html', {
+    #     'ayudas': ayudas
+    # })
 
 def formRegistroAyuda(request):
     opciones = Socios.objects.select_related('user').all()
@@ -176,7 +223,7 @@ def eliminar_ayuda(request, codigo):
             ayuda = get_object_or_404(AyudasEconomicas, id=codigo)
             detalles = DetallesAyuda.objects.filter(ayuda=ayuda, cancelado=True)
             if detalles.exists():
-                messages.warning(request, 'No se puede eliminar el descuento. Hay registros de aportaciones asociadas a esta ayuda.')
+                messages.warning(request, 'No se puede eliminar la ayuda. Hay registros de aportaciones asociadas a esta ayuda.')
                 return redirect('/verayudas')
 
             # Obtenemos el préstamo
@@ -193,4 +240,27 @@ def eliminar_ayuda(request, codigo):
         # Si ocurre algún error durante la transacción, la transacción se revierte automáticamente
         messages.warning(request,'Ups, ha ocurrido un problema')
     return redirect('/verayudas')
+
+from django.http import JsonResponse
+
+def guardar_aportacion(request, detalle_id):
+    if request.method == 'POST':
+        detalleayuda = get_object_or_404(DetallesAyuda, id=detalle_id)
+        valor = request.POST.get('valor')
+        print(valor)
+        
+        if valor is not None:
+            detalleayuda.cancelado=True
+            detalleayuda.fecha=date.today()
+            detalleayuda.valor = valor
+            detalleayuda.save()
+            return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False})
+
+def verificar_socio(request, detalle_id):
+    detalle = DetallesAyuda.objects.get(id=detalle_id)
+    socio_id_null = detalle.ayuda.socio_id is None
+    return JsonResponse({'socio_id_null': socio_id_null})
+
         

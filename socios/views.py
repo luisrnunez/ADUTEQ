@@ -20,12 +20,13 @@ from . import models
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
+from django.utils import timezone
 from django.views.decorators.cache import cache_control
 
 from django.core.mail import send_mail
-
+from .models import AjustesSistema
 from django.template.loader import render_to_string
-
+from .models import Periodo
 # Create your views here.
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def login_(request):
@@ -58,13 +59,36 @@ def cerrar_sesion(request):
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def Principal(request):
+    try:
+        ajustes, created = AjustesSistema.objects.get_or_create(defaults={'periodoAutomatico': True})
+        periodo = Periodo.objects.get(activo=True)
+        fecha_actual = timezone.now().date()
+        if ajustes.periodoAutomatico and periodo.fecha_fin < fecha_actual:
+            periodo.activo = False
+            periodo.save()
+            messages.warning(request,'Se ha cerrado automaticamente el periodo actual, nota: si desea que no se cierre automaticamente vaya a ajustes')
+        if  periodo.fecha_fin <= fecha_actual:
+            messages.warning(request,'El periodo actual esta caducado por favor registre un nuevo periodo en ajustes')
+    except:
+        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
     return render(request, "base.html")
+
 
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def PanelActividades(request):
-    return render(request, "emp_actividades.html")
+    try:
+        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+        if periodo_seleccionado:
+            return render(request, "emp_actividades.html")
+        else:
+            messages.warning(request, 'Para poder realizar transaciones agregue un nuevo periodo')
+            return render(request, "base.html")
+    except:
+        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
+        return render(request, "base.html")
+    
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def Autenticacion_usuarios(request):
