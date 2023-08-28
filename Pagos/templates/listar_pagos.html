@@ -65,7 +65,7 @@
                         {% if periodo_seleccionado.activo == True %}
                                 <th scope="col">Editar</th>
                                 <th scope="col">Eliminar</th>
-<th scope="col">Convertir a Cuotas</th>
+                                <th scope="col">Convertir a Cuotas</th>
                             {% endif %}
                         
                     </tr>
@@ -91,7 +91,7 @@
                                     <button class="delete-btn">Eliminar</button>
                                 </form>
                             </td>
-<td>
+                            <td>
                             <form action="{% url 'convertir_cuotas' pago.id %}"">
                                 <button class="delete-btn">Convertir</button>
                             </form>
