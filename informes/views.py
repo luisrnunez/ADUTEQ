@@ -160,7 +160,6 @@ def nuevo_enviar_correo(request, socio_id):
     informe_data = generar_pdf(datospdf(socio_id, numero_mes, anio))
 
     if enviarGastoEmail(socio_id, resultados, informe_data):
-        print(resultados)
         response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
     else:
         response = {'status': 'error', 'message': 'Ups. algo salío mal'}
