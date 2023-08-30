@@ -372,7 +372,7 @@ def extraer_datos_pdf(request):
         # file_path = fs.save('archivo.pdf', pdf_file)
         # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
 
-        tables = tabula.read_pdf(pdf_file, pages="all", pandas_options={'header': None, 'dtype': str})
+        tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
         datos_tabla = []
 
         for table in tables:
@@ -479,6 +479,8 @@ def verificar_registros(request):
     if request.method == 'POST':
         registros_formulario = request.POST
         campos = list(registros_formulario.keys())
+        print("registros_formulario:", registros_formulario)
+        print("campos:", campos)
         campos.remove('csrfmiddlewaretoken')
         registros_con_estilo = []
         cant_registros = len(registros_formulario.getlist(campos[0]))
