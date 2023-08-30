@@ -53,7 +53,7 @@ def lista_pagos(request):
             }
            
             print(periodo_seleccionado)
-            pagos = Pagos.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("socio","proveedor")
+            pagos = Pagos.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-id","socio","proveedor")
             context = {
                 'pagos': pagos,
                 'periodos': periodos,
@@ -71,7 +71,7 @@ def lista_pagos(request):
             'fecha_inicio': periodo_seleccionado.fecha_inicio,
             'fecha_fin': periodo_seleccionado.fecha_fin
         }
-        pagos = Pagos.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-fecha_consumo", "proveedor")
+        pagos = Pagos.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-id","-fecha_consumo", "proveedor")
         items_por_pagina = 10
         paginator = Paginator(pagos, items_por_pagina)
         numero_pagina = request.GET.get('page')
@@ -95,7 +95,7 @@ def obtener_periodos_por_anio(request, anio):
     return JsonResponse({'periodos': list(periodos)})
 
 
-
+from django.db.models import Q
 def lista_pagos_cuotas(request):
     periodos = Periodo.objects.all()  # Obtener todos los períodos
     anos = periodos.values_list('anio', flat=True).distinct()
@@ -112,7 +112,10 @@ def lista_pagos_cuotas(request):
             }
            
             print(periodo_seleccionado)
-            pagos = Pagos_cuotas.objects.filter(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("estado")
+            pagos = Pagos_cuotas.objects.filter(
+                Q(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
+                Q(fecha_descuento__lt=fechas_periodo['fecha_inicio'], estado="False")
+            ).order_by("-id","estado")
     
             context = {
                 'pago_cuotas': pagos,
@@ -131,7 +134,10 @@ def lista_pagos_cuotas(request):
             'fecha_inicio': periodo_seleccionado.fecha_inicio,
             'fecha_fin': periodo_seleccionado.fecha_fin
         }
-        pagos = Pagos_cuotas.objects.filter(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("estado")
+        pagos = Pagos_cuotas.objects.filter(
+                Q(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
+                Q(fecha_descuento__lt=fechas_periodo['fecha_inicio'], estado="False")
+            ).order_by("-id","estado")
         items_por_pagina = 10
         paginator = Paginator(pagos, items_por_pagina)
         numero_pagina = request.GET.get('page')
@@ -150,15 +156,6 @@ def lista_pagos_cuotas(request):
     }
     return render(request, 'pagos_cuotas.html', context)
 
-    # pago_cuotas = Pagos_cuotas.objects.all().order_by("estado")
-    # items_por_pagina = 10
-    # paginator = Paginator(pago_cuotas, items_por_pagina)
-    # numero_pagina = request.GET.get('page')
-    # try:
-    #     pagos_paginados=paginator.get_page(numero_pagina)
-    # except PageNotAnInteger:
-    #     pagos_paginados=paginator.get_page(1)
-    # return render(request, 'pagos_cuotas.html', {'pago_cuotas': pagos_paginados})
 
 
 def extraer_descuentos(request):
@@ -175,19 +172,27 @@ def agrefar_pagos(request):
     else:
         socio_id = request.POST.get('socio')
         socios = Socios.objects.get(id=socio_id)
-
         proveedor_id = request.POST.get('proveedor')
         proveedores = Proveedor.objects.get(id=proveedor_id)
         cupo=detallesCupos.objects.get(proveedor=proveedores,socio=socios)
         fecha = request.POST.get('fecha_consumo')
         cantidad = request.POST.get('consumo_total')
-        if(float(cantidad)<=cupo.cupo):
-            pagos = Pagos.objects.create(socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_consumo=fecha)
-            messages.success(request, 'Exito')
+
+        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+        if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+            if(float(cantidad)<=cupo.cupo):
+                pagos = Pagos.objects.create(socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_consumo=fecha)
+                messages.success(request, 'Exito')
+                return redirect('/listar_pagos/')
+            else:
+                messages.warning(request, 'La cantidad que desea ingresar es superior a la brindada por el proveedor')
             return redirect('/listar_pagos/')
         else:
-            messages.warning(request, 'La cantidad que desea ingresar es superior a la brindada por el proveedor')
-        return redirect('/listar_pagos/')
+            messages.warning(request, f'La fecha que ingresaste no esta dentro del periodo actual de {periodo_seleccionado.nombre}')
+            users = User.objects.filter(is_active=True)
+            socios = Socios.objects.filter(user__in=users)
+            proveedores = Proveedor.objects.filter(estado=True)
+            return render(request, 'agregar_pago.html', {'socios': socios, 'proveedores': proveedores})
 
 
 def agregar_pagos_cuotas(request):
@@ -221,25 +226,33 @@ def agregar_pagos_cuotas(request):
 
             # if(str(cantidad)>cupo):
             #     messages.warning(request, 'El valor que desea ingrear es superior al cupo brindado por el proveedor')
-
-            pagoscuotas = Pagos_cuotas.objects.create(
-                socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha,
-                numero_cuotas=numero_cuoa, cuota_actual=0, valor_cuota=valor_cuo
-            )
-            pagoscuotas.save()
-
-            for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
-                detalle_cuatas = Detalle_cuotas(
-                    pago_cuota=pagoscuotas,
-                    numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago,
-                    valor_cuota=valor_cuo,
-                    socio=socios, proveedor=proveedores
+            periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+            if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+                pagoscuotas = Pagos_cuotas.objects.create(
+                    socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha,
+                    numero_cuotas=numero_cuoa, cuota_actual=0, valor_cuota=valor_cuo
                 )
-                detalle_cuatas.save()
+                pagoscuotas.save()
 
-            messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
-            return redirect('/lista_pagos_cuotas/')
+                for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                    detalle_cuatas = Detalle_cuotas(
+                        pago_cuota=pagoscuotas,
+                        numero_cuota=numero_cuota,
+                        fecha_descuento=fecha_pago,
+                        valor_cuota=valor_cuo,
+                        socio=socios, proveedor=proveedores
+                    )
+                    detalle_cuatas.save()
+
+                messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
+                return redirect('/lista_pagos_cuotas/')
+            else:
+                messages.warning(request, f'La fecha que ingresaste no esta dentro del periodo actual de {periodo_seleccionado.nombre}')
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(user__in=users)
+                proveedores = Proveedor.objects.filter(estado=True)
+                return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
+            
     except Exception as e:
         messages.warning(request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
     return redirect('/lista_pagos_cuotas/')
@@ -431,7 +444,7 @@ def guardar_descuentos_prov(request, id, fecha):
             elif nombre and socios is None:
                 usuarios = User.objects.filter(is_staff=False)
                 for usuario in usuarios:
-                    if usuario.first_name + ' ' + usuario.last_name == nombre:
+                    if usuario.last_name + ' ' + usuario.first_name == nombre:
                         socio = usuario
                         print('usuario: ',socio)
                         
@@ -440,18 +453,25 @@ def guardar_descuentos_prov(request, id, fecha):
                 
 
             proveedor = Proveedor.objects.get(id=id)
-            if socios.exists():
-                socio = socios.first()  # Obtener la primera instancia de Socios en la queryset socios
-                Pagos.objects.create(socio=socio, proveedor=proveedor, consumo_total=consumo_total, fecha_consumo=fecha)
-                response = {
-                                            'status': True,
-                                            'message': 'Registros guardados correctamente.'
-                                            }
+            periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+            if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+                if socios.exists():
+                    socio = socios.first()  # Obtener la primera instancia de Socios en la queryset socios
+                    Pagos.objects.create(socio=socio, proveedor=proveedor, consumo_total=consumo_total, fecha_consumo=fecha)
+                    response = {
+                                                'status': True,
+                                                'message': 'Registros guardados correctamente.'
+                                                }
+                else:
+                    response = {
+                                                    'status': False,
+                                                    'message': 'Registros no se pudieron guardar'
+                                                    }  
             else:
-                response = {
-                                                'status': False,
-                                                'message': 'Registros no se pudieron guardar'
-                                                }   
+                    response = {
+                                                    'status': False,
+                                                    'message':  f'La fecha que ingresaste no esta dentro del periodo actual de {periodo_seleccionado.nombre}'
+                                                    }  
     return JsonResponse(response)
 
 
@@ -472,6 +492,7 @@ def verificar_registros(request):
             datos['estilo_color'] = 'normal'  # Agregamos la nueva columna 'estilo_color' con valor 'normal'
             ide = registros_formulario.getlist('ide')
             if ide[i].isdigit():
+                
                 if Socios.objects.filter(cedula=ide[i]).exists():
                     valor=0
                     datos['estilo_color'] = 'normal'
@@ -479,24 +500,28 @@ def verificar_registros(request):
                     cant_errores = cant_errores + 1
                     datos['estilo_color'] = 'rojo'
             else:
-                usuarios = User.objects.filter(is_staff=False)
+                usuarios = User.objects.filter(is_staff=False).order_by('first_name')
                 usuario_existe = False
                 for usuario in usuarios:
-                    if usuario.first_name + ' ' + usuario.last_name == ide[i]:
+                    var1 = usuario.last_name + ' ' + usuario.first_name
+                   
+                    if var1 == ide[i]:
                         usuario_existe = True
-                        break
+                        break  # Romper el bucle si se encuentra una coincidencia
+                
                 if usuario_existe:
                     valor = 0
-                # registros_con_estilo.append(datos)
-
+                else:
+                    valor = 1
+             
             des = registros_formulario.getlist('des')
             des[i] = des[i].replace(',', '').replace('.', '')
             if des[i].isdigit():
                 valor1 = 0
-                print('es digito')
+                # print('es digito')
             else:
                 cant_errores = cant_errores + 1
-            print(des[i])
+            # print(des[i])
             #cambio color
             if valor == 0 and valor1 == 0:
                 datos['estilo_color'] = 'normal'
@@ -505,10 +530,10 @@ def verificar_registros(request):
                 datos['estilo_color'] = 'rojo'
             registros_con_estilo.append(datos)
 
-        print(registros_con_estilo)
-        print(valor,'  ',valor1)
-        print(cant_errores)
-        proveedores = Proveedor.objects.filter(estado=True)
+        # print(registros_con_estilo)
+        # print(valor,'  ',valor1)
+        # print(cant_errores)
+        # proveedores = Proveedor.objects.filter(estado=True)
         if cant_errores > 0:
             response = {
                 'status': False,

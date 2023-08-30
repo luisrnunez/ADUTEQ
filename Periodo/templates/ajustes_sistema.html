@@ -100,9 +100,10 @@
                             <div style="display: inline-flex; justify-content: space-between; width: 80%;">
                                 <h3 style="width: 80%;">Cierre Automático:</h3>
                                 <select style="border-color: red;" name="cierre_automatico" id="cierre_automatico">
-                                    <option value="si" {% if ajustes.periodoAutomatico %}selected{% endif %}>Sí</option>
                                     <option value="no" {% if not ajustes.periodoAutomatico %}selected{% endif %}>No
                                     </option>
+                                    <option value="si" {% if ajustes.periodoAutomatico %}selected{% endif %}>Sí</option>
+                                    
                                 </select>
                             </div>
 
@@ -332,26 +333,7 @@
                 document.getElementById('Nombre').value = `${nombreFin}`;
 
             });
-
-            fechaFinInput.addEventListener('change', function () {
-                const fechaFin = new Date(fechaFinInput.value);
-                const fechaInicio = new Date(fechaInicioInput.value);
-                const anio = fechaFin.getFullYear();
-                anioInput.value = anio;
-
-                //poner el nombre al periodo
-                const opcionesNombre = { month: 'long' };
-                const nombreInicio = fechaInicio.toLocaleDateString('es-ES', opcionesNombre);
-                const nombreFin = fechaFin.toLocaleDateString('es-ES', opcionesNombre);
-                const fechaIni = new Date(fechaInicio);
-                const feFin = new Date(fechaFin);
-                const dia1 = fechaIni.getDate();
-                const dia2 = feFin.getDate();
-
-                document.getElementById('Nombre').value = `${nombreInicio} ${dia1 + 1} - ${nombreFin} ${dia2}`;
-
-
-            });
+            //FUNCION ELIMINADA
         });
     </script>
     <script>

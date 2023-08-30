@@ -31,17 +31,17 @@
                     {% csrf_token %}
 
                     <label for="first_name">Nombre:</label>
-                    <input type="text" id="first_name" name="first_name" value="{{ socio.first_name }}"  required>
+                    <input type="text" id="first_name" name="first_name" value="{{ socio.first_name }}" required>
 
                     <label for="last_name">Apellido:</label>
-                    <input type="text" id="last_name" name="last_name" value="{{ socio.last_name }}"   required>
+                    <input type="text" id="last_name" name="last_name" value="{{ socio.last_name }}" required>
 
                     <label for="cedula">Cedula:</label>
                     <input type="text" maxlength="10" id="cedula" name="cedula" value="{{ socio.cedula }}" required>
 
                     <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
-                        value="{{ socio.fecha_nacimiento}}" required>
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ socio.fecha_nacimiento}}"
+                        required>
 
                     <label for="lugar_nacimiento">Lugar de Nacimiento:</label>
                     <input type="text" id="lugar_nacimiento" name="lugar_nacimiento"
@@ -71,7 +71,7 @@
                             style="width:95%;">
                             <option value="" disabled selected>Seleccionar Facultad</option>
                             {% for facultad in facultades %}
-                            <option value="{{ facultad.nombre_facu }}"{% if socio.facultad == facultad.nombre_facu %}selected{% endif %}>{{ facultad.nombre_facu }}</option>
+                            <option value="{{ facultad.nombre_facu }}" {% if socio.facultad == facultad.nombre_facu %}selected{% endif %}>{{ facultad.nombre_facu }}</option>
                             {% endfor %}
                         </select>
                         <input style="width:5%; right  : 20px;" type="button" id="guardarFacultadBtn" value="+"
@@ -84,7 +84,7 @@
                         <select id="categoria" name="categoria" required style="width:95%;">
                             <option value="" disabled selected>Seleccionar Categoría</option>
                             {% for categoria in categorias %}
-                            <option value="{{ categoria.nombre_cat }}"{% if socio.categoria == categoria.nombre_cat %}selected{% endif %}>{{ categoria.nombre_cat }}</option>
+                            <option value="{{ categoria.nombre_cat }}" {% if socio.categoria == categoria.nombre_cat %}selected{% endif %}>{{ categoria.nombre_cat }}</option>
                             {% endfor %}
                         </select>
                         <input style="width:5%; right  : 20px;" type="button" id="guardarCategoriaBtn" value="+"
@@ -97,7 +97,7 @@
                         <select id="dedicacion" name="dedicacion_academica" required style="width:100%;">
                             <option value="" disabled selected>Seleccionar Dedicación</option>
                             {% for dedicacion in dedicacionAcademica %}
-                            <option value="{{ dedicacion.nombre_de }}"{% if socio.dedicacion_academica == dedicacion.nombre_de %}selected{% endif %}>{{ dedicacion.nombre_de }}</option>
+                            <option value="{{ dedicacion.nombre_de }}" {% if socio.dedicacion_academica == dedicacion.nombre_de %}selected{% endif %}>{{ dedicacion.nombre_de }}</option>
                             {% endfor %}
                         </select>
                         <input style="width:5%; right  : 20px;" type="button" id="guardarDedicacionBtn" value="+"
@@ -109,13 +109,13 @@
                         <select id="titulo" name="titulo" required style="width:100%;">
                             <option value="" disabled selected>Seleccionar Título</option>
                             {% for titulo in titulos %}
-                            <option value="{{ titulo.nombre_ti }}"{% if socio.titulo == titulo.nombre_ti %}selected{% endif %}>{{ titulo.nombre_ti }}</option>
+                            <option value="{{ titulo.nombre_ti }}" {% if socio.titulo == titulo.nombre_ti %}selected{% endif %}>{{ titulo.nombre_ti }}</option>
                             {% endfor %}
                         </select>
                         <input style="width:5%; right  : 20px;" type="button" id="guardarTituloBtn" value="+"
                             data-bs-toggle="modal" data-bs-target="#staticBackdrop3">
                     </div>
-                    <!-- <input type="text" id="titulo" name="titulo" value="{{ socio.titulo }}" required> -->
+                    
 
                     <label for="foto">Agregar foto de Perfil:</label>
                     {% get_media_prefix as media_prefix %}
@@ -123,7 +123,7 @@
                         <div class="custom-file">
                             <div class="upload-preview">
                                 <div id="imagePreview">
-                                    <img src="{{ media_prefix }}{{ socio.foto }}"  >
+                                    <img src="{{ media_prefix }}{{ socio.foto }}">
                                 </div>
                             </div>
                             <input type="file" class="custom-file-input" id="foto" name="foto"
@@ -139,7 +139,8 @@
                         <label for="password" style="margin-left: 5px;">Contraseña:</label>
 
                         <div style="position: relative;">
-                            <input type="password" id="password" name="password" value="{{ usuario.password }}" required>
+                            <input type="password" id="password" name="password" value="{{ usuario.password }}"
+                                required>
                             <span id="tgl_password" class="fas fa-eye-slash"
                                 style="position: absolute; right: 20px;top: 25%; cursor: pointer;"></span>
                         </div>
@@ -158,10 +159,10 @@
                 <script>
                     const passwordInput = document.getElementById("password");
                     const toggleIcon = document.getElementById("tgl_password");
-            
+
                     toggleIcon.addEventListener("click", togglePasswordVisibility.bind(null, passwordInput, toggleIcon));
-                   
-            
+
+
                     function togglePasswordVisibility(inputElement, iconElement) {
                         if (inputElement.type === "password") {
                             inputElement.type = "text";
@@ -184,23 +185,24 @@
                                     Agregar nueva Facultad
                                 </h1>
                             </div>
-                            
-                                <div class="modal-body">
-                                    <label class="fw-bold" for="nom_facu">Nombre de la facultad:</label>
-                                    <input class="form-control mb-2" type="text" name="nom_facu" id="nom_facu"
-                                        placeholder="Ingrese el nombre de la facultad" required />
-                                    <label class="fw-bold" for="descripcion">Descripción:</label>
-                                    <textarea maxlength="70" class="form-control mb-2" name="descripcion_facu" id="descripcion_facu" rows="3"
-                                        placeholder="Ingrese una descripcion"></textarea>
-                                </div>
-                                <div class="modal-footer" style="display: inline-block; width: 100%;">
-                                    <button id="btnAgregarFacultad" class="btn btn-success" style="width: 45%;">Aceptar</button>
-                                    <button style="width: 48%; background-color: red; right: 0px;" type="button"
-                                        class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Cerrar
-                                    </button>
-                                </div>
-                        
+
+                            <div class="modal-body">
+                                <label class="fw-bold" for="nom_facu">Nombre de la facultad:</label>
+                                <input class="form-control mb-2" type="text" name="nom_facu" id="nom_facu"
+                                    placeholder="Ingrese el nombre de la facultad" required />
+                                <label class="fw-bold" for="descripcion">Descripción:</label>
+                                <textarea maxlength="70" class="form-control mb-2" name="descripcion_facu"
+                                    id="descripcion_facu" rows="3" placeholder="Ingrese una descripcion"></textarea>
+                            </div>
+                            <div class="modal-footer" style="display: inline-block; width: 100%;">
+                                <button id="btnAgregarFacultad" class="btn btn-success"
+                                    style="width: 45%;">Aceptar</button>
+                                <button style="width: 48%; background-color: red; right: 0px;" type="button"
+                                    class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cerrar
+                                </button>
+                            </div>
+
                             <div class="modal-header" style="background-color: white">
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
                                     Lista de facultades
@@ -242,21 +244,22 @@
                                     Agregar nueva categoria
                                 </h1>
                             </div>
-                                <div class="modal-body">
-                                    <label class="fw-bold" for="nom_cat">Nombre de Categoria:</label>
-                                    <input class="form-control mb-2" type="text" name="nom_cat" id="nom_cat"
-                                        placeholder="Ingrese el nombre de la categoria" required />
-                                    <label class="fw-bold" for="descripcion">Descripción:</label>
-                                    <textarea maxlength="70" class="form-control mb-2" name="descripcion" id="descripcion_cat" rows="3"
-                                        placeholder="Ingrese una descripcion"></textarea>
-                                </div>
-                                <div class="modal-footer" style="display: inline-block; width: 100%;">
-                                    <button id="btnAgregarCategoria" class="btn btn-success" style="width: 45%;">Aceptar</button>
-                                    <button style="width: 48%; background-color: red; right: 0px;" type="button"
-                                        class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Cerrar
-                                    </button>
-                                </div>
+                            <div class="modal-body">
+                                <label class="fw-bold" for="nom_cat">Nombre de Categoria:</label>
+                                <input class="form-control mb-2" type="text" name="nom_cat" id="nom_cat"
+                                    placeholder="Ingrese el nombre de la categoria" required />
+                                <label class="fw-bold" for="descripcion">Descripción:</label>
+                                <textarea maxlength="70" class="form-control mb-2" name="descripcion"
+                                    id="descripcion_cat" rows="3" placeholder="Ingrese una descripcion"></textarea>
+                            </div>
+                            <div class="modal-footer" style="display: inline-block; width: 100%;">
+                                <button id="btnAgregarCategoria" class="btn btn-success"
+                                    style="width: 45%;">Aceptar</button>
+                                <button style="width: 48%; background-color: red; right: 0px;" type="button"
+                                    class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cerrar
+                                </button>
+                            </div>
                             <div class="modal-header" style="background-color: white">
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
                                     Lista de categorias
@@ -290,29 +293,30 @@
                 <div class="modal fade" id="staticBackdrop2" data-bs-backdrop="static" data-bs-keyboard="false"
                     tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
-                        <div  id="modal_cont3" class="modal-content">
+                        <div id="modal_cont3" class="modal-content">
                             <div class="modal-header" style="background-color: white">
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
                                     Agregar nueva dedicacion academica
                                 </h1>
                             </div>
-                        
-                                <div class="modal-body">
-                                    <label class="fw-bold" for="nom_de">Tiempo:</label>
-                                    <input class="form-control mb-2" type="text" name="nom_de" id="nom_de"
-                                        placeholder="Ingrese el tiempo dedicado del socio" required />
-                                    <label class="fw-bold" for="descripcion">Descripción:</label>
-                                    <textarea maxlength="70" class="form-control mb-2" name="descripcion" id="descripcion_de" rows="3"
-                                        placeholder="Ingrese una descripcion"></textarea>
-                                </div>
-                                <div class="modal-footer" style="display: inline-block; width: 100%;">
 
-                                    <button id="btnAgregarDedicacion" class="btn btn-success" style="width: 45%;"  >Aceptar</button>
-                                    <button style="width: 48%; background-color: red; right: 0px;" type="button"
-                                        class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Cerrar
-                                    </button>
-                                </div>
+                            <div class="modal-body">
+                                <label class="fw-bold" for="nom_de">Tiempo:</label>
+                                <input class="form-control mb-2" type="text" name="nom_de" id="nom_de"
+                                    placeholder="Ingrese el tiempo dedicado del socio" required />
+                                <label class="fw-bold" for="descripcion">Descripción:</label>
+                                <textarea maxlength="70" class="form-control mb-2" name="descripcion"
+                                    id="descripcion_de" rows="3" placeholder="Ingrese una descripcion"></textarea>
+                            </div>
+                            <div class="modal-footer" style="display: inline-block; width: 100%;">
+
+                                <button id="btnAgregarDedicacion" class="btn btn-success"
+                                    style="width: 45%;">Aceptar</button>
+                                <button style="width: 48%; background-color: red; right: 0px;" type="button"
+                                    class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cerrar
+                                </button>
+                            </div>
                             <div class="modal-header" style="background-color: white">
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
                                     Lista de dedicacion
@@ -352,22 +356,23 @@
                                     Agregar nuevo titulo
                                 </h1>
                             </div>
-                                <div class="modal-body">
-                                    <label class="fw-bold" for="nom_ti">Titulo:</label>
-                                    <input class="form-control mb-2" type="text" name="nom_ti" id="nom_ti"
-                                        placeholder="Ingrese el nombre del titulo" required />
-                                    <label class="fw-bold" for="descripcion">Descripción:</label>
-                                    <textarea maxlength="70" class="form-control mb-2" name="descripcion" id="descripcion_ti" rows="3"
-                                        placeholder="Ingrese una descripcion"></textarea>
-                                </div>
-                                <div class="modal-footer" style="display: inline-block; width: 100%;">
-                                    <button id="btnAgregarTitulo" class="btn btn-success" style="width: 45%;">Aceptar</button>
-                                    <button style="width: 48%; background-color: red; right: 0px;" type="button"
-                                        class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Cerrar
-                                    </button>
-                                </div>
-                            
+                            <div class="modal-body">
+                                <label class="fw-bold" for="nom_ti">Titulo:</label>
+                                <input class="form-control mb-2" type="text" name="nom_ti" id="nom_ti"
+                                    placeholder="Ingrese el nombre del titulo" required />
+                                <label class="fw-bold" for="descripcion">Descripción:</label>
+                                <textarea maxlength="70" class="form-control mb-2" name="descripcion"
+                                    id="descripcion_ti" rows="3" placeholder="Ingrese una descripcion"></textarea>
+                            </div>
+                            <div class="modal-footer" style="display: inline-block; width: 100%;">
+                                <button id="btnAgregarTitulo" class="btn btn-success"
+                                    style="width: 45%;">Aceptar</button>
+                                <button style="width: 48%; background-color: red; right: 0px;" type="button"
+                                    class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Cerrar
+                                </button>
+                            </div>
+
                             <div class="modal-header" style="background-color: white">
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
                                     Lista de Titulos
@@ -396,14 +401,14 @@
                             </table>
                         </div>
                     </div>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-   
+    <script>
+
 
         $(document).ready(function () {
             // Obtener el valor del token CSRF de la cookie
@@ -417,192 +422,233 @@
                     }
                 }
             });
-            
-            $('#modal_cont4').on('click', '#btnAgregarTitulo', function () {
-                    const nom_ti = document.getElementById('nom_ti').value; 
-                    const descripcion = document.getElementById('descripcion_ti').value; 
-                 
-                    agregarTitulo(nom_ti,descripcion);
-                    nomtie.value = '';
-                    descripcion.value = '';
-                });
-                function agregarTitulo(nom_ti,descripcion) {
-                
-                    $.ajax({
-                        type: 'POST',
-                        url: '{% url "agregar_titulo_socios" %}', // URL de la vista Django para eliminar el registro
-                        data: { nom_ti: nom_ti ,descripcion: descripcion},
-                        success: function (response) {
-                            var tablaTitulo = $('#tablaTitulo');
-                            $('#tablaTitulo tbody tr').remove();
-                            if (response.valor == 1) {
-                                Swal.fire({
-                            icon: response.icon,
-                            title: response.title,
-                            text: response.text
-                        });
-                            }
-                            
-                            // Iterar sobre los datos actualizados y construir las filas de la tabla
-                            for (var i = 0; i < response.titulos.length; i++) {
-                                var titulo= response.titulos[i];
-                                var newRow = '<tr>' +
-                                    '<td>' + titulo.nombre_ti + '</td>' +
-                                    '<td>' + titulo.descripcion + '</td>' +
-                                    '<td>' +
-                                    '<button data-id="' +titulo.id+ '" id="eliminarBtnTitulo" class="delete-btn">Eliminar</button>'
-                                '</td>' +
-                                    '</tr>';
-                                    tablaTitulo.append(newRow);
-                            }
 
-                            console.log('Tabla actualizada.');
-                        },
-                        error: function () {
-                            console.log('Error al agg el registro.');
+            $('#modal_cont4').on('click', '#btnAgregarTitulo', function () {
+                const nom_ti = document.getElementById('nom_ti').value;
+                const descripcion = document.getElementById('descripcion_ti').value;
+
+                agregarTitulo(nom_ti, descripcion);
+                nomtie.value = '';
+                descripcion.value = '';
+            });
+            function agregarTitulo(nom_ti, descripcion) {
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "agregar_titulo_socios" %}', // URL de la vista Django para eliminar el registro
+                    data: { nom_ti: nom_ti, descripcion: descripcion },
+                    success: function (response) {
+                        var tablaTitulo = $('#tablaTitulo');
+                        $('#tablaTitulo tbody tr').remove();
+                        if (response.valor == 1) {
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.text
+                            });
                         }
-                    });
-                }
+
+                        // Iterar sobre los datos actualizados y construir las filas de la tabla
+                        for (var i = 0; i < response.titulos.length; i++) {
+                            var titulo = response.titulos[i];
+                            var newRow = '<tr>' +
+                                '<td>' + titulo.nombre_ti + '</td>' +
+                                '<td>' + titulo.descripcion + '</td>' +
+                                '<td>' +
+                                '<button data-id="' + titulo.id + '" id="eliminarBtnTitulo" class="delete-btn">Eliminar</button>'
+                            '</td>' +
+                                '</tr>';
+                            tablaTitulo.append(newRow);
+                        }
+
+                        var selectTitulos = $('#titulo');
+                        selectTitulos.empty(); // Limpiar las opciones existentes
+
+                        // Agregar las nuevas opciones al select
+                        for (var i = 0; i < response.titulos.length; i++) {
+                            var titulo = response.titulos[i];
+                            selectTitulos.append($('<option>', {
+                                value: titulo.id,
+                                text: titulo.nombre_ti
+                            }));
+                        }
+                    },
+                    error: function () {
+                        console.log('Error al agg el registro.');
+                    }
+                });
+            }
 
             $('#modal_cont3').on('click', '#btnAgregarDedicacion', function () {
-                    const nom_de = document.getElementById('nom_de').value; 
-                    const descripcion = document.getElementById('descripcion_de').value; 
-                 
-                    agregarDedicacion(nom_de,descripcion);
-                    nom_de.value = '';
-                    descripcion.value = '';
-                });
-                function agregarDedicacion(nom_de,descripcion) {
-                
-                    $.ajax({
-                        type: 'POST',
-                        url: '{% url "agregar_dedicacion_socios" %}', // URL de la vista Django para eliminar el registro
-                        data: { nom_de: nom_de ,descripcion: descripcion},
-                        success: function (response) {
-                            var tablaDedicacion = $('#tablaDedicacion');
-                            $('#tablaDedicacion tbody tr').remove();
-                            if (response.valor == 1) {
-                                Swal.fire({
-                            icon: response.icon,
-                            title: response.title,
-                            text: response.text
-                        });
-                            }
-                            
-                            // Iterar sobre los datos actualizados y construir las filas de la tabla
-                            for (var i = 0; i < response.dedicacionAcademica.length; i++) {
-                                var dedicacion= response.dedicacionAcademica[i];
-                                var newRow = '<tr>' +
-                                    '<td>' + dedicacion.nombre_de + '</td>' +
-                                    '<td>' + dedicacion.descripcion + '</td>' +
-                                    '<td>' +
-                                    '<button data-id="' +dedicacion.id+ '" id="eliminarBtnDedicacion" class="delete-btn">Eliminar</button>'
-                                '</td>' +
-                                    '</tr>';
-                                    tablaDedicacion.append(newRow);
-                            }
+                const nom_de = document.getElementById('nom_de').value;
+                const descripcion = document.getElementById('descripcion_de').value;
 
-                            console.log('Tabla actualizada.');
-                        },
-                        error: function () {
-                            console.log('Error al agg el registro.');
+                agregarDedicacion(nom_de, descripcion);
+                nom_de.value = '';
+                descripcion.value = '';
+            });
+            function agregarDedicacion(nom_de, descripcion) {
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "agregar_dedicacion_socios" %}', // URL de la vista Django para eliminar el registro
+                    data: { nom_de: nom_de, descripcion: descripcion },
+                    success: function (response) {
+                        var tablaDedicacion = $('#tablaDedicacion');
+                        $('#tablaDedicacion tbody tr').remove();
+                        if (response.valor == 1) {
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.text
+                            });
                         }
-                    });
-                }
+
+                        // Iterar sobre los datos actualizados y construir las filas de la tabla
+                        for (var i = 0; i < response.dedicacionAcademica.length; i++) {
+                            var dedicacion = response.dedicacionAcademica[i];
+                            var newRow = '<tr>' +
+                                '<td>' + dedicacion.nombre_de + '</td>' +
+                                '<td>' + dedicacion.descripcion + '</td>' +
+                                '<td>' +
+                                '<button data-id="' + dedicacion.id + '" id="eliminarBtnDedicacion" class="delete-btn">Eliminar</button>'
+                            '</td>' +
+                                '</tr>';
+                            tablaDedicacion.append(newRow);
+                        }
+
+                        var selectDedicacion = $('#dedicacion');
+                        selectDedicacion.empty(); // Limpiar las opciones existentes
+
+                        // Agregar las nuevas opciones al select
+                        for (var i = 0; i < response.dedicacionAcademica.length; i++) {
+                            var dedicacion = response.dedicacionAcademica[i];
+                            selectDedicacion.append($('<option>', {
+                                value: dedicacion.id,
+                                text: dedicacion.nombre_de
+                            }));
+                        }
+
+                    },
+                    error: function () {
+                        console.log('Error al agg el registro.');
+                    }
+                });
+            }
 
             $('#modal_cont').on('click', '#btnAgregarFacultad', function () {
-                    const nom_facu = document.getElementById('nom_facu').value; 
-                    const descripcion = document.getElementById('descripcion_facu').value; 
-                 
-                    agregarFacultad(nom_facu,descripcion);
-                    nom_facu.value = '';
-                    descripcion.value = '';
-                });
-                function agregarFacultad(nom_facu,descripcion) {
-                    console.log(nom_facu)
-                    $.ajax({
-                        type: 'POST',
-                        url: '{% url "agregar_facultad_socios" %}', // URL de la vista Django para eliminar el registro
-                        data: { nom_facu: nom_facu ,descripcion: descripcion},
-                        success: function (response) {
-                            var tablaFacultad = $('#tablaFacultad');
-                            $('#tablaFacultad tbody tr').remove();
-                            if (response.valor == 1) {
-                                Swal.fire({
-                            icon: response.icon,
-                            title: response.title,
-                            text: response.text
-                        });
-                            }
-                            
-                            // Iterar sobre los datos actualizados y construir las filas de la tabla
-                            for (var i = 0; i < response.facultades.length; i++) {
-                                var facultad = response.facultades[i];
-                                var newRow = '<tr>' +
-                                    '<td>' + facultad.nombre_facu + '</td>' +
-                                    '<td>' + facultad.descripcion + '</td>' +
-                                    '<td>' +
-                                    '<button data-id="' +facultad.id+ '" id="eliminarBtnFacultad" class="delete-btn">Eliminar</button>'
-                                '</td>' +
-                                    '</tr>';
-                                tablaFacultad.append(newRow);
-                            }
+                const nom_facu = document.getElementById('nom_facu').value;
+                const descripcion = document.getElementById('descripcion_facu').value;
 
-                            console.log('Tabla actualizada.');
-                        },
-                        error: function () {
-                            console.log('Error al agg el registro.');
+                agregarFacultad(nom_facu, descripcion);
+                nom_facu.value = '';
+                descripcion.value = '';
+            });
+            function agregarFacultad(nom_facu, descripcion) {
+                console.log(nom_facu)
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "agregar_facultad_socios" %}', // URL de la vista Django para eliminar el registro
+                    data: { nom_facu: nom_facu, descripcion: descripcion },
+                    success: function (response) {
+                        var tablaFacultad = $('#tablaFacultad');
+                        $('#tablaFacultad tbody tr').remove();
+                        if (response.valor == 1) {
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.text
+                            });
                         }
-                    });
-                }
-            
-                $('#modal_cont2').on('click', '#btnAgregarCategoria', function () {
-                    const nom_cat = document.getElementById('nom_cat').value; 
-                    const descripcion = document.getElementById('descripcion_cat').value; 
-                
-                    agregarCategoria(nom_cat,descripcion);
-                    nom_cat.value = '';
-                    descripcion.value = '';
-                });
-                function agregarCategoria(nom_cat,descripcion) {
-                
-                    $.ajax({
-                        type: 'POST',
-                        url: '{% url "agregar_categoria_socios" %}', // URL de la vista Django para eliminar el registro
-                        data: { nom_cat: nom_cat ,descripcion: descripcion},
-                        success: function (response) {
-                            var tablaCategoria = $('#tablaCategoria');
-                            $('#tablaCategoria tbody tr').remove();
-                            if (response.valor == 1) {
-                                Swal.fire({
-                            icon: response.icon,
-                            title: response.title,
-                            text: response.text
-                        });
-                            }
-                            
-                            // Iterar sobre los datos actualizados y construir las filas de la tabla
-                            for (var i = 0; i < response.categorias.length; i++) {
-                                var categoria= response.categorias[i];
-                                var newRow = '<tr>' +
-                                    '<td>' + categoria.nombre_cat + '</td>' +
-                                    '<td>' + categoria.descripcion + '</td>' +
-                                    '<td>' +
-                                    '<button data-id="' +categoria.id+ '" id="eliminarBtnCategoria" class="delete-btn">Eliminar</button>'
-                                '</td>' +
-                                    '</tr>';
-                                    tablaCategoria.append(newRow);
-                            }
 
-                            console.log('Tabla actualizada.');
-                        },
-                        error: function () {
-                            console.log('Error al agg el registro.');
+                        // Iterar sobre los datos actualizados y construir las filas de la tabla
+                        for (var i = 0; i < response.facultades.length; i++) {
+                            var facultad = response.facultades[i];
+                            var newRow = '<tr>' +
+                                '<td>' + facultad.nombre_facu + '</td>' +
+                                '<td>' + facultad.descripcion + '</td>' +
+                                '<td>' +
+                                '<button data-id="' + facultad.id + '" id="eliminarBtnFacultad" class="delete-btn">Eliminar</button>'
+                            '</td>' +
+                                '</tr>';
+                            tablaFacultad.append(newRow);
                         }
-                    });
-                }
 
-         
+                        var selectFacultad = $('#facultad');
+                        selectFacultad.empty(); // Limpiar las opciones existentes
+
+                        // Agregar las nuevas opciones al select
+                        for (var i = 0; i < response.facultades.length; i++) {
+                            var facultad = response.facultades[i];
+                            selectFacultad.append($('<option>', {
+                                value: facultad.id,
+                                text: facultad.nombre_facu
+                            }));
+                        }
+                    },
+                    error: function () {
+                        console.log('Error al agg el registro.');
+                    }
+                });
+            }
+
+            $('#modal_cont2').on('click', '#btnAgregarCategoria', function () {
+                const nom_cat = document.getElementById('nom_cat').value;
+                const descripcion = document.getElementById('descripcion_cat').value;
+
+                agregarCategoria(nom_cat, descripcion);
+                nom_cat.value = '';
+                descripcion.value = '';
+            });
+            function agregarCategoria(nom_cat, descripcion) {
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "agregar_categoria_socios" %}', // URL de la vista Django para eliminar el registro
+                    data: { nom_cat: nom_cat, descripcion: descripcion },
+                    success: function (response) {
+                        var tablaCategoria = $('#tablaCategoria');
+                        $('#tablaCategoria tbody tr').remove();
+                        if (response.valor == 1) {
+                            Swal.fire({
+                                icon: response.icon,
+                                title: response.title,
+                                text: response.text
+                            });
+                        }
+
+                        // Iterar sobre los datos actualizados y construir las filas de la tabla
+                        for (var i = 0; i < response.categorias.length; i++) {
+                            var categoria = response.categorias[i];
+                            var newRow = '<tr>' +
+                                '<td>' + categoria.nombre_cat + '</td>' +
+                                '<td>' + categoria.descripcion + '</td>' +
+                                '<td>' +
+                                '<button data-id="' + categoria.id + '" id="eliminarBtnCategoria" class="delete-btn">Eliminar</button>'
+                            '</td>' +
+                                '</tr>';
+                            tablaCategoria.append(newRow);
+                        }
+
+                        var selectCategoria = $('#categoria');
+                        selectCategoria.empty(); // Limpiar las opciones existentes
+
+                        // Agregar las nuevas opciones al select
+                        for (var i = 0; i < response.categorias.length; i++) {
+                            var categoria = response.categorias[i];
+                            selectCategoria.append($('<option>', {
+                                value: categoria.id,
+                                text: categoria.nombre_cat
+                            }));
+                        }
+                    },
+                    error: function () {
+                        console.log('Error al agg el registro.');
+                    }
+                });
+            }
+
+
             // Agregar evento de clic al botón de eliminar en cada fila
             $('#tablaFacultad').on('click', '#eliminarBtnFacultad', function () {
                 var idRegistro = $(this).data('id'); // Obtener el ID del registro a eliminar
@@ -618,7 +664,7 @@
                     success: function (response) {
                         var tablaFacultad = $('#tablaFacultad');
                         $('#tablaFacultad tbody tr').remove();
-                      
+
                         // Iterar sobre los datos actualizados y construir las filas de la tabla
                         for (var i = 0; i < response.facultades.length; i++) {
                             var facultad = response.facultades[i];
@@ -626,12 +672,12 @@
                                 '<td>' + facultad.nombre_facu + '</td>' +
                                 '<td>' + facultad.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' +facultad.id+ '" id="eliminarBtnFacultad" class="delete-btn">Eliminar</button>'
+                                '<button data-id="' + facultad.id + '" id="eliminarBtnFacultad" class="delete-btn">Eliminar</button>'
                             '</td>' +
                                 '</tr>';
                             tablaFacultad.append(newRow);
                         }
-                        
+
                         console.log('Tabla actualizada.');
                     },
                     error: function () {
@@ -662,7 +708,7 @@
                                 '<td>' + categoria.nombre_cat + '</td>' +
                                 '<td>' + categoria.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' +categoria.id+ '" id="eliminarBtnCategoria" class="delete-btn">Eliminar</button>'
+                                '<button data-id="' + categoria.id + '" id="eliminarBtnCategoria" class="delete-btn">Eliminar</button>'
                             '</td>' +
                                 '</tr>';
                             tablaCategoria.append(newRow);
@@ -699,7 +745,7 @@
                                 '<td>' + dedicacion.nombre_de + '</td>' +
                                 '<td>' + dedicacion.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' +dedicacion.id+ '" id="eliminarBtnDedicacion" class="delete-btn">Eliminar</button>'
+                                '<button data-id="' + dedicacion.id + '" id="eliminarBtnDedicacion" class="delete-btn">Eliminar</button>'
                             '</td>' +
                                 '</tr>';
                             tablaDedicacion.append(newRow);
