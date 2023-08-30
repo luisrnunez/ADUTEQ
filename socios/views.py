@@ -1,4 +1,5 @@
 import datetime
+from gettext import translation
 import re
 import datetime
 import re
@@ -92,6 +93,10 @@ def PanelActividades(request):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def Autenticacion_usuarios(request):
+
+    # if request.user.is_authenticated:
+    #     return redirect('principal')
+
     try:
         if request.method == 'POST':
             username = request.POST['username']
@@ -112,90 +117,91 @@ def Autenticacion_usuarios(request):
             return redirect('login.html')
 
 
-
+from django.db import transaction
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def guardar_socio(request):
 
+    try:
+        with transaction.atomic():
+            if request.method == 'POST':
+                username = request.POST.get('username')
+                password = request.POST.get('password')
+                cedula = request.POST.get('cedula')
+                first_name = request.POST.get('first_name')
+                last_name = request.POST.get('last_name')
+                fecha_nacimiento = request.POST.get('fecha_nacimiento')
+                lugar_nacimiento = request.POST.get('lugar_nacimiento')
+                email = request.POST.get('email')
+                numero_telefonico = request.POST.get('numero_telefonico')
+                numero_convencional = request.POST.get('numero_convencional')
+                direccion_domiciliaria = request.POST.get('direccion_domiciliaria')
+                facultad = request.POST.get('facultad')
+                categoria = request.POST.get('categoria')
+                dedicacion_academica = request.POST.get('dedicacion_academica')
+                titulo = request.POST.get('titulo')
+                aporte = request.POST.get('aporte')
 
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        cedula = request.POST.get('cedula')
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        fecha_nacimiento = request.POST.get('fecha_nacimiento')
-        lugar_nacimiento = request.POST.get('lugar_nacimiento')
-        email = request.POST.get('email')
-        numero_telefonico = request.POST.get('numero_telefonico')
-        numero_convencional = request.POST.get('numero_convencional')
-        direccion_domiciliaria = request.POST.get('direccion_domiciliaria')
-        facultad = request.POST.get('facultad')
-        categoria = request.POST.get('categoria')
-        dedicacion_academica = request.POST.get('dedicacion_academica')
-        titulo = request.POST.get('titulo')
-        aporte = request.POST.get('aporte')
 
-        if 'foto' in request.FILES:
-                foto = request.FILES['foto']
-        else:
-             foto=""
+                if 'foto' in request.FILES:
+                    foto = request.FILES['foto']
+                else:
+                    foto=""
 
-        if 'foto' in request.FILES:
-            foto = request.FILES['foto']
-        else:
-            foto=""
+                user = User(username=username,password=password, email=email, first_name=first_name, last_name=last_name)
+                
+                valor = False;   
+                if User.objects.filter(username=username).exists():
+                        messages.warning(
+                            request, 'El nombre de usuario ya está registrado')
+                        valor = True
+                if Socios.objects.filter(cedula=cedula).exists():
+                        messages.warning(
+                            request, 'El número de cédula ya está registrado')
+                        valor = True
+                if User.objects.filter(email=email).exists():
+                        messages.warning(
+                            request, 'El correo ya está registrado, ingrese otro')
+                        valor = True
+                if Socios.objects.filter(numero_telefonico=numero_telefonico).exists():
+                        messages.warning(
+                            request, 'El número de telefono ya está registrado')
+                        valor = True
+                if Socios.objects.filter(numero_convencional=numero_convencional).exists():
+                        messages.warning(
+                            request, 'El número de convencional ya está registrado')
+                        valor = True
 
-        user = User(username=username,password=password, email=email, first_name=first_name, last_name=last_name)
-        
-        valor = False;   
-        if User.objects.filter(username=username).exists():
-                messages.warning(
-                    request, 'El nombre de usuario ya está registrado')
-                valor = True
-        if Socios.objects.filter(cedula=cedula).exists():
-                messages.warning(
-                    request, 'El número de cédula ya está registrado')
-                valor = True
-        if User.objects.filter(email=email).exists():
-                messages.warning(
-                    request, 'El correo ya está registrado, ingrese otro')
-                valor = True
-        if Socios.objects.filter(numero_telefonico=numero_telefonico).exists():
-                messages.warning(
-                    request, 'El número de telefono ya está registrado')
-                valor = True
-        if Socios.objects.filter(numero_convencional=numero_convencional).exists():
-                messages.warning(
-                    request, 'El número de convencional ya está registrado')
-                valor = True
+                if valor == True:
+                    ListaDatos = carga_datos_html()
+                    ListaDatos.update( {
+                                    'socio': request.POST,'usuario': user
+                                })
+                    return render(request, 'emp_agg_socios.html', ListaDatos)
 
-        if valor == True:
-            ListaDatos = carga_datos_html()
-            ListaDatos.update( {
-                            'socio': request.POST,'usuario': user
-                        })
-            return render(request, 'emp_agg_socios.html', ListaDatos)
+                user = User.objects.create_user(username=username,password=password, email=email,
+                                    last_login=timezone.now().date(),
+                                    is_superuser=False, first_name=first_name, last_name=last_name,
+                                    is_staff=False, is_active=True, date_joined=timezone.now().date())
+                
+                socios = Socios(user=user,cedula=cedula, fecha_nacimiento=fecha_nacimiento,lugar_nacimiento=lugar_nacimiento,
+                                    numero_telefonico=numero_telefonico,numero_convencional=numero_convencional, direccion_domiciliaria=direccion_domiciliaria,
+                                    categoria=categoria,facultad=facultad,
+                                    dedicacion_academica=dedicacion_academica,aporte=aporte,
+                                    titulo=titulo,foto=foto)
+            
+            
+                socios.save()
+                messages.success(request, 'Se ha agregado un nuevo socio')
+                enviar_email_nuevaSocio(username,password,email)
 
-        user = User.objects.create_user(username=username,password=password, email=email,
-                              last_login=timezone.now().date(),
-                              is_superuser=False, first_name=first_name, last_name=last_name,
-                              is_staff=False, is_active=True, date_joined=timezone.now().date())
-        
-        socios = Socios(user=user,cedula=cedula, fecha_nacimiento=fecha_nacimiento,lugar_nacimiento=lugar_nacimiento,
-                            numero_telefonico=numero_telefonico,numero_convencional=numero_convencional, direccion_domiciliaria=direccion_domiciliaria,
-                            categoria=categoria,facultad=facultad,
-                            dedicacion_academica=dedicacion_academica,aporte=aporte,
-                            titulo=titulo,foto=foto)
-      
-    
-        socios.save()
-        messages.success(request, 'Se ha agregado un nuevo socio')
-        enviar_email_nuevaSocio(username,password,email)
+                # Redirigir a la página deseada después de guardar los datos
+                return redirect('listar_socios')
 
-        # Redirigir a la página deseada después de guardar los datos
-        return redirect('listar_socios')
-   
+    except Exception as e:
+        # Si ocurre algún error durante la transacción, la transacción se revierte automáticamente
+        messages.warning(request,'Ups, ha ocurrido un problema' ) 
+        print(e)
     return render(request, 'emp_socios.html')
 
 def enviar_email_nuevaSocio(username,password,email):
@@ -234,7 +240,7 @@ def editar_socio(request, socio_id):
             socio.dedicacion_academica = request.POST.get(
                 'dedicacion_academica')
             socio.titulo = request.POST.get('titulo')
-            #socio.aporte = request.POST.get('aporte')
+            # socio.aporte = request.POST.get('aporte')
 
             # if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():
             #     messages.warning(request, 'El nombre de usuario ya está registrado')

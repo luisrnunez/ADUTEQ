@@ -1,192 +1,198 @@
 {% extends 'base.html' %}
 {% load static %}
 
-    {% block content %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 
-    <style>
-        .body{
-            font-size: 14px !important;
-        }
+<style>
+    .body {
+        font-size: 14px !important;
+    }
+
     .pagination-container {
         display: flex;
         justify-content: center;
         margin-top: 20px;
     }
-    </style>
-    <!-- Aquí va el contenido de la página -->
-    <div class="content-menu" style="padding-top: 0%; font-size:  16px;" >
+</style>
+<!-- Aquí va el contenido de la página -->
+<div class="content-menu" style="padding-top: 0%; font-size:  16px;">
 
-        <div class="header" style="border-radius: 0;">
-            <h1>Proveedores</h1>
+    <div class="header" style="border-radius: 0;">
+        <h1>Proveedores</h1>
+    </div>
+
+    <div class="socios-content ">
+        <div class="botones-sup">
+            <a href="/aggproveedor"> <button class="add-socio-btn"> Agregar Nuevo Proveedor</button></a>
+            <div class="search-form">
+
+                <select id="criterio" name="criterio">
+                    <option value="nombres">Nombre</option>
+                    <option value="ruc">RUC</option>
+                    <option value="telefono">Telefono</option>
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+                <input type="text" id="buscador_input" name="valor" placeholder="Buscar proveedor...">
+                <!-- <button type="submit">Buscar</button> -->
+
+            </div>
         </div>
 
-        <div class="socios-content ">
-            <div class="botones-sup">
-                <a href="/aggproveedor"> <button class="add-socio-btn"> Agregar Nuevo Proveedor</button></a>
-                <div class="search-form">
-
-                    <select id="criterio" name="criterio">
-                        <option value="nombres">Nombre</option>
-                        <option value="ruc">RUC</option>
-                        <option value="telefono">Telefono</option>
-                        <option value="1">Activo</option>
-                        <option value="0">Inactivo</option>
-                    </select>
-                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar proveedor...">
-                    <!-- <button type="submit">Buscar</button> -->
-
-                </div>
-            </div>
 
 
 
 
-
-            <!--barra de busqueda-->
-            <!---
+        <!--barra de busqueda-->
+        <!---
             <div class="input-group">
                 <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
                     aria-describedby="search-addon" />
                 <button type="button" class="btn btn-outline-primary">search</button>
             </div>-->
 
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Telefono</th>
-                        <th>Dirección</th>
-                        <th>RUC</th>
-                        <th>Comisión</th>
-                        <th>Cupo</th>
-                        <th>Estado</th>
-                        <th>Editar</th>
-                        <th>Detalles Cupo</th>
-                        <th>C. Banco</th>
-                    </tr>
-                </thead>
-                <tbody id="proveedor-body">
-                    {% for proveedor in proveedores%}
-                    <tr>
-                        <td>{{proveedor.nombre}}</td>
-                        <td>{{proveedor.telefono}}</td>
-                        <td>{{proveedor.direccion}}</td>
-                        <td>{{proveedor.RUC}}</td>
-                        <td>{{proveedor.comision}}%</td>
-                        <td>{{proveedor.cupo}}</td>
-                        <td>
-                            {% if proveedor.estado %}
-                            <button class="green-button" onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
-                                <span class="visto-icon"></span>
-                                Activo
-                            </button>
-                            {% else %}
-                            <button class="red-button" onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
-                                <span class="no-visto-icon"> </span>Inactivo
-                            </button>
-                            {% endif %}
-
-                        </td>
-                        <td>
-
-                            <a href="/editProveedor/{{proveedor.id}}">
-                                <button class="edit-btn">
-                                    Editar
-                                </button></a>
-                            </a>
-                        </td> 
-                        <td>
-
-                            <a href="/verdetallescupo/{{proveedor.id}}">
-                                <button class="edit-btn">
-                                    Detalles Cupo
-                                </button></a>
-                            </a>
-                        </td> 
-                        <td>
-
-                            <a href='{% url "agregarCuenta" proveedor.id %}'>
-                                <button class="edit-btn">
-                                    Cuentas
-                                </button></a>
-                            </a>
-                        </td> 
-                    </tr>
-                    {% endfor %}
-                    
-                </tbody>
-            </table>
-            <div class="pagination-container">
-                <nav aria-label="...">
-                    <ul class="pagination">
-                        {% if proveedores.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ proveedores.previous_page_number }}">anterior</a>
-                            </li>
+        <table class="socios-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Telefono</th>
+                    <th>Dirección</th>
+                    <th>RUC</th>
+                    <th>Comisión</th>
+                    <th>Cupo</th>
+                    <th>Estado</th>
+                    <th>Editar</th>
+                    <th>Detalles Cupo</th>
+                    <th>C. Banco</th>
+                </tr>
+            </thead>
+            <tbody id="proveedor-body">
+                {% for proveedor in proveedores%}
+                <tr>
+                    <td>{{proveedor.nombre}}</td>
+                    <td>{{proveedor.telefono}}</td>
+                    <td>{{proveedor.direccion}}</td>
+                    <td>{{proveedor.RUC}}</td>
+                    <td>{{proveedor.comision}}%</td>
+                    <td>{{proveedor.cupo}}</td>
+                    <td>
+                        {% if proveedor.estado %}
+                        <button class="green-button"
+                            onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
+                            <span class="visto-icon"></span>
+                            Activo
+                        </button>
+                        {% else %}
+                        <button class="red-button"
+                            onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
+                            <span class="no-visto-icon"> </span>Inactivo
+                        </button>
                         {% endif %}
-                        <li class="pagination-item active">
-                            <span style="border-radius: 5px;" class="page-link">{{ proveedores.number }}</span>
-                        </li>
-                        {% if proveedores.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ proveedores.next_page_number }}">siguiente</a>
-                            </li>
-                        {% endif %}
-                        
-                        <!-- Agregar enlace a la última página -->
-                        
-                    </ul>
-                </nav>
-            </div>
+
+                    </td>
+                    <td>
+
+                        <a href="/editProveedor/{{proveedor.id}}">
+                            <button class="edit-btn">
+                                Editar
+                            </button></a>
+                        </a>
+                    </td>
+                    <td>
+
+                        <a href="/verdetallescupo/{{proveedor.id}}">
+                            <button class="edit-btn">
+                                Detalles Cupo
+                            </button></a>
+                        </a>
+                    </td>
+                    <td>
+
+                        <a href='{% url "agregarCuenta" proveedor.id %}'>
+                            <button class="edit-btn">
+                                Cuentas
+                            </button></a>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+        <div class="pagination-container">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    {% if proveedores.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ proveedores.previous_page_number }}">anterior</a>
+                    </li>
+                    {% endif %}
+                    <li class="pagination-item active">
+                        <span style="border-radius: 5px;" class="page-link">{{ proveedores.number }}</span>
+                    </li>
+                    {% if proveedores.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ proveedores.next_page_number }}">siguiente</a>
+                    </li>
+                    {% endif %}
+                    {% if proveedores.paginator.num_pages > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ proveedores.paginator.num_pages }}">última</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </div>
+</div>
 
-    
+
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-$(document).ready(function() {
-$("#buscador_input").on("input", function() {
-    var query = $(this).val();
-    var criterio = document.getElementById('criterio').value; 
-    console.log(criterio)
-    console.log(query)
-    $.ajax({
-        url: '{% url "search" %}',  // Cambia esto a la URL de tu vista de búsqueda
-        type: "POST",
-        data: {
-            csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
-            query: query,
-            criterio: criterio
-        },
-        success: function(data) {  // Verifica los datos devueltos por el servidor
-            $("#proveedor-body").html(data.rendered_table); 
-        }
+    $(document).ready(function () {
+        $("#buscador_input").on("input", function () {
+            var query = $(this).val();
+            var criterio = document.getElementById('criterio').value;
+            console.log(criterio)
+            console.log(query)
+            $.ajax({
+                url: '{% url "search" %}',  // Cambia esto a la URL de tu vista de búsqueda
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                    query: query,
+                    criterio: criterio
+                },
+                success: function (data) {  // Verifica los datos devueltos por el servidor
+                    $("#proveedor-body").html(data.rendered_table);
+                }
+            });
+        });
     });
-});
-});
 
-$(document).ready(function() {
-$("#criterio").on("change", function() {
-    var criterio = $(this).val();
-    $.ajax({
-        url: '{% url "search" %}', 
-        type: "POST",
-        data: {
-            csrfmiddlewaretoken: '{{ csrf_token }}',  
-            query: "",
-            criterio: criterio
-        },
-        success: function(data) {  
-            $("#proveedor-body").html(data.rendered_table); 
-        }
+    $(document).ready(function () {
+        $("#criterio").on("change", function () {
+            var criterio = $(this).val();
+            $.ajax({
+                url: '{% url "search" %}',
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    query: "",
+                    criterio: criterio
+                },
+                success: function (data) {
+                    $("#proveedor-body").html(data.rendered_table);
+                }
+            });
+        });
     });
-});
-});
 
 </script>
 {% endblock %}
 
-    {% endblock %}
+{% endblock %}
