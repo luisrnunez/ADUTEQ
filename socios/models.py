@@ -76,7 +76,7 @@ def datos_para_el_pdf(socio_id, mes, anio):
         cursor.execute(f"SELECT * FROM obtener_info_ayuda_economica({socio_id}, {mes}, {anio});")
         aportaciones_ayuda = cursor.fetchall()
 
-        cursor.execute(f"SELECT * FROM obtener_informe_mensual({socio_id}, {mes}, {anio});")
+        cursor.execute(f"SELECT * FROM obtener_informe_mensual2({socio_id}, {mes}, {anio});")
         consumo_total = cursor.fetchall()
 
     return consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumo_total

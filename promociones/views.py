@@ -170,15 +170,17 @@ def enviar_promocion_a_todos(request, promo_id):
             template = get_template('correo_promo.html')
             context = {'promocion': promocion}
             content = template.render(context)
+
+            emisor_personalizado = 'williamvera210@gmail.com'
             
-            email = EmailMultiAlternatives(
+            emaill = EmailMultiAlternatives(
                 'Nueva Promoción: ' + promocion.titulo,
                 'Nueva promoción disponible',
                 settings.EMAIL_HOST_USER,
                 [socio.user.email])
             
             # agregamos el contenido HTML
-            email.attach_alternative(content, 'text/html')
+            emaill.attach_alternative(content, 'text/html')
             
             # redimensionar la imagen y convertirla a formato JPEG
             imagen = Image.open(promocion.imagen)
@@ -190,9 +192,9 @@ def enviar_promocion_a_todos(request, promo_id):
             # agregamos la imagen redimensionada al correo
             imagen_adjunta = MIMEImage(imagen_io.getvalue())
             imagen_adjunta.add_header('Content-ID', '<promocion_imagen>')
-            email.attach(imagen_adjunta)
+            emaill.attach(imagen_adjunta)
             
-            email.send()
+            emaill.send()
             
         response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
     except Exception as e:

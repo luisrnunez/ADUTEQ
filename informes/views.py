@@ -32,6 +32,7 @@ from datetime import datetime
 from django.template.loader import get_template
 from django.template import Context
 import os
+import calendar
 
 
 
@@ -116,6 +117,14 @@ def generar_pdf(context):
         return result.getvalue()
     
 def datospdf(socio_id, mes, anio):
+
+    nombres_meses = [
+    "-ENERO", "-FEBRERO", "-MARZO", "-ABRIL", "-MAYO", "-JUNIO",
+    "-JULIO", "-AGOSTO", "-SEPTIEMBRE", "-OCTUBRE", "-NOVIEMBRE", "-DICIEMBRE"
+]
+
+    nombre_mes = nombres_meses[mes - 1]
+
     data = datos_para_el_pdf(socio_id, mes, anio)
     consumos_proveedor = data[0]
     consumos_cuotas = data[1]
@@ -127,19 +136,20 @@ def datospdf(socio_id, mes, anio):
     hide_consumos_cuotas = any(valor_cuota == 0 or valor_cuota is None for _, _, _, valor_cuota in consumos_cuotas)
     hide_aportaciones_socio = any(montoa == 0 or montoa is None for _, montoa in aportaciones_socio)
     hide_aportaciones_ayuda = any(valor_aportado == 0 or valor_aportado is None for _, valor_aportado  in aportaciones_ayuda)
-    hide_consumos_totales = any(columna2 == 0 or columna2 is None for _, columna2 in consumos_totales)
+    #hide_consumos_totales = any(columna2 == 0 or columna2 is None for _, columna2 in consumos_totales)
 
     context = {
         'hide_consumos_proveedor': hide_consumos_proveedor,
         'hide_consumos_cuotas': hide_consumos_cuotas,
         'hide_aportaciones_socio': hide_aportaciones_socio,
         'hide_aportaciones_ayuda': hide_aportaciones_ayuda,
-        'hide_consumos_totales': hide_consumos_totales,
+        #'hide_consumos_totales': hide_consumos_totales,
         'consumos_proveedor': consumos_proveedor,
         'consumos_cuotas': consumos_cuotas,
         'aportaciones_socio': aportaciones_socio,
         'aportaciones_ayuda': aportaciones_ayuda,
-        'consumos_totales': consumos_totales
+        'consumos_totales': consumos_totales,
+        'mes':nombre_mes
     }
 
     return context
@@ -154,50 +164,32 @@ def nuevo_enviar_correo(request, socio_id):
     numero_mes = hoy.month
     anio = hoy.year
     
-    socio = Socios.objects.get(id=socio_id)
-    resultados = obtener_datos_socioss(socio_id, numero_mes, anio)
+    selected_mes = request.POST.get('mes', 'mes_actual')
 
+    if selected_mes == 'mes_actual':
+        numero_mes = hoy.month
+        anio = hoy.year
+    else:
+        if hoy.month == 1: 
+            numero_mes = 12  
+        else:
+            numero_mes = hoy.month - 1 
+
+        anio = hoy.year if numero_mes != 12 else hoy.year - 1
+        
+    resultados = obtener_datos_socioss(socio_id, numero_mes, anio)
     informe_data = generar_pdf(datospdf(socio_id, numero_mes, anio))
 
     if enviarGastoEmail(socio_id, resultados, informe_data):
-        response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
+        response = {'status': 'success', 'message': 'Informe enviado correctamente'}
     else:
-        response = {'status': 'error', 'message': 'Ups. algo salío mal'}
+        response = {'status': 'error', 'message': 'Ups. algo salió mal'}
 
     return JsonResponse(response)
 
 
 
 ###################################---ENVIAR CORREO TODOS----############################
-def enviar_correo_todos():
-    socios = Socios.objects.all()
-    hoy = datetime.today()
-
-    for socio in socios:
-        if socio.user.is_active:
-            try:
-                numero_mes = hoy.month
-                anio = hoy.year
-
-                template = get_template('gastosmensual.html')
-                resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
-                context={'gastos':resultados}
-                content = template.render(context)
-                
-                pdf_buffer = generar_pdf(datospdf(socio.id, numero_mes, anio))
-                if pdf_buffer:
-                    email = EmailMultiAlternatives(
-                        'Informe mensual ADUTEQ',
-                        'Gastos',
-                        settings.EMAIL_HOST_USER,
-                        [socio.user.email]
-                    )
-                    email.attach_alternative(content, 'text/html')
-                    email.attach('informe.pdf', pdf_buffer, 'application/pdf')
-                    email.send()
-            except Exception as e:
-                print(str(e))
-    return True
 
 
 def enviarGastoEmail(socio_id, context, pdf_buffer):
@@ -225,14 +217,50 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
         return False
     
 
-def enviar_correo_todoss(request):
+def enviar_correo_todos(request):
+    selected_mes = request.POST.get('mes', 'mes_actual')  # Obtener el mes seleccionado del POST
 
-    if enviar_correo_todos():
-        response = {'status': 'success', 'message': 'Correo enviado a todos los socios'}
-    else:
-        response = {'status': 'error', 'message': 'Ups. algo salío mal'}
+    hoy = datetime.today()
+    nombres_meses = [
+        "-ENERO", "-FEBRERO", "-MARZO", "-ABRIL", "-MAYO", "-JUNIO",
+        "-JULIO", "-AGOSTO", "-SEPTIEMBRE", "-OCTUBRE", "-NOVIEMBRE", "-DICIEMBRE"
+    ]
 
-    return JsonResponse(response)
+    for socio in Socios.objects.all():
+        if socio.user.is_active:
+            try:
+                if selected_mes == 'mes_actual':
+                    numero_mes = hoy.month
+                    anio = hoy.year
+                    nombre_mes = nombres_meses[numero_mes - 1]
+                else:
+                    if hoy.month == 1: 
+                        numero_mes = 12  
+                    else:
+                        numero_mes = hoy.month - 1 
+
+                    anio = hoy.year if numero_mes != 12 else hoy.year - 1
+                    nombre_mes = nombres_meses[numero_mes - 1]
+
+                template = get_template('gastosmensual.html')
+                resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
+                context = {'gastos': resultados}
+                content = template.render(context)
+
+                pdf_buffer = generar_pdf(datospdf(socio.id, numero_mes, anio))
+                if pdf_buffer:
+                    email = EmailMultiAlternatives(
+                        'Informe mensual ADUTEQ ' + nombre_mes,
+                        'Gastos',
+                        settings.EMAIL_HOST_USER,
+                        [socio.user.email]
+                    )
+                    email.attach_alternative(content, 'text/html')
+                    email.attach('informe.pdf', pdf_buffer, 'application/pdf')
+                    email.send()
+            except Exception as e:
+                print(str(e))
+    return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
 def reportes(request):
     return render(request, "reportes.html")

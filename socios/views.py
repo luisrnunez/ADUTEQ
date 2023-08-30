@@ -234,7 +234,7 @@ def editar_socio(request, socio_id):
             socio.dedicacion_academica = request.POST.get(
                 'dedicacion_academica')
             socio.titulo = request.POST.get('titulo')
-            socio.aporte = request.POST.get('aporte')
+            #socio.aporte = request.POST.get('aporte')
 
             # if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():
             #     messages.warning(request, 'El nombre de usuario ya está registrado')
