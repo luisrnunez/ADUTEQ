@@ -15,7 +15,7 @@
                     <label for="socio">Socio:</label>
                     <select class="form-control mb-2" name="socio" required style="width: 100%;">
                         {% for socio in socios %}
-                        <option value="{{ socio.id }}">{{ socio.user.first_name }}</option>
+                        <option value="{{ socio.id }}">{{ socio.user.first_name}} {{socio.user.last_name}}</option>
                         {% endfor %}
                     </select>
 

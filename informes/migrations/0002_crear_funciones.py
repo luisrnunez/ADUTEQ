@@ -370,18 +370,21 @@ def actualizar_descuentos(apps, schema_editor):
                CREATE OR REPLACE FUNCTION public.actualizar_descuentos(
                     mes integer,
                     anio integer,
-                    descuento integer)
+                    cedu character varying)
                     RETURNS void
                     LANGUAGE 'plpgsql'
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
                 BEGIN
-                    UPDATE public."Pagos_pagos"
+                    UPDATE public."Pagos_pagos" p
                     SET estado = True
-                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
-                    and id=descuento;
-                    END;       
+                    FROM public.socios_socios s
+                    WHERE p.socio_id = s.id
+                        AND EXTRACT(MONTH FROM p.fecha_consumo) = mes
+                        AND EXTRACT(YEAR FROM p.fecha_consumo) = anio
+                        AND s.cedula = cedu;
+                END;
                 $BODY$;
                 """
             )
@@ -398,18 +401,18 @@ def actualizar_estados(apps, schema_editor):
                 CREATE OR REPLACE FUNCTION public.actualizar_estados(
                     mes integer,
                     anio integer,
-                    socio integer)
+                    id_pago integer)
                     RETURNS void
                     LANGUAGE 'plpgsql'
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                                BEGIN
-                                    UPDATE public."Pagos_detalle_cuotas"
-                                    SET estado = True
-                                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio
-                                    and socio_id=socio;
-                                END;
+                                                BEGIN
+                                                    UPDATE public."Pagos_detalle_cuotas"
+                                                    SET estado = True
+                                                    where id=id_pago;
+                                                END;
+                                                
                                 
                 $BODY$;
                 """
@@ -629,36 +632,36 @@ def obtener_consumos_proveedores_func(apps, schema_editor):
                 CREATE OR REPLACE FUNCTION public.obtener_consumos_proveedores_func(
                     mes integer,
                     anio integer)
-                    RETURNS TABLE(nombre text, cedula character varying, fecha date, descuento_proveedores numeric, id_desc bigint) 
+                    RETURNS TABLE(nombre text, cedula character varying, descuento_proveedores numeric) 
                     LANGUAGE 'plpgsql'
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                     ROWS 1000
 
                 AS $BODY$
-                BEGIN
-                    RETURN QUERY
-                    SELECT
-                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
-                        s.cedula AS cedula,
-                        p.fecha_consumo,
-                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
-                        p.id AS id_desc
-                    FROM
-                        public.socios_socios s
-                    INNER JOIN
-                        public.auth_user u ON s.user_id = u.id
-                    LEFT JOIN (
-                        SELECT socio_id, fecha_consumo, SUM(consumo_total) AS consumo_total, id
-                        FROM public."Pagos_pagos"
-                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
-                        and estado= False
-                        GROUP BY socio_id, fecha_consumo, id
-                    ) p ON s.id = p.socio_id
-                    GROUP BY
-                        u.first_name, u.last_name, s.cedula, p.fecha_consumo, p.id
-                    HAVING SUM(COALESCE(p.consumo_total, 0)) > 0;
-                END;
+                                BEGIN
+                                    RETURN QUERY
+                                    SELECT
+                                        CONCAT(u.last_name, ' ', u.first_name) AS Nombre,
+                                        s.cedula AS cedula,
+                                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores
+                                    FROM
+                                        public.socios_socios s
+                                    INNER JOIN
+                                        public.auth_user u ON s.user_id = u.id
+                                    LEFT JOIN (
+                                        SELECT socio_id, SUM(consumo_total) AS consumo_total
+                                        FROM public."Pagos_pagos"
+                                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                                        AND estado = False
+                                        GROUP BY socio_id
+                                    ) p ON s.id = p.socio_id
+                                    GROUP BY
+                                        u.first_name, u.last_name, s.cedula
+                                    HAVING SUM(COALESCE(p.consumo_total, 0)) > 0
+                                    order by u.last_name;
+                                END;
+                                
                 $BODY$;
                 """
             )
@@ -675,36 +678,41 @@ def obtener_cuota_descuentos_func(apps, schema_editor):
                 CREATE OR REPLACE FUNCTION public.obtener_cuota_descuentos_func(
                     mes integer,
                     anio integer)
-                    RETURNS TABLE(nombre text, cedula character varying, fecha date, cuota_descuento numeric, id_socio bigint) 
+                    RETURNS TABLE(nombres text, cedula character varying, fecha date, cuota_descuento numeric, id_socio bigint, proveedor character varying) 
                     LANGUAGE 'plpgsql'
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                     ROWS 1000
 
                 AS $BODY$
-                                BEGIN
-                                    RETURN QUERY
-                                    SELECT
-                                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
-                                        s.cedula AS cedula,
-                                        pd.fecha_descuento,
-                                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
-                                        s.id
-                                    FROM
-                                        public.socios_socios s
-                                    INNER JOIN
-                                        public.auth_user u ON s.user_id = u.id
-                                    LEFT JOIN (
-                                        SELECT socio_id, fecha_descuento, SUM(valor_cuota) AS valor_cuota
-                                        FROM public."Pagos_detalle_cuotas"
-                                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
-                                        AND estado = False
-                                        GROUP BY socio_id, fecha_descuento
-                                    ) pd ON s.id = pd.socio_id
-                                    GROUP BY
-                                        u.first_name, u.last_name, s.cedula, pd.fecha_descuento,s.id
-                                    HAVING SUM(COALESCE(pd.valor_cuota, 0)) > 0;
-                                END;
+                                                BEGIN
+                                                    RETURN QUERY
+                                                    SELECT
+                                                        CONCAT(u.last_name, ' ', u.first_name) AS Nombres,
+                                                        s.cedula AS cedula,
+                                                        pd.fecha_descuento,
+                                                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
+                                                        pd.id,
+                                                        pr.nombre
+                                                    FROM
+                                                        public.socios_socios s
+                                                    INNER JOIN
+                                                        public.auth_user u ON s.user_id = u.id
+                                                    LEFT JOIN (
+                                                        SELECT socio_id, fecha_descuento, SUM(valor_cuota) AS valor_cuota, id, proveedor_id
+                                                        FROM public."Pagos_detalle_cuotas"
+                                                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
+                                                        AND estado = False
+                                                        GROUP BY socio_id, fecha_descuento,id
+                                                    ) pd ON s.id = pd.socio_id
+                                                    LEFT JOIN(select nombre, id 
+                                                    from public.proveedores_proveedor) pr on pd.proveedor_id = pr.id
+                                                    GROUP BY
+                                                        u.first_name, u.last_name, s.cedula, pd.fecha_descuento, pd.id,pr.nombre
+                                                    HAVING SUM(COALESCE(pd.valor_cuota, 0)) > 0
+                                                    order by u.last_name;
+                                                END;
+                                                
                                 
                 $BODY$;
                 """
@@ -729,29 +737,31 @@ def obtener_cuota_prestamos_func(apps, schema_editor):
                     ROWS 1000
 
                 AS $BODY$
-                BEGIN
-                    RETURN QUERY
-                    SELECT
-                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
-                        s.cedula AS cedula,
-                        pm.fecha_pago,
-                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
-                        s.id
-                    FROM
-                        public.socios_socios s
-                    INNER JOIN
-                        public.auth_user u ON s.user_id = u.id
-                    LEFT JOIN (
-                        SELECT socio_id, fecha_pago, SUM(monto_pago) AS monto_pago
-                        FROM public."Prestamos_pagomensual"
-                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
-                        AND cancelado = False
-                        GROUP BY socio_id, fecha_pago
-                    ) pm ON s.id = pm.socio_id
-                    GROUP BY
-                        u.first_name, u.last_name, s.cedula, pm.fecha_pago,s.id
-                    HAVING SUM(COALESCE(pm.monto_pago, 0)) > 0;
-                END;
+                                BEGIN
+                                    RETURN QUERY
+                                    SELECT
+                                        CONCAT(u.last_name, ' ', u.first_name) AS Nombre,
+                                        s.cedula AS cedula,
+                                        pm.fecha_pago,
+                                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
+                                        s.id
+                                    FROM
+                                        public.socios_socios s
+                                    INNER JOIN
+                                        public.auth_user u ON s.user_id = u.id
+                                    LEFT JOIN (
+                                        SELECT socio_id, fecha_pago, SUM(monto_pago) AS monto_pago
+                                        FROM public."Prestamos_pagomensual"
+                                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
+                                        AND cancelado = False
+                                        GROUP BY socio_id, fecha_pago
+                                    ) pm ON s.id = pm.socio_id
+                                    GROUP BY
+                                        u.first_name, u.last_name, s.cedula, pm.fecha_pago,s.id
+                                    HAVING SUM(COALESCE(pm.monto_pago, 0)) > 0
+                                    order by u.last_name;
+                                END;
+                                
                 $BODY$;
                 """
             )
