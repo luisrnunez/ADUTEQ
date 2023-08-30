@@ -223,8 +223,8 @@ def editar_socio(request, socio_id):
             if 'foto' in request.FILES:
                 socio.foto = request.FILES['foto']
               
-            usuario.username = request.POST.get('username')
-            usuario.set_password(request.POST['password'])
+            # usuario.username = request.POST.get('username')
+            # usuario.set_password(request.POST['password'])
             socio.cedula = request.POST.get('cedula')
             usuario.first_name = request.POST.get('first_name')
             usuario.last_name = request.POST.get('last_name')

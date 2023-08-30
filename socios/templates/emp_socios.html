@@ -20,6 +20,40 @@
         display: block;
         margin: 0 auto;
     }
+
+    /* Estilos para el modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 50px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    /* Estilos para cerrar el modal */
+    .close {
+        color: white;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    /* Estilos para la imagen ampliada */
+    #modalImage {
+        display: block;
+        margin: 0 auto;
+        max-width: 90%;
+        max-height: 80vh;
+        /* border-radius: 50%; */
+        object-fit: cover;
+    }
 </style>
 
 
@@ -33,9 +67,9 @@
             <div>
                 <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
                 <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
-                 
-    
-    
+
+
+
                 <!-- </form> -->
                 <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
                     <button class="add-socio-btn">Enviar correo a todos</button>
@@ -46,7 +80,7 @@
             </div>
             <div style="display: inline-flex; justify-content: end; width: max-content;">
                 <div class="search-form">
-    
+
                     <select id="criterio" name="criterio">
                         <option value="nombres">Nombre</option>
                         <option value="apellidos">Apellido</option>
@@ -61,7 +95,7 @@
 
                 </div>
             </div>
-            
+
         </div>
 
 
@@ -91,7 +125,8 @@
                     <td>{{ socio.user.last_name }}</td>
                     <td>
                         {% if socio.foto %}
-                        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image">
+                        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image"
+                            onclick="openModal('{{ socio.foto.url }}')">
                         {% else %}
                         No hay foto disponible.
                         {% endif %}
@@ -127,15 +162,14 @@
                         </a>
                     </td>
                     <td>
-                        <a href="/aportaciones_socio/{{socio.id}}"
-                            class="edit-btn" style="text-decoration: none;"> Aportación
+                        <a href="/aportaciones_socio/{{socio.id}}" class="edit-btn" style="text-decoration: none;">
+                            Aportación
                         </a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-
         <div class="pagination-container">
             <nav aria-label="...">
                 <ul class="pagination">
@@ -159,99 +193,115 @@
     </div>
     <!-- Resto del contenido de la página -->
 </div>
+<div id="imageModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" alt="Imagen ampliada">
+</div>
 {% block scripts %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 
-function confirmarEnvioCorreoTodos() {
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Deseas enviar correo a todos los soci@s',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'Cancelar',
-        dangerMode: true,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Enviando correos...',
-                html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
-                    '<p style="margin-top: 10px;">Enviando correos a todos los soci@s...</p>',
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                allowEnterKey: false,
-                didOpen: () => {
-                    $.ajax({
-                        url: '/enviar_gastos_todos/',
-                        type: 'POST',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                        dataType: 'json',
-                        success: function (response) {
-                            Swal.fire({
-                                title: response.status === 'success' ? 'Éxito' : 'Error',
-                                text: response.message,
-                                icon: response.status === 'success' ? 'success' : 'error',
-                            });
-                        },
-                        error: function (xhr, errmsg, err) {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Ocurrió un error al enviar los correos',
-                                icon: 'error',
-                            });
-                        },
-                    });
+    function confirmarEnvioCorreoTodos() {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas enviar correo a todos los soci@s',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Enviando correos...',
+                    html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
+                        '<p style="margin-top: 10px;">Enviando correos a todos los soci@s...</p>',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        $.ajax({
+                            url: '/enviar_gastos_todos/',
+                            type: 'POST',
+                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                            dataType: 'json',
+                            success: function (response) {
+                                Swal.fire({
+                                    title: response.status === 'success' ? 'Éxito' : 'Error',
+                                    text: response.message,
+                                    icon: response.status === 'success' ? 'success' : 'error',
+                                });
+                            },
+                            error: function (xhr, errmsg, err) {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al enviar los correos',
+                                    icon: 'error',
+                                });
+                            },
+                        });
+                    },
+                });
+            }
+        });
+    }
+
+
+    $(document).ready(function () {
+        $("#buscador_input").on("input", function () {
+            var query = $(this).val();
+            var criterio = document.getElementById('criterio').value;
+            console.log(criterio)
+            console.log(query)
+            $.ajax({
+                url: '{% url "buscar_socios" %}',
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    query: query,
+                    criterio: criterio
                 },
+                success: function (data) {
+                    $("#socios-body").html(data.rendered_table);
+                }
             });
-        }
-    });
-}
-
-
-    $(document).ready(function() {
-    $("#buscador_input").on("input", function() {
-        var query = $(this).val();
-        var criterio = document.getElementById('criterio').value; 
-        console.log(criterio)
-        console.log(query)
-        $.ajax({
-            url: '{% url "buscar_socios" %}',
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                query: query,
-                criterio: criterio
-            },
-            success: function(data) { 
-                $("#socios-body").html(data.rendered_table); 
-            }
         });
     });
-});
 
-$(document).ready(function() {
-    $("#criterio").on("change", function() {
-        var criterio = $(this).val();
-       
-        $.ajax({
-            url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
-                query: "",
-                criterio: criterio
-            },
-            success: function(data) {  // Verifica los datos devueltos por el servidor
-                $("#socios-body").html(data.rendered_table); 
-            }
+    $(document).ready(function () {
+        $("#criterio").on("change", function () {
+            var criterio = $(this).val();
+
+            $.ajax({
+                url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                    query: "",
+                    criterio: criterio
+                },
+                success: function (data) {  // Verifica los datos devueltos por el servidor
+                    $("#socios-body").html(data.rendered_table);
+                }
+            });
         });
     });
-});
 
+    function openModal(imageSrc) {
+        var modal = document.getElementById("imageModal");
+        var modalImage = document.getElementById("modalImage");
 
+        modalImage.src = imageSrc;
+        modal.style.display = "block";
+    }
+
+    // Función para cerrar el modal
+    function closeModal() {
+        var modal = document.getElementById("imageModal");
+        modal.style.display = "none";
+    }
 
 </script>
 {% endblock %}
@@ -326,53 +376,68 @@ $(document).ready(function() {
 
 <script>
     function confirmarEnvioCorreo(socio_id, firstName, lastName) {
-    // Mostrar un cuadro de confirmación con SweetAlert2
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: `¿Desea enviar correos a ${firstName} ${lastName}?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'Cancelar',
-        dangerMode: true,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Mostrar el mensaje flotante con imagen y texto de carga
-            Swal.fire({
-                title: 'Enviando correos...',
-                html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
-                    `<p style="margin-top: 10px;">Enviando correo a ${firstName} ${lastName}...</p>`,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                allowEnterKey: false,
-                didOpen: () => {
-                    // Realizar la acción de enviar correo mediante AJAX
-                    $.ajax({
-                        url: `/enviar_gastos/`+socio_id+'/',
-                        type: 'POST',
-                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                        dataType: 'json',
-                        success: function (response) {
-                            Swal.fire({
-                                title: response.status === 'success' ? 'Éxito' : 'Error',
-                                text: response.message,
-                                icon: response.status === 'success' ? 'success' : 'error',
-                            });
-                        },
-                        error: function (xhr, errmsg, err) {
-                            Swal.fire({
-                                title: 'Error',
-                                text: 'Ocurrió un error al enviar el correo',
-                                icon: 'error',
-                            });
-                        },
-                    });
-                },
-            });
-        }
-    });
-}
+        // Mostrar un cuadro de confirmación con SweetAlert2
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: `¿Desea enviar correos a ${firstName} ${lastName}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar el mensaje flotante con imagen y texto de carga
+                Swal.fire({
+                    title: 'Enviando correos...',
+                    html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
+                        `<p style="margin-top: 10px;">Enviando correo a ${firstName} ${lastName}...</p>`,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        // Realizar la acción de enviar correo mediante AJAX
+                        $.ajax({
+                            url: `/enviar_gastos/` + socio_id + '/',
+                            type: 'POST',
+                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                            dataType: 'json',
+                            success: function (response) {
+                                Swal.fire({
+                                    title: response.status === 'success' ? 'Éxito' : 'Error',
+                                    text: response.message,
+                                    icon: response.status === 'success' ? 'success' : 'error',
+                                });
+                            },
+                            error: function (xhr, errmsg, err) {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al enviar el correo',
+                                    icon: 'error',
+                                });
+                            },
+                        });
+                    },
+                });
+            }
+        });
+    }
+</script>
+<script>
+    function openModal(imageSrc) {
+        var modal = document.getElementById("imageModal");
+        var modalImage = document.getElementById("modalImage");
+
+        modalImage.src = imageSrc;
+        modal.style.display = "block";
+    }
+
+    // Función para cerrar el modal
+    function closeModal() {
+        var modal = document.getElementById("imageModal");
+        modal.style.display = "none";
+    }
 </script>
 <!-- <script>
     function confirmarEnvioCorreoTodos() {

@@ -6,7 +6,8 @@
     <td>{{ socio.user.last_name }}</td>
     <td>
         {% if socio.foto %}
-        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image">
+        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image"
+        onclick="openModal('{{ socio.foto.url }}')">
         {% else %}
         No hay foto disponible.
         {% endif %}
@@ -50,4 +51,3 @@
     <td colspan="9">No se encontraron resultados.</td>
 </tr>
 {% endfor %}
-
