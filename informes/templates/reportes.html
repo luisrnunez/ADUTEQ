@@ -4,90 +4,119 @@
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pantalla con Imágenes y Texto</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantalla con Imágenes y Texto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
 
-  .image-container {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
+    .image-container {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
 
-  .image-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 0 10px;
-  }
+    .image-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 10px;
+    }
 
-  .image-card img {
-    max-width: 200px;
-    margin-bottom: 10px;
-  }
+    .image-card img {
+      max-width: 200px;
+      margin-bottom: 10px;
+    }
 
-  .text {
-    text-align: center;
-    font-size: 14px;
-    color: #000000;
-    font-weight: bold;
-  }
+    .text {
+      text-align: center;
+      font-size: 14px;
+      color: #000000;
+      font-weight: bold;
+    }
 
-  .text p {
-    margin: 0;
-  }
-</style>
+    .text p {
+      margin: 0;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
+
 <body>
   <div class="image-container">
-    <div class="image-card">
-      <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">
-      <div class="text">
-        <p>Reporte Descuento Total Socios</p>
-        <a href="/reportes_socios_todos/"> <button style="margin-top: 10px;" class="add-socio-btn"> Generar Reporte</button></a>
+    <form method="post" action="{% url 'reportes_socios_todos' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">
+        <div class="text">
+          <p>Reporte Descuento Total Socios</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpdts" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="image-card">
-      <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">
-      <div class="text">
-        <p>Reporte Descuento Pendientes Socios</p>
-        <a href="/reportes_socios/"> <button style="margin-top: 10px;" class="add-socio-btn"> Generar Reporte</button></a>
-      </div>
-    </div>
-    <div class="image-card">
-      <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 2">
-      <div class="text">
-        <p>Reporte Consumo Mensual Proveedores.</p>
-        <a href="/generar_reporte/"> <button style="margin-top: 10px;" class="add-socio-btn"> Generar Reporte</button></a>
-      </div>
-    </div>
-    <div class="image-card">
-      <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
-      <div class="text">
-        <p>Reporte General Descuento Socio</p>
-        <a href="/reportes_socios_general/"> <button style="margin-top: 10px;" class="add-socio-btn"> Generar Reporte</button></a>
-      </div>
-    </div>
-  </div>
-  
-  <div class="image-container">
-    
-  </div>
+    </form>
 
+    <form method="post" action="{% url 'reportes_socios' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">
+        <div class="text">
+          <p>Reporte Descuento Pendientes Socios</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpdps" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'generar_reporte' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 2">
+        <div class="text">
+          <p>Reporte Consumo Mensual Proveedores.</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpcmp" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'reportes_socios_general' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
+        <div class="text">
+          <p>Reporte General Descuento Socio</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpgds" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+  </div>
 </body>
+
 </html>
 
 

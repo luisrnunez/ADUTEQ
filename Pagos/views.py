@@ -367,39 +367,18 @@ def extraer_datos_pdf(request):
     if request.method == 'POST':
 
         pdf_file = request.FILES['pdf_file']
-        # Configurar el almacenamiento del archivo en la carpeta "media" del proyecto
         fs = FileSystemStorage(location=settings.MEDIA_ROOT + '/pdf')
 
-        # Guardar el archivo PDF en la carpeta "pdf" dentro de la carpeta "media"
-        file_path = fs.save('archivo.pdf', pdf_file)
-        file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
+        # file_path = fs.save('archivo.pdf', pdf_file)
+        # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
 
-        tables = tabula.read_pdf(pdf_file, pages="all")
-
-     
-
+        tables = tabula.read_pdf(pdf_file, pages="all", pandas_options={'header': None, 'dtype': str})
         datos_tabla = []
 
-        # print(tables)
-
-        # Procesar cada tabla extraída
         for table in tables:
-            # Obtener los encabezados de la tabla
-            #headers = table.columns.tolist()
-            #print(headers)
-
-            # Recorrer las filas de la tabla
             for index, row in table.iterrows():
-                # Obtener los valores de cada columna en la fila
-                #column = row.tolist()
                 row_data = {}
-                # print(row.tolist())
-                #row_data['cedula'] = column[0] if len(column) >= 1 else ''
-                #row_data['nombre'] = column[1] if len(column) >= 2 else ''
-                #row_data['consumo_total'] = column[2] if len(
-                #    column) >= 3 else ''
                 datos_tabla.append(row.tolist())
-
         proveedores = Proveedor.objects.filter(estado=True)
         return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
 
@@ -573,7 +552,8 @@ def verificar_registros(request):
 
 
 def generar_reporte_pdf(request):
-    fecha_actual = datetime.now()
+    fecha_actual_str = request.POST.get('fecharpcmp')
+    fecha_actual = datetime.strptime(fecha_actual_str, '%Y-%m-%d')
     mes = fecha_actual.month
     anio = fecha_actual.year
 

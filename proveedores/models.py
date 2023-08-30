@@ -9,7 +9,7 @@ from django.utils import timezone
 class Proveedor(models.Model):
     nombre=models.CharField(max_length=200)
     telefono=models.CharField(max_length=13)
-    RUC=models.CharField(unique=True,max_length=13)
+    ruc=models.CharField(unique=True,max_length=13)
     direccion=models.CharField(max_length=500)
     comision=models.IntegerField()
     cupo=models.DecimalField(max_digits = 8, decimal_places = 2)

@@ -30,7 +30,7 @@
                             <label class="fw-bold" for="socio">Socio:</label>
                             <select class="form-control mb-2" name="socio" required>
                                 {% for socio in socios %}
-                                <option value="{{ socio.id }}">{{ socio.user.first_name }}</option>
+                                <option value="{{ socio.id }}">{{ socio.user.last_name }} {{ socio.user.first_name }}</option>
                                 {% endfor %}
                             </select>
                             <label class="fw-bold" for="proveedor">Proveedor:</label>

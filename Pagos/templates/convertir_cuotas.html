@@ -28,7 +28,7 @@
                         </div>
                         <div class="card-body">
                             <label class="fw-bold" for="socio">Socio:</label>
-                            <input  name="socioNombre" id="socioNombre" class="form-control mb-2" value="{{pagos.socio.user.first_name}}"  required>
+                            <input  name="socioNombre" id="socioNombre" class="form-control mb-2" value="{{pagos.socio.user.first_name}} {{pagos.socio.user.last_name}}"  required>
                             <input type="hidden" name="socio" id="socio" class="form-control mb-2" value="{{pagos.socio.id}}"  required>
                             <!-- <select class="form-control mb-2" name="socio" required>
                                 {% for socio in socios %}

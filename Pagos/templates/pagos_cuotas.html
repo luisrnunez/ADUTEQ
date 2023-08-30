@@ -54,8 +54,8 @@
                         <!-- <th scope="col">Cuota Actual</th> -->
                         <th scope="col">Consumo Total</th>
                         <!-- <th scope="col">Valor Cuota</th> -->
-                        <th scope="col">Estado</th>
                         <th scope="col">Fecha Descuento</th>
+                        <th scope="col">Estado</th>
                         <th scope="col">Detalle</th>
                         {% if periodo_seleccionado.activo %}
                         <th scope="col">Eliminar</th>
@@ -66,12 +66,13 @@
                     {% for pago_cuota in pago_cuotas %}
                     <tr>
                         <td>{{pago_cuota.id}}</td>
-                        <td>{{pago_cuota.socio.user.first_name }}</td>
+                        <td>{{pago_cuota.socio.user.last_name }} {{pago_cuota.socio.user.first_name }}</td>
                         <td>{{pago_cuota.proveedor.nombre}}</td>
                         <td>{{pago_cuota.numero_cuotas}}</td>
                         <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
                         <td>{{pago_cuota.consumo_total}}</td>
                         <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
+                        <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
                         <td>
                             {% if pago_cuota.estado %}
                             <button class="green-button">
@@ -83,7 +84,6 @@
                             </button>
                             {% endif %}
                         </td>
-                        <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
                         <td>
                             <form action="{% url 'detalles_cuota' pago_cuota.id %}">
                                 <button class="edit-btn">Ver Detalle</button>

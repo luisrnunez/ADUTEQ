@@ -259,7 +259,8 @@ def generar_reporte_pdf_total_usuarios(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_consumo_pendientes.pdf"'
 
-    fecha_actual = datetime.now()
+    fecha_actual_str = request.POST.get('fecharpdps')
+    fecha_actual = datetime.strptime(fecha_actual_str, '%Y-%m-%d')
     mes = fecha_actual.month
     anio = fecha_actual.year
     resultados = obtener_consumo_total_func(mes, anio)
@@ -293,35 +294,41 @@ def generar_reporte_pdf_total_usuarios(request):
     return HttpResponse("Error al generar el PDF", status=500)
 
 def generar_reporte_consumo_todos(request):
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="reporte_consumo_todos.pdf"'
+    if request.method == 'POST':
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="reporte_consumo_todos.pdf"'
 
-    fecha_actual = datetime.now()
-    mes = fecha_actual.month
-    anio = fecha_actual.year
-    resultados = obtener_consumo_total_todos_func(mes, anio)
-    image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
-    total = obtener_suma_total(mes, anio) or 0
+        fecha_actual_str = request.POST.get('fecharpdts')
+        fecha_actual = datetime.strptime(fecha_actual_str, '%Y-%m-%d')
+
+        mes = fecha_actual.month
+        anio = fecha_actual.year
+        resultados = obtener_consumo_total_todos_func(mes, anio)
+        image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+        total = obtener_suma_total(mes, anio) or 0
 
 
-    template = get_template('reporte_consu_todos.html') 
-    context = {'resultados': resultados,
-               'mes': mes,
-               'image_path': image_path,
-                'anio': anio,
-                'total': total
-                } 
+        template = get_template('reporte_consu_todos.html') 
+        context = {'resultados': resultados,
+                'mes': mes,
+                'image_path': image_path,
+                    'anio': anio,
+                    'total': total
+                    } 
 
-    html = template.render(context)
-    result = BytesIO()
+        html = template.render(context)
+        result = BytesIO()
 
-    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+        pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
 
-    if not pdf.err:
-        response.write(result.getvalue())
-        return response
+        if not pdf.err:
+            response.write(result.getvalue())
+            return response
 
-    return HttpResponse("Error al generar el PDF", status=500)
+        return HttpResponse("Error al generar el PDF", status=500)
+    else:
+        return HttpResponse("Error al generar el PDF", status=500)
+    
 
 def cargar_imagen(path):
     imagen = Image(path)
@@ -456,7 +463,8 @@ def reportes_socios_general(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_general_socios.pdf"'
 
-    fecha_actual = datetime.now()
+    fecha_actual_str = request.POST.get('fecharpgds')
+    fecha_actual = datetime.strptime(fecha_actual_str, '%Y-%m-%d')
     mes = fecha_actual.month
     anio = fecha_actual.year
     resultados = obtener_consumo_total_todos_func(mes, anio)
