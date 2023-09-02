@@ -13,9 +13,9 @@
       display: flex;
       flex-wrap: wrap;
       height: 100vh;
-      background-color: white;
-      align-items: center; justify-content: center;
-      
+      background-color: #eee8e8;
+      align-items: center;
+      justify-content: center;
     }
 
     .row {
@@ -28,8 +28,8 @@
     .boton {
       flex-basis: 33.33%;
       height: 33.33vh;
-      background-color: #34b234;
-      border-radius: 50%;
+      /* background-color: #34b234; */
+      border-radius: 10%;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -39,6 +39,7 @@
       background-size: cover;
       background-position: center;
       overflow: hidden;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 1);
 
 
     }
@@ -46,6 +47,7 @@
 
     .boton:hover {
       transform: scale(1.1);
+      background-color: #54db54;
     }
 
     .imagen {
@@ -57,7 +59,7 @@
     h2 {
       margin: 0;
       font-size: large;
-      color: white;
+      color: rgb(0, 0, 0);
     }
 
     body {
@@ -82,7 +84,7 @@
 </head>
 
 <body>
-  <div class="content-menu" >
+  <div class="content-menu">
 
 
     <div class="container">
@@ -120,7 +122,7 @@
         </button>
       </div>
 
-      <div class="row">
+      <div class="row" style="margin-top: -140px;">
         <button class="boton">
 
           <a href="/motivos">
@@ -140,17 +142,19 @@
         </button>
 
         <button class="boton">
-          <img src="{% static 'img/icon-tesoreria.png' %}" alt="Imagen" class="imagen">
+          <a href="/cuentas">
+            <img src="{% static 'img/icon-tesoreria.png' %}" alt="Imagen" class="imagen">
+          </a>
           <h2>TESORERIA</h2>
         </button>
 
         <button class="boton">
           <a href="/promociones">
-          <img src="{% static 'img/icon-publicidad2.png' %}" alt="Imagen" class="imagen">
+            <img src="{% static 'img/icon-publicidad2.png' %}" alt="Imagen" class="imagen">
           </a>
           <h2>PUBLICIDAD</h2>
         </button>
-        
+
       </div>
     </div>
   </div>

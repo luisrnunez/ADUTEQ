@@ -88,7 +88,7 @@ def PanelActividades(request):
             return render(request, "base.html")
     except:
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
-        return render(request, "base.html")
+        return render(request, "emp_actividades.html")
     
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)

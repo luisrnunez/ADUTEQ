@@ -309,6 +309,8 @@ body {
     margin-bottom: 10px;
     width: 100%;
     justify-content: space-between; 
+    border-width: 1px;
+    border-color: #000000;
 }
 .pagination-container {
     display: flex;

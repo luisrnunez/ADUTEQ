@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'Prestamos',
     'promociones',
     'Periodo',
+    'cuentas',
 ]
 CRONJOBS = [
     ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),

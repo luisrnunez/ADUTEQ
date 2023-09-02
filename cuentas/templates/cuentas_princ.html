@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            text-align: center;
+        }
+        .contenedorvm{
+            display: grid;
+            grid-template-areas:'cabecera cabecera cabecera'
+                                'ingresos ingresos fecha'
+                                'descripcion valor comision'
+                                'footer footer footer';
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            border: 2px solid black;
+            grid-template-rows: 50px 40px 40px 30px;
+        }
+        .caja{
+            border: 2px solid black;
+            font-weight: bold;
+        }
+        .c1{
+            grid-area: cabecera;
+            font-size: xx-large;
+        }
+        .c2{
+            grid-area: ingresos;
+            font-size: medium;
+        }
+        .c3{
+            grid-area: fecha;
+            font-size: medium;
+        }
+        .c4{
+            grid-area: descripcion;
+        }
+        .c5{
+            grid-area: valor;
+        }
+        .c6{
+            grid-area: footer;
+        }
+        .c7{
+            grid-area: comision;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedorvm">
+        <div class="caja c1">Asocion de Docentes Univerdidad Tecnica Estatal de Quevedo</div>
+        <div class="caja c2">Ingresos registrados del mes -- año --</div>
+        <div class="caja c3">fecha 00/00/000</div>
+        <div class="caja c4">Ingresos del Mes</div>
+        <div class="caja c5">valor</div>
+        <div class="caja c7">Comision</div>
+        <div class="caja c6">00/00/0000 - 00/00/0000</div>
+    </div>
+</body>
+</html>
+{% endblock %}

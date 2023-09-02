@@ -573,6 +573,7 @@ def generar_reporte_pdf(request):
     proveedores = Proveedor.objects.all().order_by('nombre')
 
     image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+    fecha_gen=datetime.now()
 
     # Renderizar el template HTML utilizando el contexto
     template = get_template('reporte_proveedores.html')
@@ -582,12 +583,13 @@ def generar_reporte_pdf(request):
         'proveedores': proveedores,
         'datos_reporte': datos_reporte,
         'image_path': image_path,
+        'fecha_gen': fecha_gen
     }
     html = template.render(context)
 
     # Crear un objeto PDF utilizando xhtml2pdf
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_{mes}_{anio}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="reporte_consumo_proveedores_{mes}_{anio}.pdf"'
 
     buffer = BytesIO()
    
