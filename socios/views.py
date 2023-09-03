@@ -65,12 +65,24 @@ def Principal(request):
         periodo = Periodo.objects.get(activo=True)
         fecha_actual = timezone.now().date()
         if ajustes.periodoAutomatico and periodo.fecha_fin < fecha_actual:
+            
+            fechaCierre = periodo.fecha_fin 
+            mes = fechaCierre.month
+            anio = fechaCierre.year
+            import calendar
+            import locale
+            locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
+            nombreMes = calendar.month_name[mes+1].capitalize().upper()
+            periodoNuevo = Periodo(anio=periodo.anio, nombre=nombreMes, fecha_inicio=periodo.fecha_fin, fecha_fin=f'{anio}-{mes+1}-{ajustes.dia_cierre}')
+            periodoNuevo.save()
+
+            # dar de baja al periodo pasado
             periodo.activo = False
             periodo.save()
             messages.warning(request,'Se ha cerrado automaticamente el periodo actual, nota: si desea que no se cierre automaticamente vaya a ajustes')
-        if  periodo.fecha_fin <= fecha_actual:
-            messages.warning(request,'El periodo actual esta caducado por favor registre un nuevo periodo en ajustes')
-    except:
+        if  periodo.fecha_fin == fecha_actual:
+            messages.warning(request,'El periodo actual se cerrara mañana automaticamente, si no desea esta accion vaya a ajustes!')
+    except :
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
     return render(request, "base.html")
 

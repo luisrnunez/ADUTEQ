@@ -14,3 +14,4 @@ class Periodo(models.Model):
 
 class AjustesSistema(models.Model):
     periodoAutomatico = models.BooleanField(default=True)
+    dia_cierre = models.CharField(max_length=2,default=15) 

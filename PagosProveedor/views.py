@@ -82,7 +82,7 @@ def aplicar_pago(request, PagosProveedor_id, valor):
     else:
         messages.warning(request, 'El pago no pudo ser procesado')
 
-    return redirect('/lista_pagosp/')
+    return redirect('/listar_pagosp/')
 
 
 def presagregar_pdf(request, det_id): 

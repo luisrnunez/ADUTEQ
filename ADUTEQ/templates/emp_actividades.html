@@ -12,40 +12,41 @@
     .container {
       display: flex;
       flex-wrap: wrap;
-      height: 100vh;
+      
       background-color: white;
       align-items: center; justify-content: center;
       
     }
 
     .row {
-      width: 75%;
+      margin-top: 4rem;
+      width: 80%;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
     .boton {
-      flex-basis: 33.33%;
+      border-color: #34b234;
+      border-radius: 15px;
+      flex-basis: 50%;
       height: 33.33vh;
-      background-color: #34b234;
-      border-radius: 50%;
+      background-color: white;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      transition: transform 0.3s ease;
       margin-right: 20px;
       background-size: cover;
       background-position: center;
       overflow: hidden;
-
-
+      transition: background-color 0.3s;
     }
 
-
     .boton:hover {
-      transform: scale(1.1);
+        background-color:  #34b234;
+        border-color:  #34b234; 
+        
     }
 
     .imagen {
@@ -56,15 +57,15 @@
 
     h2 {
       margin: 0;
-      font-size: large;
-      color: white;
+      font-size:medium;
+      color: black;
     }
 
     body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
+      background-color: white;
     }
 
     .boton-img::after {
@@ -86,6 +87,7 @@
 
 
     <div class="container">
+      <br><br><br><br><br><br>
       <div class="row">
 
         <button class="boton">
