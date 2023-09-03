@@ -1036,6 +1036,67 @@ def obtener_informe_mensual2(apps, schema_editor):
                 """
             )
 
+create_function1="""
+CREATE OR REPLACE FUNCTION crear_detalles_cupo_nuevo_socio()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.proveedores_detallescupos (cupo, fechaccupo, proveedor_id, socio_id, permanente)
+    SELECT p.cupo, CURRENT_DATE, p.id, NEW.id, false
+    FROM public.proveedores_proveedor p;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function2="""
+CREATE OR REPLACE FUNCTION crear_detalles_cupo_nuevo_proveedor()
+RETURNS TRIGGER AS $$
+DECLARE
+    socio_id bigint;
+BEGIN
+    FOR socio_id IN (SELECT id FROM public.socios_socios) -- Obtener todos los IDs de socios
+    LOOP
+        INSERT INTO public.proveedores_detallescupos (cupo, fechaccupo, proveedor_id, socio_id, permanente)
+        VALUES (NEW.cupo, CURRENT_DATE, NEW.id, socio_id, false);
+    END LOOP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function3="""
+CREATE OR REPLACE FUNCTION actualizar_detalles_cupo_cambio_cupo()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE public.proveedores_detallescupos
+    SET cupo = NEW.cupo
+    WHERE proveedor_id = NEW.id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_trigger1="""
+CREATE TRIGGER trigger_nuevo_socio
+AFTER INSERT ON public.socios_socios
+FOR EACH ROW
+EXECUTE FUNCTION crear_detalles_cupo_nuevo_socio();
+"""
+
+create_trigger2="""
+CREATE TRIGGER trigger_nuevo_proveedor
+AFTER INSERT ON public.proveedores_proveedor
+FOR EACH ROW
+EXECUTE FUNCTION crear_detalles_cupo_nuevo_proveedor();
+"""
+
+create_trigger3="""
+CREATE TRIGGER trigger_cambio_cupo
+AFTER UPDATE OF cupo ON public.proveedores_proveedor
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_detalles_cupo_cambio_cupo();
+"""
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -1064,4 +1125,10 @@ class Migration(migrations.Migration):
         migrations.RunPython(obtener_suma_prestamo_total_func),
         migrations.RunPython(obtener_suma_total),
         migrations.RunPython(obtener_informe_mensual2),
+        migrations.RunSQL(create_function1),
+        migrations.RunSQL(create_function2),
+        migrations.RunSQL(create_function3),
+        migrations.RunSQL(create_trigger1),
+        migrations.RunSQL(create_trigger2),
+        migrations.RunSQL(create_trigger3),
     ]

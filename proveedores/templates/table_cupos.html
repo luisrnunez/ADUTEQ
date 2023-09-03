@@ -1,0 +1,27 @@
+{% for cupo in detalles_cupos %}
+    <tr>
+        <td>{{ cupo.socio.user.first_name }} {{ cupo.socio.user.last_name }}</td>
+        <td>{{ cupo.proveedor.nombre}}</td>
+        <td>{{ cupo.cupo}}$</td>
+        <td>
+        {% if cupo.permanente %}
+            <button class="green-button">
+            <span class="visto-icon"></span>
+            Si
+            </button>
+        {% else %}
+            <button class="red-button">
+            <span class="no-visto-icon"></span> No
+            </button>
+        {% endif %}
+        </td>
+        <td>{{ cupo.fechaccupo}}</td>
+
+        <td>
+        <form action="{% url 'editarcupos' cupo.id %}">
+            <button class="edit-btn">Editar</button>
+        </form>
+
+        </td>
+    </tr>
+{% endfor %}
