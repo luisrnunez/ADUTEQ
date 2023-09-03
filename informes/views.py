@@ -549,7 +549,7 @@ def reportes_datos_socios(request):
     fecha_actual = datetime.now()
     mes = fecha_actual.month
     anio = fecha_actual.year
-    socios = Socios.objects.annotate(last_name=F('user__last_name')).order_by('last_name')
+    socios = Socios.objects.filter(user__is_active=True).annotate(last_name=F('user__last_name')).order_by('last_name')
     image_path = os.path.join(os.path.dirname(
         __file__), 'static', 'img', 'aduteq.png')
     fecha_gen = datetime.now()
