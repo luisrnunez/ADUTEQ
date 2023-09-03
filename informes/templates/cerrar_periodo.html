@@ -261,6 +261,8 @@
             <div class="tabla-header">
                 <h2>Descuento por Cuotas</h2>
                 {% if suma_des_cuot > 0 %}
+                <button style="margin: 0% 0% 0% 50%;" type="button" class="red-button"
+                    id="toggleTableButton2">Ocultar</button>
                 <button class="tabla-button" type="submit">Registrar Descuento</button>
                 {% endif %}
             </div>
@@ -277,7 +279,7 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="discountTable2">
                     {% for descuento in descuento_cuotas %}
                     <tr>
                         <td>{{descuento.0}}</td>
@@ -310,6 +312,24 @@
                     });
 
                     // Resto del código para enviar el formulario...
+                });
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var toggleButton = document.getElementById("toggleTableButton2");
+                    var discountTable = document.getElementById("discountTable2");
+
+                    toggleButton.addEventListener("click", function () {
+                        discountTable.classList.toggle("hidden");
+
+                        if (discountTable.classList.contains("hidden")) {
+                            toggleButton.textContent = "Mostrar";
+                            toggleButton.style.backgroundColor = "hsl(133, 62%, 49%)";
+                        } else {
+                            toggleButton.textContent = "Ocultar";
+                            toggleButton.style.backgroundColor = "red";
+                        }
+                    });
                 });
             </script>
         </div>

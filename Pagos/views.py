@@ -372,7 +372,7 @@ def extraer_datos_pdf(request):
         # file_path = fs.save('archivo.pdf', pdf_file)
         # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
 
-        tables = tabula.read_pdf(pdf_file, pages="all", pandas_options={'header': None, 'dtype': str})
+        tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
         datos_tabla = []
 
         for table in tables:
@@ -479,6 +479,8 @@ def verificar_registros(request):
     if request.method == 'POST':
         registros_formulario = request.POST
         campos = list(registros_formulario.keys())
+        print("registros_formulario:", registros_formulario)
+        print("campos:", campos)
         campos.remove('csrfmiddlewaretoken')
         registros_con_estilo = []
         cant_registros = len(registros_formulario.getlist(campos[0]))
@@ -571,6 +573,7 @@ def generar_reporte_pdf(request):
     proveedores = Proveedor.objects.all().order_by('nombre')
 
     image_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'aduteq.png')
+    fecha_gen=datetime.now()
 
     # Renderizar el template HTML utilizando el contexto
     template = get_template('reporte_proveedores.html')
@@ -580,12 +583,13 @@ def generar_reporte_pdf(request):
         'proveedores': proveedores,
         'datos_reporte': datos_reporte,
         'image_path': image_path,
+        'fecha_gen': fecha_gen
     }
     html = template.render(context)
 
     # Crear un objeto PDF utilizando xhtml2pdf
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_{mes}_{anio}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="reporte_consumo_proveedores_{mes}_{anio}.pdf"'
 
     buffer = BytesIO()
    

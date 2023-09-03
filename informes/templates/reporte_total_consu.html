@@ -4,47 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @page {
-            background-image: url('img/aduteq.png');
-            size: landscape;
+        /* @page {
+            background-image: url('ADUTEQ\informes\static\img\aduteq.png');
+            size: a4;
             margin: 20mm 10mm;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            /* Añadido para espaciar los elementos */
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: flex-start;
-            align-content: flex-start;
-        }
-
-        .fecha {
-            display: flex;
-            align-items: flex-start;
-            text-align: center;
-        }
-
-        table {
-            width: 90%;
-            border-collapse: collapse;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
+        } */
         th,
         td {
             border: 1px solid #ddd;
@@ -55,22 +19,33 @@
         th {
             background-color: #f2f2f2;
         }
+        h4{
+            text-align: right;
+        }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="{{ image_path }}" alt="Logo" width="150" height="150">
-        </div>
-        <div class="fecha">
-            <h1>Reporte Descuento Pendientes Socios - {{ mes }}/{{ anio }}</h1>
-            <h1>Total: {{total}}</h1>
-        </div>
-    </div>
-    <table>
+    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+        <tr>
+            <td style="width: 180px; text-align: left; border: none;">
+                <img src="{{ image_path }}" alt="Logo" style="max-width: 150px; max-height: 150px;">
+            </td>
+            <td style="text-align: center; border: none;">
+                <h1 style="font-size: x-large;">Asociación de Docentes Universidad Tecnica Estatal de Quevedo</h1>
+                <h3>Reporte Descuento Pendientes Socios - {{ mes }}/{{ anio }}</h1>
+                <h1 style="font-size: x-large;">Total: {{total}}</h1>
+            </td>
+            <td style="width: 180px; text-align: right; border: none;">
+                <h4>Fecha de generación: {{fecha_gen}}</h4>
+            </td>
+        </tr>
+    </table>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
             <tr>
+                <th>N°</th>
                 <th>Nombre</th>
                 <th>Cédula</th>
                 <th>Cuota préstamos</th>
@@ -84,16 +59,26 @@
         <tbody>
             {% for row in resultados %}
             <tr>
-                <td>{{ row.0 }}</td>
-                <td>{{ row.1 }}</td>
-                <td>{{ row.2 }}</td>
-                <td>{{ row.3 }}</td>
-                <td>{{ row.4 }}</td>
-                <td>{{ row.5 }}</td>
-                <td>{{ row.6 }}</td>
-                <td>{{ row.7 }}</td>
+                <td style="text-align: center; width: 5%;">{{ forloop.counter }}</td>
+                <td style="text-align: left; width: 30%;">{{ row.0 }}</td>
+                <td style="width: 10%;">{{ row.1 }}</td>
+                <td style="text-align: right;">{{ row.2 }}</td>
+                <td style="text-align: right;">{{ row.3 }}</td>
+                <td style="text-align: right;">{{ row.4 }}</td>
+                <td style="text-align: right;">{{ row.5 }}</td>
+                <td style="text-align: right;">{{ row.6 }}</td>
+                <td style="text-align: right;">{{ row.7 }}</td>
             </tr>
             {% endfor %}
+            <td style="text-align: center;">Total</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>{{total}}</td>
         </tbody>
     </table>
 </body>

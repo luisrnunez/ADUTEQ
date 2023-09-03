@@ -48,7 +48,7 @@
                     </select>
 
                     <label id="description" for="descripcion">Descripcion:</label>
-                    <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required>
+                    <textarea id="descripcion" name="descripcion" rows="4" required>{{ promoción.descripcion }}</textarea>
 
                     <label id="image" for="foto">Agregar Imagen Promo:</label>
                     {% get_media_prefix as media_prefix %}

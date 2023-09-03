@@ -60,7 +60,7 @@
         </div>
 
 
-        <table id="tablaSocios" class="socios-table">
+        <table id="tablaSocios" class="socios-table dataTable">
             <thead>
                 <tr>
                     <th>Tipo</th>
@@ -135,7 +135,7 @@
                     </td>
                     <td>
                         <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
-                            class="edit-btn notify" style="text-decoration: none;"> Notificar
+                        title="Notificar de esto a todos los socios" class="edit-btn notify" style="text-decoration: none;"> Notificar
                         </a>
                     </td>
                 </tr>
@@ -179,7 +179,7 @@
                     </td>
                     <td>
                         <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
-                            class="edit-btn notify" style="text-decoration: none;"> Notificar
+                            class="edit-btn notify" style="text-decoration: none;" title="Notificar de esto a todos los socios"> Notificar
                         </a>
                     </td>
                 </tr>
@@ -501,5 +501,17 @@ $(document).ready(function() {
     </script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tablaSocios tbody');
+        var rows = table.find('tr').get();
+    
+        rows.reverse(); // Invertir el orden de las filas
+    
+        $.each(rows, function (index, row) {
+            table.append(row);
+        });
+    });
+    </script>
 
 {% endblock %}

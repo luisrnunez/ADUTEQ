@@ -46,7 +46,8 @@
                         </select>
 
                         <label for="last_name">Descripcion:</label>
-                        <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required>
+                        <!-- <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required> -->
+                        <textarea value="{{ promocion.descripcion }}" id="descripcion" name="descripcion" rows="4" required>{{ promocion.descripcion }}</textarea>
 
                         <label for="foto">Agregar Imagen Promo:</label>
                         {% get_media_prefix as media_prefix %}
@@ -86,7 +87,8 @@
 
 
                         <label for="last_name">Descripcion:</label>
-                        <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required>
+                        <!-- <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required> -->
+                        <textarea value="{{ promocion.descripcion }}" id="descripcion" name="descripcion" rows="4" required>{{ promocion.descripcion }}</textarea>
 
                         <label for="foto">Agregar Imagen Promo:</label>
                         {% get_media_prefix as media_prefix %}

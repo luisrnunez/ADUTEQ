@@ -53,9 +53,7 @@ INSTALLED_APPS = [
     'Prestamos',
     'promociones',
     'Periodo',
-]
-CRONJOBS = [
-    ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
+    'cuentas',
 ]
 
 MIDDLEWARE = [

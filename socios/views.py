@@ -88,7 +88,7 @@ def PanelActividades(request):
             return render(request, "base.html")
     except:
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
-        return render(request, "base.html")
+        return render(request, "emp_actividades.html")
     
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -223,8 +223,8 @@ def editar_socio(request, socio_id):
             if 'foto' in request.FILES:
                 socio.foto = request.FILES['foto']
               
-            usuario.username = request.POST.get('username')
-            usuario.set_password(request.POST['password'])
+            # usuario.username = request.POST.get('username')
+            # usuario.set_password(request.POST['password'])
             socio.cedula = request.POST.get('cedula')
             usuario.first_name = request.POST.get('first_name')
             usuario.last_name = request.POST.get('last_name')

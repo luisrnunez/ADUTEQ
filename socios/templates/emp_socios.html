@@ -21,122 +21,192 @@
         margin: 0 auto;
     }
 
-    
+    /* Estilos para el modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 50px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+
+    /* Estilos para cerrar el modal */
+    .close {
+        color: white;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    /* Estilos para la imagen ampliada */
+    #modalImage {
+        display: block;
+        margin: 0 auto;
+        max-width: 90%;
+        max-height: 80vh;
+        /* border-radius: 50%; */
+        object-fit: cover;
+    }
+
+    .botones_arriba {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-right: 10px;
+        flex-flow: row wrap;
+        border: 1px solid rgb(187, 189, 186);
+        width: 100%;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgb(134, 134, 134);
+        margin: 5px;
+        border-radius: 1%;
+    }
+
+    .image-header {
+        margin-bottom: 20px;
+        background-color: #34b234;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 5px;
+        /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+    }
+
+    h3 {
+        font-weight: bold;
+        color: white;
+    }
 </style>
 
 
 <div class="content-menu">
 
-    <div class="header">
-        <h1>Socios</h1>
-    </div>
     <div class="socios-content ">
         <div class="botones-sup">
-            <div>
-                <a href="{% url 'agg_socios' %}"> <button class="add-socio-btn"> Agregar Nuevo Socio</button></a>
-                <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
-                 
-    
-    
-                <!-- </form> -->
-                <a style="margin-left: 15px; margin-top: 2px;" onclick="confirmarEnvioCorreoTodos()">
-                    <button class="add-socio-btn">Enviar correo a todos</button>
-                </a>
-                <a style="margin-left: 15px; margin-top: 2px;" href="/registraraportaciones/">
-                    <button class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
-                </a>
-            </div>
-            <div style="display: inline-flex; justify-content: end; width: max-content;">
-                <div class="search-form">
-    
-                    <select id="criterio" name="criterio">
-                        <option value="nombres">Nombre</option>
-                        <option value="apellidos">Apellido</option>
-                        <option value="categoria">Categoría</option>
-                        <option value="facultad">Facultad</option>
-                        <option value="cedula">Cédula</option>
-                        <option value="1">Activo</option>
-                        <option value="0">Inactivo</option>
-                    </select>
-                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
-                    <!-- <button type="submit">Buscar</button> -->
-
+            <div class="botones_arriba">
+                <div class="image-header">
+                    <h3>Socios</h3>
                 </div>
+                <a href="{% url 'agg_socios' %}">
+                    <button style="margin: 5px;" class="add-socio-btn">
+                        Agregar Nuevo Socio
+                    </button></a>
+                <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
+
+                <!-- </form> -->
+                <a onclick="confirmarEnvioCorreoTodos()">
+                    <button style="margin: 5px;" class="add-socio-btn">Enviar correo a todos</button>
+                </a>
+                <a href="/registraraportaciones/">
+                    <button style="margin: 5px;" class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
+                </a>
+                <a href="/reportes_datos_socios/" target="_blank" style=" text-decoration: none;
+                 display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <i style="font-size: 50px; margin: 5px;" class="far fa-file-pdf"></i>
+                    <p>Datos Socios</p>
+                </a>
+                <div style="display: inline-flex; justify-content: end; width: max-content;">
+                    <div class="search-form">
+
+                        <select id="criterio" name="criterio">
+                            <option value="nombres">Nombre</option>
+                            <option value="apellidos">Apellido</option>
+                            <option value="categoria">Categoría</option>
+                            <option value="facultad">Facultad</option>
+                            <option value="cedula">Cédula</option>
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                        <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
+                        <!-- <button type="submit">Buscar</button> -->
+
+                    </div>
+                </div>
+                <table id="tablaSocios" class="socios-table">
+                    <thead>
+                        <tr>
+                            <th>Cedula</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Foto</th>
+                            <!-- <th>Dirección</th> -->
+                            <th>Teléfono</th>
+                            <th>Correo Electrónico</th>
+                            <!-- <th>Categoria</th> -->
+                            <th>Estado</th>
+                            <th>Editar</th>
+                            <th>Enviar Correo</th>
+                            <th>Aportaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="socios-body">
+                        <!-- {% include 'tabla_parcialSocios.html' %} -->
+                        {% for socio in socios %}
+                        <tr>
+                            <td>{{ socio.cedula }}</td>
+                            <td>{{ socio.user.first_name }}</td>
+                            <td>{{ socio.user.last_name }}</td>
+                            <td style="text-align: center;">
+                                {% if socio.foto %}
+                                <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image"
+                                    onclick="openModal('{{ socio.foto.url }}')">
+                                {% else %}
+                                No hay foto disponible.
+                                {% endif %}
+                            </td>
+                            <!-- <td>{{ socio.direccion_domiciliaria }}</td> -->
+                            <td>{{ socio.numero_telefonico }}</td>
+                            <td>{{ socio.user.email }}</td>
+                            <!-- <td>{{ socio.categoria }}</td> -->
+                            <td>
+                                {% if socio.user.is_active %}
+                                <button class="green-button"
+                                    onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
+                                    <span class="visto-icon"></span>
+                                    Activo
+                                </button>
+                                {% else %}
+                                <button class="red-button"
+                                    onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
+                                    <span class="no-visto-icon"></span> Inactivo
+                                </button>
+                                {% endif %}
+
+                            </td>
+                            <td>
+                                <button class="edit-btn"
+                                    onclick="confirmarEdicion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+                                    Editar
+                                </button>
+                            </td>
+                            <td>
+                                <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
+                                    class="edit-btn notify-socio" style="text-decoration: none;"> Notificar
+                                </a>
+                            </td>
+                            <td>
+                                <a href="/aportaciones_socio/{{socio.id}}" class="edit-btn"
+                                    style="text-decoration: none;">
+                                    Aportación
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            
         </div>
 
 
-        <table id="tablaSocios" class="socios-table">
-            <thead>
-                <tr>
-                    <th>Cedula</th>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>Foto</th>
-                    <!-- <th>Dirección</th> -->
-                    <th>Teléfono</th>
-                    <th>Correo Electrónico</th>
-                    <!-- <th>Categoria</th> -->
-                    <th>Estado</th>
-                    <th>Editar</th>
-                    <th>Enviar Correo</th>
-                    <th>Aportaciones</th>
-                </tr>
-            </thead>
-            <tbody id="socios-body">
-                <!-- {% include 'tabla_parcialSocios.html' %} -->
-                {% for socio in socios %}
-                <tr>
-                    <td>{{ socio.cedula }}</td>
-                    <td>{{ socio.user.first_name }}</td>
-                    <td>{{ socio.user.last_name }}</td>
-                    <td>
-                        {% if socio.foto %}
-                        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image">
-                        {% else %}
-                        No hay foto disponible.
-                        {% endif %}
-                    </td>
-                    <!-- <td>{{ socio.direccion_domiciliaria }}</td> -->
-                    <td>{{ socio.numero_telefonico }}</td>
-                    <td>{{ socio.user.email }}</td>
-                    <!-- <td>{{ socio.categoria }}</td> -->
-                    <td>
-                        {% if socio.user.is_active %}
-                        <button class="green-button"
-                            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
-                            <span class="visto-icon"></span>
-                            Activo
-                        </button>
-                        {% else %}
-                        <button class="red-button"
-                            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
-                            <span class="no-visto-icon"></span> Inactivo
-                        </button>
-                        {% endif %}
-
-                    </td>
-                    <td>
-                        <button class="edit-btn"
-                            onclick="confirmarEdicion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
-                            Editar
-                        </button>
-                    </td>
-                    <td>
-                        <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
-                            class="edit-btn notify-socio" style="text-decoration: none;"> Notificar
-                        </a>
-                    </td>
-                    <td>
-                        <a href="/aportaciones_socio/{{socio.id}}"
-                            class="edit-btn" style="text-decoration: none;"> Aportación
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
 
         <div class="pagination-container">
             <nav aria-label="...">
@@ -161,9 +231,13 @@
     </div>
     <!-- Resto del contenido de la página -->
 </div>
+<div id="imageModal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" alt="Imagen ampliada">
+</div>
 {% block scripts %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 
 function confirmarEnvioCorreoTodos() {
@@ -236,27 +310,40 @@ function confirmarEnvioCorreoTodos() {
         });
     });
 });
+    
 
-$(document).ready(function() {
-    $("#criterio").on("change", function() {
-        var criterio = $(this).val();
-       
-        $.ajax({
-            url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
-                query: "",
-                criterio: criterio
-            },
-            success: function(data) {  // Verifica los datos devueltos por el servidor
-                $("#socios-body").html(data.rendered_table); 
-            }
+    $(document).ready(function () {
+        $("#criterio").on("change", function () {
+            var criterio = $(this).val();
+
+            $.ajax({
+                url: '{% url "buscar_socios" %}',  // Cambia esto a la URL de tu vista de búsqueda
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                    query: "",
+                    criterio: criterio
+                },
+                success: function (data) {  // Verifica los datos devueltos por el servidor
+                    $("#socios-body").html(data.rendered_table);
+                }
+            });
         });
     });
-});
 
+    function openModal(imageSrc) {
+        var modal = document.getElementById("imageModal");
+        var modalImage = document.getElementById("modalImage");
 
+        modalImage.src = imageSrc;
+        modal.style.display = "block";
+    }
+
+    // Función para cerrar el modal
+    function closeModal() {
+        var modal = document.getElementById("imageModal");
+        modal.style.display = "none";
+    }
 
 </script>
 {% endblock %}
@@ -392,24 +479,24 @@ $(document).ready(function() {
 
 
 
-<!-- <script>
-    function confirmarEnvioCorreoTodos() {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: 'Deseas enviar correo a todos los soci@s',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí',
-            cancelButtonText: 'Cancelar',
-            dangerMode: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Se confirma el envio de correo a todos los soci@s
-                window.location.href = '/enviar_gastos_todos';
-            }
-        });
-    }
-</script> -->
+// <script>
+//     function confirmarEnvioCorreoTodos() {
+//         Swal.fire({
+//             title: '¿Estás seguro?',
+//             text: 'Deseas enviar correo a todos los soci@s',
+//             icon: 'warning',
+//             showCancelButton: true,
+//             confirmButtonText: 'Sí',
+//             cancelButtonText: 'Cancelar',
+//             dangerMode: true,
+//         }).then((result) => {
+//             if (result.isConfirmed) {
+//                 // Se confirma el envio de correo a todos los soci@s
+//                 window.location.href = '/enviar_gastos_todos';
+//             }
+//         });
+//     }
+// </script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
