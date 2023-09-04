@@ -7,6 +7,7 @@ import PyPDF2
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from uritools import uridecode
 from .models import Socios, Proveedor, Pagos, Pagos_cuotas, Detalle_cuotas
 from proveedores.models import detallesCupos
 from .forms import PagosForm
@@ -364,25 +365,25 @@ def eliminar_pago(request, pago_id):
 
 
 def extraer_datos_pdf(request):
-    if request.method == 'POST':
+    try:
+        if request.method == 'POST':
 
-        pdf_file = request.FILES['pdf_file']
-        fs = FileSystemStorage(location=settings.MEDIA_ROOT + '/pdf')
+            pdf_file = request.FILES['pdf_file']
+            fs = FileSystemStorage(location=settings.MEDIA_ROOT + '/pdf')
 
-        # file_path = fs.save('archivo.pdf', pdf_file)
-        # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
+            # file_path = fs.save('archivo.pdf', pdf_file)
+            # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
+            tables = tabula.read_pdf(pdf_file, pages="all", pandas_options={'header': None, 'dtype': str })
+            datos_tabla = []
 
         tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
         datos_tabla = []
 
-        for table in tables:
-            for index, row in table.iterrows():
-                row_data = {}
-                datos_tabla.append(row.tolist())
+        return redirect('/listar_pagos/')
+    except:
+        messages.warning(request,'Error la cargar el documento por ingrese de nuevo')
         proveedores = Proveedor.objects.filter(estado=True)
-        return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
-
-    return redirect('/listar_pagos/')
+        return  render(request, 'extraer_descuentos.html', {'proveedores': proveedores})
 
 
 
@@ -506,10 +507,17 @@ def verificar_registros(request):
                 usuario_existe = False
                 for usuario in usuarios:
                     var1 = usuario.last_name + ' ' + usuario.first_name
-                   
+                    # 
+                    # var1_normalized = uridecode(var1)  # Normalizar caracteres
                     if var1 == ide[i]:
                         usuario_existe = True
                         break  # Romper el bucle si se encuentra una coincidencia
+                                    
+
+                    # # Normalizar y comparar con cada valor en ide
+                    # if var1_normalized  == ide[i]:
+                    #     usuario_existe = True
+                    #     break  # Romper el bucle si se encuentra una coincidencia
                 
                 if usuario_existe:
                     valor = 0

@@ -14,11 +14,4 @@ class Periodo(models.Model):
 
 class AjustesSistema(models.Model):
     periodoAutomatico = models.BooleanField(default=True)
-
-    
-# class Correos_y_mas(models.Model):
-#     direccion_email = models.EmailField(unique=True)
-#     estado = models.BooleanField(default=False)
-
-#     def __str__(self):
-#         return self.direccion_email
+    dia_cierre = models.CharField(max_length=2,default=15) 

@@ -78,11 +78,11 @@
                             <p style="color: red;">Período Inactivo</p>
                             {% endif %}
                             <p>Dias restantes:
-                                {% if dias_restantes <= 0 %} 
-                                <span style="color: red;">Periodo caducado</span>
-                                    {% else %}
-                                    {{ dias_restantes }}
-                                    {% endif %}
+                                {% if dias_restantes %} 
+                                {% if dias_restantes >= 0 %} 
+                                    {{ dias_restantes }}   
+                                {% endif %}
+                                {% endif %}
                             </p>
                             {% if periodo.descripcion %} 
                             <p>Descripcion: </p>
@@ -97,13 +97,36 @@
                             <br><br>
                             <br><br>
                             <br><br>
+                            <div style="display: inline-flex; ; width: 80%;">
+                            <span > <strong>Nota:</strong>  Al activar el cierre automatico se creara uno a partir del dia de cierre asignado,
+                                es decir cada (dia) de dicho mes se crear un nuevo periodo
+                            </span>
+                           
+                        </div>
+                        <br>
+                        <br>
+                            <div style="display: inline-flex; ; width: 80%;">
+                                <h3 style="width: 44%">Dia de cierre:</h3> <br> <br>
+                                <input type="text" id="numero_mes" name="numero_mes" 
+                                {% if ajustes.periodoAutomatico %}    
+                                value="{{ ajustes.dia_cierre }}" 
+                                {% else %}
+                                value="15" 
+                                {% endif %} style="width:10%"
+                                >
+                            </div>
+                            <script>
+                                var campoNumerico = document.getElementById("numero_mes");
+                                campoNumerico.addEventListener("input", function () {
+                                    this.value = this.value.replace(/[^0-9]/g, "").substring(0, 2);
+                                });         
+                            </script>
                             <div style="display: inline-flex; justify-content: space-between; width: 80%;">
                                 <h3 style="width: 80%;">Cierre Automático:</h3>
                                 <select style="border-color: red;" name="cierre_automatico" id="cierre_automatico">
                                     <option value="no" {% if not ajustes.periodoAutomatico %}selected{% endif %}>No
                                     </option>
                                     <option value="si" {% if ajustes.periodoAutomatico %}selected{% endif %}>Sí</option>
-                                    
                                 </select>
                             </div>
 
