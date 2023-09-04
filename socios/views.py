@@ -59,27 +59,12 @@ def cerrar_sesion(request):
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-<<<<<<< HEAD
-=======
-
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 def Principal(request):
     try:
         ajustes, created = AjustesSistema.objects.get_or_create(defaults={'periodoAutomatico': True})
         periodo = Periodo.objects.get(activo=True)
         fecha_actual = timezone.now().date()
         if ajustes.periodoAutomatico and periodo.fecha_fin < fecha_actual:
-<<<<<<< HEAD
-            periodo.activo = False
-            periodo.save()
-            messages.warning(request,'Se ha cerrado automaticamente el periodo actual, nota: si desea que no se cierre automaticamente vaya a ajustes')
-        if  periodo.fecha_fin <= fecha_actual:
-            messages.warning(request,'El periodo actual esta caducado por favor registre un nuevo periodo en ajustes')
-    except:
-        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
-    return render(request, "base.html")
-
-=======
             
             fechaCierre = periodo.fecha_fin 
             mes = fechaCierre.month
@@ -100,7 +85,6 @@ def Principal(request):
     except :
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')   
     return render(request, "base.html",{'periodo': periodo})
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 
 @login_required
@@ -109,17 +93,10 @@ def PanelActividades(request):
     try:
         periodo_seleccionado = Periodo.objects.filter(activo=True).first()
         if periodo_seleccionado:
-<<<<<<< HEAD
-            return render(request, "emp_actividades.html")
-        else:
-            messages.warning(request, 'Para poder realizar transaciones agregue un nuevo periodo')
-            return render(request, "base.html")
-=======
             return render(request, "emp_actividades.html",{'periodo': periodo_seleccionado})
         else:
             messages.warning(request, 'Para poder realizar transaciones agregue un nuevo periodo')
             return render(request, "base.html",{'periodo': periodo_seleccionado})
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     except:
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
         return render(request, "emp_actividades.html")
@@ -428,18 +405,11 @@ def ListaSocios(request):
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
-<<<<<<< HEAD
-         socios_pag=paginator.get_page(numero_pagina)
-    except PageNotAnInteger:
-         socios_pag=paginator.get_page(1)
-    return render(request, "emp_socios.html", {'socios': socios_pag})
-=======
         periodo = Periodo.objects.get(activo=True)
         socios_pag=paginator.get_page(numero_pagina)
     except PageNotAnInteger:
          socios_pag=paginator.get_page(1)
     return render(request, "emp_socios.html", {'socios': socios_pag,'periodo': periodo})
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def AggSocio(request):

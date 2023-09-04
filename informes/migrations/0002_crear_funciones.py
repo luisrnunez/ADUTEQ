@@ -949,7 +949,6 @@ def obtener_suma_total(apps, schema_editor):
                 """
             )
 
-<<<<<<< HEAD
 def obtener_informe_mensual2(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -1098,8 +1097,6 @@ FOR EACH ROW
 EXECUTE FUNCTION actualizar_detalles_cupo_cambio_cupo();
 """
 
-=======
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -1127,7 +1124,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(obtener_suma_descuento_cuotas_func),
         migrations.RunPython(obtener_suma_prestamo_total_func),
         migrations.RunPython(obtener_suma_total),
-<<<<<<< HEAD
         migrations.RunPython(obtener_informe_mensual2),
         migrations.RunSQL(create_function1),
         migrations.RunSQL(create_function2),
@@ -1135,6 +1131,4 @@ class Migration(migrations.Migration):
         migrations.RunSQL(create_trigger1),
         migrations.RunSQL(create_trigger2),
         migrations.RunSQL(create_trigger3),
-=======
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     ]

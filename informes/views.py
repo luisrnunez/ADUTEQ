@@ -32,7 +32,8 @@ from datetime import datetime
 from django.template.loader import get_template
 from django.template import Context
 import os
-from .models import Periodo
+import calendar
+
 
 # Create your views here.
 

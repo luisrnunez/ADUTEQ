@@ -41,11 +41,11 @@
 
                     <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
                     <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ socio.fecha_nacimiento}}"
-                        required>
+                        >
 
                     <label for="lugar_nacimiento">Lugar de Nacimiento:</label>
                     <input type="text" id="lugar_nacimiento" name="lugar_nacimiento"
-                        value="{{ socio.lugar_nacimiento }}" required>
+                        value="{{ socio.lugar_nacimiento }}" >
 
 
 
@@ -54,15 +54,15 @@
 
                     <label for="numero_telefonico">Teléfono:</label>
                     <input type="text" id="numero_telefonico" name="numero_telefonico"
-                        value="{{ socio.numero_telefonico }}" required>
+                        value="{{ socio.numero_telefonico }}" >
 
                     <label for="numero_convencional">Teléfono Convencional:</label>
                     <input type="text" id="numero_convencional" name="numero_convencional"
-                        value="{{ socio.numero_convencional }}" required>
+                        value="{{ socio.numero_convencional }}" >
 
                     <label for="direccion_domiciliaria">Dirección Domiciliaria:</label>
                     <input type="text" id="direccion_domiciliaria" name="direccion_domiciliaria"
-                        value="{{ socio.direccion_domiciliaria }}" required>
+                        value="{{ socio.direccion_domiciliaria }}" >
 
                     <label for="facultad">Facultad:</label>
 
@@ -223,8 +223,8 @@
                                         <td>{{facultad.descripcion}}</td>
                                         <td>
 
-                                            <button data-id="{{ facultad.id }}" id="eliminarBtnFacultad"
-                                                class="delete-btn">Eliminar</button>
+                                            <!-- <button data-id="{{ facultad.id }}" id="eliminarBtnFacultad"
+                                                class="delete-btn">Eliminar</button> -->
 
                                         </td>
                                     </tr>
@@ -279,8 +279,8 @@
                                         <td>{{categoria.nombre_cat}}</td>
                                         <td>{{categoria.descripcion}}</td>
                                         <td>
-                                            <button data-id="{{ categoria.id }}" id="eliminarBtnCategoria"
-                                                class="delete-btn">Eliminar</button>
+                                            <!-- <button data-id="{{ categoria.id }}" id="eliminarBtnCategoria"
+                                                class="delete-btn">Eliminar</button> -->
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -336,8 +336,8 @@
                                         <td>{{dedicacion.nombre_de}}</td>
                                         <td>{{dedicacion.descripcion}}</td>
                                         <td>
-                                            <button data-id="{{ dedicacion.id }}" id="eliminarBtnDedicacion"
-                                                class="delete-btn">Eliminar</button>
+                                            <!-- <button data-id="{{ dedicacion.id }}" id="eliminarBtnDedicacion"
+                                                class="delete-btn">Eliminar</button> -->
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -392,8 +392,8 @@
                                         <td>{{titulo.nombre_ti}}</td>
                                         <td>{{titulo.descripcion}}</td>
                                         <td>
-                                            <button data-id="{{ titulo.id }}" id="eliminarBtnTitulo"
-                                                class="delete-btn">Eliminar</button>
+                                            <!-- <button data-id="{{ titulo.id }}" id="eliminarBtnTitulo"
+                                                class="delete-btn">Eliminar</button> -->
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -455,7 +455,6 @@
                                 '<td>' + titulo.nombre_ti + '</td>' +
                                 '<td>' + titulo.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + titulo.id + '" id="eliminarBtnTitulo" class="delete-btn">Eliminar</button>'
                             '</td>' +
                                 '</tr>';
                             tablaTitulo.append(newRow);
@@ -511,7 +510,7 @@
                                 '<td>' + dedicacion.nombre_de + '</td>' +
                                 '<td>' + dedicacion.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + dedicacion.id + '" id="eliminarBtnDedicacion" class="delete-btn">Eliminar</button>'
+                                
                             '</td>' +
                                 '</tr>';
                             tablaDedicacion.append(newRow);
@@ -568,7 +567,7 @@
                                 '<td>' + facultad.nombre_facu + '</td>' +
                                 '<td>' + facultad.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + facultad.id + '" id="eliminarBtnFacultad" class="delete-btn">Eliminar</button>'
+                              
                             '</td>' +
                                 '</tr>';
                             tablaFacultad.append(newRow);
@@ -624,7 +623,7 @@
                                 '<td>' + categoria.nombre_cat + '</td>' +
                                 '<td>' + categoria.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + categoria.id + '" id="eliminarBtnCategoria" class="delete-btn">Eliminar</button>'
+                                
                             '</td>' +
                                 '</tr>';
                             tablaCategoria.append(newRow);
@@ -672,7 +671,7 @@
                                 '<td>' + facultad.nombre_facu + '</td>' +
                                 '<td>' + facultad.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + facultad.id + '" id="eliminarBtnFacultad" class="delete-btn">Eliminar</button>'
+                            
                             '</td>' +
                                 '</tr>';
                             tablaFacultad.append(newRow);
@@ -708,7 +707,7 @@
                                 '<td>' + categoria.nombre_cat + '</td>' +
                                 '<td>' + categoria.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + categoria.id + '" id="eliminarBtnCategoria" class="delete-btn">Eliminar</button>'
+                                
                             '</td>' +
                                 '</tr>';
                             tablaCategoria.append(newRow);
@@ -745,7 +744,7 @@
                                 '<td>' + dedicacion.nombre_de + '</td>' +
                                 '<td>' + dedicacion.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + dedicacion.id + '" id="eliminarBtnDedicacion" class="delete-btn">Eliminar</button>'
+                               
                             '</td>' +
                                 '</tr>';
                             tablaDedicacion.append(newRow);
@@ -781,7 +780,7 @@
                                 '<td>' + titulo.nombre_ti + '</td>' +
                                 '<td>' + titulo.descripcion + '</td>' +
                                 '<td>' +
-                                '<button data-id="' + titulo.id + '" id="eliminarBtnTitulo" class="delete-btn">Eliminar</button>'
+                                
                             '</td>' +
                                 '</tr>';
                             tablatitulo.append(newRow);

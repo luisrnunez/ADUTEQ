@@ -12,10 +12,10 @@ from Periodo.models import Periodo,AjustesSistema
 class Socios(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='socio',default=1)
     cedula = models.CharField(max_length=10, unique=True)
-    fecha_nacimiento = models.DateTimeField()
-    lugar_nacimiento = models.CharField(max_length=100)
-    numero_telefonico = models.CharField(max_length=20,unique=True,blank=True,null=True)
-    numero_convencional = models.CharField(max_length=20,unique=True,blank=True,null=True)
+    fecha_nacimiento = models.DateTimeField(unique=False,blank=True,null=True)
+    lugar_nacimiento = models.CharField(max_length=100,unique=False,blank=True,null=True)
+    numero_telefonico = models.CharField(max_length=20,unique=False,blank=True,null=True)
+    numero_convencional = models.CharField(max_length=20,unique=False,blank=True,null=True)
     direccion_domiciliaria = models.CharField(max_length=100)
     facultad = models.CharField(max_length=100,null=True,blank=True)
     categoria = models.CharField(max_length=100)
@@ -76,11 +76,7 @@ def datos_para_el_pdf(socio_id, mes, anio):
         cursor.execute(f"SELECT * FROM obtener_info_ayuda_economica({socio_id}, {mes}, {anio});")
         aportaciones_ayuda = cursor.fetchall()
 
-<<<<<<< HEAD
         cursor.execute(f"SELECT * FROM obtener_informe_mensual2({socio_id}, {mes}, {anio});")
-=======
-        cursor.execute(f"SELECT * FROM obtener_informe_mensual({socio_id}, {mes}, {anio});")
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
         consumo_total = cursor.fetchall()
 
     return consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumo_total

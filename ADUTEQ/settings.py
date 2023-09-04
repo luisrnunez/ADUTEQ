@@ -13,12 +13,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
-<<<<<<< HEAD
 import django
 from django.utils.encoding import smart_str
 django.utils.encoding.smart_text = smart_str
-=======
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,16 +57,8 @@ INSTALLED_APPS = [
     'promociones',
     'Periodo',
     'cuentas',
-<<<<<<< HEAD
-    'tinymce',
 ]
 
-=======
-]
-CRONJOBS = [
-    ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
-]
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -111,11 +100,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "dbaduteq",
         "USER": "postgres",
-<<<<<<< HEAD
         "PASSWORD": "root",
-=======
-        "PASSWORD": "123",
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
         "HOST": "127.0.0.1",
         "PORT":"5432",
     }
@@ -161,10 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-<<<<<<< HEAD
 TINYMCE_JS_URL = os.path.join(STATIC_URL, "path/to/tiny_mce/tiny_mce.js")
-=======
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 # Agregar estas líneas
 SELECT2_PATH = 'select2/'

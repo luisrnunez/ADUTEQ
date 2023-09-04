@@ -6,11 +6,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
-<<<<<<< HEAD
-=======
 
 from .models import Periodo
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 from . import models
 from .models import Empleado
 from django.contrib.auth.decorators import login_required
@@ -25,18 +22,11 @@ def listar_empleados(request):
     paginator = Paginator(empleados, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
-<<<<<<< HEAD
-        empleados_pag=paginator.get_page(numero_pagina)
-    except PageNotAnInteger:
-        empleados_pag=paginator.get_page(1)
-    return render(request, "lista_empleados.html", {'empleados': empleados_pag})
-=======
         periodo_seleccionado = Periodo.objects.filter(activo=True).first()
         empleados_pag=paginator.get_page(numero_pagina)
     except PageNotAnInteger:
         empleados_pag=paginator.get_page(1)
     return render(request, "lista_empleados.html", {'empleados': empleados_pag,'periodo': periodo_seleccionado})
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 @login_required
 def editar_empleado(request, empleado_id):

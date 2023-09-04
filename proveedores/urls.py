@@ -13,10 +13,7 @@ urlpatterns = [
     path('verificarexiste/', views.verificarexi),
     #barra de busqueda
     path('busqueda/', views.busqueda, name='search'),
-<<<<<<< HEAD
     path('busquedadetallescupos/', views.busqueda_detalles_cupos, name='searchcupo'),
-=======
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
     path('prueba/', views.prueba),
     #------------------------------------------------------------
