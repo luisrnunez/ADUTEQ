@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .models import Periodo
+from Periodo.models import Periodo
 from .models import Proveedor, detallesCupos, CuentaBancaria
 from django.contrib import messages
 from django.db.models import Q
