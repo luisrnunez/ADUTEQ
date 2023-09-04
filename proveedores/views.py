@@ -123,7 +123,7 @@ def editarPro(request):
     proveedor= get_object_or_404(Proveedor, id=request.POST.get('id'))
 
 
-    if Proveedor.objects.exclude(id=request.POST.get('id')).filter(RUC=RUCp).exists():
+    if Proveedor.objects.exclude(id=request.POST.get('id')).filter(ruc=RUCp).exists():
         response = {
             'status': 'error',
             'message': 'Ya existe un proveedor registrado con este RUC'
@@ -145,7 +145,7 @@ def editarPro(request):
     else:
         proveedor.nombre=nombrep
         proveedor.telefono=telefonop
-        proveedor.RUC=RUCp
+        proveedor.ruc=RUCp
         proveedor.direccion=direccionp
         proveedor.comision=comisionp
         proveedor.cupo=cupop

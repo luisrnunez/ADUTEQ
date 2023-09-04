@@ -9,6 +9,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-k8I/X+JZbgDzMSm3Z0nK5Xf5y5IQzq5iPbqjk5f6cD5x2l4K1+a7mN9MXTf5ZbzU5F"
+        crossorigin="anonymous"></script>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
     <style>
         body {
             text-align: center;
@@ -24,18 +36,19 @@
         .contenedorvm {
             display: grid;
             grid-template-areas:
-                'cabecera cabecera cabecera'
-                'ingresos ingresos fecha'
-                'descripcion valor comision'
-                'des1 valor1 comision1'
-                'des2 valor2 comision2'
-                'des3 valor3 comision3 '
-                'footer footer footer';
+                'cabecera cabecera cabecera cabecera'
+                'ingresos ingresos ingresos ingresos'
+                'descripcion detalle valor comision'
+                'des1 detallec1 valor1 comision1'
+                'des2 detallec2 valor2 comision2'
+                'des3 detallec3 valor3 comision3'
+                'valortotal valorfin valorfin totalc'
+                'footer footer footer footer';
             width: 100%;
             margin: auto;
             padding: 20px;
             border: 2px solid black;
-            grid-template-rows: 50px 40px 40px 40px 40px 30px;
+            grid-template-rows: 50px 40px 40px 40px 40px 40px 40px 30px;
             text-align: center;
         }
 
@@ -48,24 +61,33 @@
         .c1 {
             grid-area: cabecera;
             font-size: xx-large;
+            display: flex;
+            align-items: center;
         }
 
         .c2 {
             grid-area: ingresos;
-            font-size: medium;
+            font-size: large;
         }
 
         .c3 {
             grid-area: fecha;
             font-size: medium;
+            grid-template-columns: max-content 10px;
         }
 
         .c4 {
             grid-area: descripcion;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .c5 {
             grid-area: valor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .c6 {
@@ -74,9 +96,15 @@
 
         .c7 {
             grid-area: comision;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .c8 {
             grid-area: des1;
+            display: flex;
+            align-items: center;
         }
 
         .c9 {
@@ -86,8 +114,11 @@
         .c10 {
             grid-area: comision1;
         }
+
         .c11 {
             grid-area: des2;
+            display: flex;
+            align-items: center;
         }
 
         .c12 {
@@ -97,8 +128,11 @@
         .c13 {
             grid-area: comision2;
         }
+
         .c14 {
             grid-area: des3;
+            display: flex;
+            align-items: center;
         }
 
         .c15 {
@@ -109,9 +143,77 @@
             grid-area: comision3;
         }
 
+        .c17 {
+            grid-area: valortotal;
+        }
+
+        .c18 {
+            grid-area: valorfin;
+        }
+
+        /* .c19 {
+            grid-area: valorcomfin;
+        } */
+        .c20 {
+            grid-area: detalle;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .c21 {
+            grid-area: detallec1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .c22 {
+            grid-area: detallec2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .c23 {
+            grid-area: detallec3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .c24 {
+            grid-area: totalc;
+        }
+
         p {
             margin: 0;
             padding: 0;
+            margin-right: 25px;
+            text-align: right;
+        }
+
+        .alig_der {
+            text-align: left;
+            margin-left: 25px;
+        }
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60%;
+            height: 80%;
+        }
+
+        .button-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            font-weight: bold;
+            font-size: small;
         }
     </style>
 </head>
@@ -119,24 +221,142 @@
 <body>
     <div class="contenedorvm">
         <div class="caja c1">
-            <p>Asocion de Docentes Univerdidad Tecnica Estatal de Quevedo</p>
+            Asocion de Docentes Univerdidad Tecnica Estatal de Quevedo
         </div>
-        <div class="caja c2">Ingresos registrados del mes -- año --</div>
-        <div class="caja c3">fecha 00/00/000</div>
-        <div class="caja c4">Ingresos del Mes</div>
-        <div class="caja c5">valor</div>
+        <div class="caja c2">Ingresos registrados del mes {{mes}} año {{anio}}</div>
+        <!-- <div class="caja c3"></div> -->
+        <div class="caja c4">Detalles de Ingresos</div>
+        <div class="caja c5">Valor</div>
         <div class="caja c7">Comision</div>
-        <div class="caja c8">Consumo de los proveedores</div>
-        <div class="caja c9">120.45</div>
-        <div class="caja c10">27.45</div>
-        <div class="caja c11">Total Descuento por Cuotas</div>
-        <div class="caja c12">3002.45</div>
-        <div class="caja c13">288.45</div>
-        <div class="caja c14">Total Prestamos</div>
-        <div class="caja c15">3744</div>
-        <div class="caja c16">3744</div>
-        <div class="caja c6">00/00/0000 - 00/00/0000</div>
+        <div class="caja c8">
+            <p class="alig_der">Consumo de los proveedores</p>
+        </div>
+        <div class="caja c9">
+            <p>{{suma_consumo}}</p>
+        </div>
+        <div class="caja c10">
+            <p>{{comision_descuentos}}</p>
+        </div>
+        <div class="caja c11">
+            <p class="alig_der">Consumo Descuentos por Cuotas Proveedores</p>
+        </div>
+        <div class="caja c12">
+            <p>{{suma_des_cuo}}</p>
+        </div>
+        <div class="caja c13">
+            <p>{{comision_descuentos_cuotas}}</p>
+        </div>
+        <div class="caja c14">
+            <p class="alig_der">Descuento Prestamos</p>
+        </div>
+        <div class="caja c15">
+            <p>{{suma_prestamos}}</p>
+        </div>
+        <div class="caja c16">
+            <p>{{suma_interes_prest}}</p>
+        </div>
+
+        <div class="caja c17">Total</div>
+        <div class="caja c18">
+            <p>{{sum_total}}</p>
+        </div>
+        <!-- <div class="caja c19"><p>50.567.00</p></div> -->
+        <div class="caja c6">fecha: {{fecha_actual}}</div>
+        <div class="caja c20">Detalle</div>
+        <div class="caja c21"><button class="btn btn-info" data-bs-toggle="modal" data-funcion="comision" data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span
+                    class="button-text">Ver Detalle</span></button>
+        </div>
+        <div class="caja c22"><button class="btn btn-info" data-bs-toggle="modal" data-funcion="comision_cuotas" data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span
+                    class="button-text">Ver Detalle</span></button>
+        </div>
+        <div class="caja c23"><button class="btn btn-info" data-bs-toggle="modal" data-funcion="prestamos" data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span
+                    class="button-text">Ver Detalle</span></button>
+        </div>
+        <div class="caja c24">
+            <p>{{total_com}}</p>
+        </div>
     </div>
+    <div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Detalles</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombres</th>
+                                <th>Valor</th>
+                                <th>Comisión/Valor+Interes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-body">
+                            
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            function cargarDatosEnModal(data) {
+                var tablaBody = $('#tabla-body');
+                tablaBody.empty();
+
+                data.forEach(function (item) {
+                    var fila = $('<tr>');
+                    fila.append($('<td>').text(item.campo1));
+                    var campo2 = parseFloat(item.campo2).toFixed(2);
+                    fila.append($('<td>').text(campo2));
+                    var campo3 = parseFloat(item.campo3).toFixed(2);
+                    fila.append($('<td>').text(campo3));
+
+                    tablaBody.append(fila);
+                });
+            }
+
+            $('.c21 button, .c22 button, .c23 button').on('click', function () {
+                var boton = $(this);
+                var funcion = boton.data('funcion');
+                var mes = boton.data('mes');
+                var anio = boton.data('anio');
+                var url = '';
+                if (funcion === 'prestamos') {
+                    url = `/obtener_informacion_prestamos/${mes}/${anio}/`;
+                } else if (funcion === 'comision') {
+                    url = `/obtener_comision_descuentos/${mes}/${anio}/`;
+                }else if (funcion === 'comision_cuotas') {
+                    url = `/obtener_comision_descuentos_cuotas/${mes}/${anio}/`;
+                }
+                
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function (response) {
+                        if (response.data) {
+                            cargarDatosEnModal(response.data);
+                            $('#detalleModal').modal('show');
+                        } else {
+                            
+                        }
+                    },
+                    error: function () {
+                        
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>
