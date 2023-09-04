@@ -20,13 +20,15 @@
         {% for pago_cuota in pago_cuotas %}
         <tr>
             <td>{{pago_cuota.id}}</td>
-            <td>{{pago_cuota.socio.user.first_name }}</td>
+            <td>{{pago_cuota.socio.user.last_name }} {{pago_cuota.socio.user.first_name }}</td>
             <td>{{pago_cuota.proveedor.nombre}}</td>
             <td>{{pago_cuota.numero_cuotas}}</td>
             <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
             <td>{{pago_cuota.consumo_total}}</td>
             <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
-            <td>
+          
+            <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
+              <td>
                 {% if pago_cuota.estado %}
                 <button class="green-button">
                     Cancelado
@@ -37,7 +39,6 @@
                 </button>
                 {% endif %}
             </td>
-            <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
             <td>
                 <form action="{% url 'detalles_cuota' pago_cuota.id %}">
                     <button class="edit-btn">Ver Detalle</button>

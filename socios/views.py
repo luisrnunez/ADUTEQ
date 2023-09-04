@@ -83,9 +83,8 @@ def Principal(request):
         if  periodo.fecha_fin == fecha_actual:
             messages.warning(request,'El periodo actual se cerrara mañana automaticamente, si no desea esta accion vaya a ajustes!')
     except :
-        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
-    return render(request, "base.html")
-
+        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')   
+    return render(request, "base.html",{'periodo': periodo})
 
 
 @login_required
@@ -94,10 +93,10 @@ def PanelActividades(request):
     try:
         periodo_seleccionado = Periodo.objects.filter(activo=True).first()
         if periodo_seleccionado:
-            return render(request, "emp_actividades.html")
+            return render(request, "emp_actividades.html",{'periodo': periodo_seleccionado})
         else:
             messages.warning(request, 'Para poder realizar transaciones agregue un nuevo periodo')
-            return render(request, "base.html")
+            return render(request, "base.html",{'periodo': periodo_seleccionado})
     except:
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')
         return render(request, "emp_actividades.html")
@@ -406,10 +405,11 @@ def ListaSocios(request):
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
-         socios_pag=paginator.get_page(numero_pagina)
+        periodo = Periodo.objects.get(activo=True)
+        socios_pag=paginator.get_page(numero_pagina)
     except PageNotAnInteger:
          socios_pag=paginator.get_page(1)
-    return render(request, "emp_socios.html", {'socios': socios_pag})
+    return render(request, "emp_socios.html", {'socios': socios_pag,'periodo': periodo})
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def AggSocio(request):

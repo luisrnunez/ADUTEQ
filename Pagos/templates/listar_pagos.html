@@ -78,7 +78,7 @@
                         {% for pago in pagos %}
                         <tr>
                             <td>{{pago.id}}</td>
-                            <td>{{ pago.socio.user.first_name }}</td>
+                            <td>{{ pago.socio.user.first_name }} {{ pago.socio.user.last_name }}</td>
                             <td>{{pago.proveedor.nombre}}</td>
                             <td>{{pago.consumo_total}}$</td>
                             <td>{{ pago.fecha_consumo|date:"j - n - Y" }}</td>

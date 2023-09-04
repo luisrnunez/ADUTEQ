@@ -99,12 +99,29 @@
     {% endif %}
 
     <div class="sidebar">
-        <div class="logo">
+        <div class="logo" style="margin-bottom: 5px;">
             <div class="profile-lg" style="margin-left: 7px;">
                 <a href="/principal"><img src="{% static 'img/aduteq.png' %} " alt="ADUTEQ Logo"></a>
+                
             </div>
-
+       
+            <div class="hidden-div">
+                <span style="font-size: 11px; text-align: center;">
+                    {% if periodo.activo %}
+                    {{ periodo.nombre }}
+                    {% endif %}
+    
+                </span> <br>
+                <span style="font-size: 9px;" style="text-align: center;">
+                    {% if periodo.activo %}
+                        {{ periodo.fecha_inicio|date:"d F" }} a {{ periodo.fecha_fin|date:"d F" }}
+                    {% endif %}
+    
+                </span>
+               
+            </div>
         </div>
+        
         <ul>
             <li><a href="/socios"><img src="{% static 'img/icon-socios.png' %}" alt="Socios"
                         width="33px">&nbsp&nbsp<span>
@@ -136,10 +153,10 @@
                 {% if request.user.is_authenticated %}
                 {% if request.user.is_superuser == False %}
                 <span class="disable-underline">{{ request.user.empleado.nombres }}</span>
-                {% endif %}
-                {% if request.user.username == 'admin' %}
+                {% else %}
                 <span class="disable-underline">Administrador</span>
                 {% endif %}
+                
                 {% endif %}
             </a>
             <div id="user-menu" class="user-menu">

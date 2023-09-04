@@ -13,6 +13,8 @@
             {% if periodo_seleccionado.activo == True %}
             <th scope="col">Editar</th>
             <th scope="col">Detalles</th>
+            {% else %}
+            <th scope="col">Detalles</th>
             {% endif %}
             <!-- <th scope="col">Eliminar</th> -->
         </tr>
@@ -20,7 +22,7 @@
     <tbody>
         {% for prestamo in prestamos %}
         <tr>
-            <td>{{ prestamo.socio.user.first_name }}</td>
+            <td>{{ prestamo.socio.user.first_name }} {{ prestamo.socio.user.last_name }}</td>
             <td>{{ prestamo.monto }}$</td>
             <td>{{ prestamo.fecha_prestamo|date:"j - n - Y" }}</td>
             <td>{{ prestamo.plazo_meses }} meses</td>
@@ -59,6 +61,14 @@
             <td>
                 <button class="edit-btn" onclick="confirmarEliminacion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Eliminar</button>
             </td>
+            {% else %}
+                {% if prestamo.cancelado == False %}
+                <td>
+                    <form action="{% url 'mostrar_detalles_pago' prestamo.socio.id prestamo.id %}">
+                        <button class="edit-btn">Detalles Pago</button>
+                    </form>
+                </td>
+                {% endif %}
             {% endif %}
         </tr>
         {% endfor %}

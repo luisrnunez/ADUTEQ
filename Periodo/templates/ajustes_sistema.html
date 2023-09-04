@@ -121,12 +121,14 @@
                                     this.value = this.value.replace(/[^0-9]/g, "").substring(0, 2);
                                 });         
                             </script>
+
                             <div style="display: inline-flex; justify-content: space-between; width: 80%;">
                                 <h3 style="width: 80%;">Cierre Automático:</h3>
                                 <select style="border-color: red;" name="cierre_automatico" id="cierre_automatico">
                                     <option value="no" {% if not ajustes.periodoAutomatico %}selected{% endif %}>No
                                     </option>
                                     <option value="si" {% if ajustes.periodoAutomatico %}selected{% endif %}>Sí</option>
+                                    
                                 </select>
                             </div>
 

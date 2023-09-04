@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+
+from .models import Periodo
 from .models import Proveedor, detallesCupos, CuentaBancaria
 from django.contrib import messages
 from django.db.models import Q
@@ -17,10 +19,11 @@ def proveedor(request):
     paginator = Paginator(proveedores, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
+        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
         proveedores_paginados = paginator.get_page(numero_pagina)
     except PageNotAnInteger:
         proveedores_paginados = paginator.get_page(1)
-    return render(request,'proveedores.html', {'proveedores': proveedores_paginados})
+    return render(request,'proveedores.html', {'proveedores': proveedores_paginados,'periodo': periodo_seleccionado})
 
 def formRegistro(request):
     return render(request,'aggProveedor.html')

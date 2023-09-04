@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from Periodo.models import Periodo
 
 # Create your models here.
 class Empleado(models.Model):

@@ -14,7 +14,7 @@ body {
     left: 0;
     top: 0;
     padding: 18px;
-    z-index: 100;
+    z-index: 1000;
     box-sizing: border-box;
     transition: width 0.3s;
 }
@@ -41,6 +41,7 @@ body {
 .sidebar .logo {
     text-align: center;
     margin-bottom: 20px;
+    position: relative;
 }
 
 .sidebar .logo img {
@@ -88,7 +89,6 @@ body {
 .sidebar .profile {
     position: fixed;
     bottom: 20px;
-    
     display: flex;
     align-items: center;
     transition: width 0.3s;
@@ -96,6 +96,20 @@ body {
 
 .sidebar:hover .profile {
     width: 200px;
+}
+.sidebar .hidden-div {
+    display: none; /* Inicialmente oculto */
+}
+
+/* Mostrar el div oculto cuando se pasa el cursor sobre el sidebar */
+.sidebar:hover .hidden-div {
+    display: block;
+    z-index: 1;
+    text-align: center;
+    opacity: 100%; /* Mostrar el div con opacidad completa */
+    pointer-events: none;
+    margin-bottom: 0%;
+    padding-bottom: 0%;
 }
 
 .sidebar .profile img {
@@ -122,7 +136,6 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-   
     transition: width 0.3s, height 0.3s;
 }
 

@@ -61,7 +61,7 @@
                     <tbody>
                         {% for prestamo in prestamos %}
                         <tr>
-                            <td>{{ prestamo.socio.user.first_name }}</td>
+                            <td>{{ prestamo.socio.user.first_name }} {{ prestamo.socio.user.last_name }}</td>
                             <td>{{ prestamo.monto }}$</td>
                             <td>{{ prestamo.fecha_prestamo|date:"j - n - Y" }}</td>
                             <td>{{ prestamo.plazo_meses }} meses</td>

@@ -34,6 +34,7 @@ from django.template import Context
 import os
 import calendar
 
+from .models import Periodo
 
 # Create your views here.
 

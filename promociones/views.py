@@ -17,6 +17,9 @@ import os
 from PIL import Image
 from django.template.loader import render_to_string
 from io import BytesIO
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import smtplib
 
@@ -173,7 +176,6 @@ def editar_promo(request, promo_id):
                     'status': 'success',
                     'message': 'Promoción editada correctamente'
                 }
-
             return JsonResponse(response)
     else:
         return render(request, 'edit_promocion.html', {'promocion':promocion, 'proveedores':proveedores})
