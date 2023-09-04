@@ -26,58 +26,102 @@
         <div class="content">
             <div class="form-container">
 
-
                 <form id="edit-promo" action="{% url 'editpromo' promo_id=promocion.id %}" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
+                        {% csrf_token %}
+                    {% if promocion.tipo%}
+                        <input type="hidden" id="id" name="id" value="{{ promocion.id }}"  >
 
-                    <input type="hidden" id="id" name="id" value="{{ promocion.id }}"  >
+                        <input type="hidden" id="tipo" name="tipo" value="{{ promocion.tipo }}"  >
 
-                    <label for="first_name">Titulo:</label>
-                    <input type="text" id="titulo" name="titulo" value="{{ promocion.titulo }}"  required>
+                        <label for="first_name">Titulo:</label>
+                        <input type="text" id="titulo" name="titulo" value="{{ promocion.titulo }}"  required>
 
-                    <label for="proveedor">Buscar o seleccionar proveedor:</label>
-                    <input type="text" id="proveedorInput" style="width:95%;" placeholder="Buscar proveedor...">
-                    <select id="proveedorSelect" name="proveedor" style="width:95%;" size="4">
-                        {% for proveedor in proveedores %}
-                        <!-- <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option> -->
-                        <option value="{{ proveedor.id }}" {% if proveedor == promocion.proveedor %} selected {% endif %}>{{ proveedor.nombre }}</option>
-                        {% endfor %}
-                    </select>
+                        <label for="proveedor">Buscar o seleccionar proveedor:</label>
+                        <input type="text" id="proveedorInput" style="width:95%;" placeholder="Buscar proveedor..." value="{{ promocion.proveedor.nombre }}">
+                        <select id="proveedorSelect" name="proveedor" style="width:95%;" size="4">
+                            {% for proveedor in proveedores %}
+                            <!-- <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option> -->
+                            <option value="{{ proveedor.id }}" {% if proveedor == promocion.proveedor %} selected {% endif %}>{{ proveedor.nombre }}</option>
+                            {% endfor %}
+                        </select>
 
-                    <label for="last_name">Descripcion:</label>
-                    <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required>
+                        <label for="last_name">Descripcion:</label>
+                        <!-- <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required> -->
+                        <textarea value="{{ promocion.descripcion }}" id="descripcion" name="descripcion" rows="4" required>{{ promocion.descripcion }}</textarea>
 
-                    <label for="foto">Agregar Imagen Promo:</label>
-                    {% get_media_prefix as media_prefix %}
-                    <div class="generated-credentials">
-                        <div class="custom-file">
-                            <div class="upload-preview">
-                                <div id="imagePreview">
-                                    <img src="{{ media_prefix }}{{ promocion.imagen }}"  >
+                        <label for="foto">Agregar Imagen Promo:</label>
+                        {% get_media_prefix as media_prefix %}
+                        <div class="generated-credentials">
+                            <div class="custom-file">
+                                <div class="upload-preview">
+                                    <div id="imagePreview">
+                                        <img src="{{ media_prefix }}{{ promocion.imagen }}"  >
+                                    </div>
                                 </div>
+                                <input type="file" class="custom-file-input" id="imagen" name="imagen"
+                                    onchange="previewImage(event)">
+                                <label class="custom-file-label" for="id_foto_perfil">Seleccionar imagen</label>
                             </div>
-                            <input type="file" class="custom-file-input" id="imagen" name="imagen"
-                                onchange="previewImage(event)">
-                            <label class="custom-file-label" for="id_foto_perfil">Seleccionar imagen</label>
                         </div>
-                    </div>
+
+                        <label for="evidencia">Evidencia (PDF):</label>
+                        <input accept="application/pdf" type="file" id="evidencia" name="evidencia" value="{{ promocion.evidencia }}">
 
 
-                    <label for="fecha_nacimiento">Fecha de Inicio:</label>
-                    <input type="date" id="fecha_inicio" name="fecha_inicio"
-                        value="{{ promocion.fecha_inicio|date:'Y-m-d'}}" required>
-                    
-                    <label for="fecha_nacimiento">Fecha Final:</label>
-                    <input type="date" id="fecha_fin" name="fecha_fin"
-                        value="{{ promocion.fecha_fin|date:'Y-m-d'}}" required>
+                        <label for="fecha_nacimiento">Fecha de Inicio:</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio"
+                            value="{{ promocion.fecha_inicio|date:'Y-m-d'}}" required>
+                        
+                        <label for="fecha_nacimiento">Fecha Final:</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin"
+                            value="{{ promocion.fecha_fin|date:'Y-m-d'}}" required>
 
-                    <input type="hidden" id="estado" name="estado" value="1">
+                        <input type="hidden" id="estado" name="estado" value="1">
+                    {% else %}
+                        <input type="hidden" id="id" name="id" value="{{ promocion.id }}"  >
+
+                        <input type="hidden" id="tipo" name="tipo" value="{{ promocion.tipo }}"  >
+
+                        <label for="first_name">Titulo:</label>
+                        <input type="text" id="titulo" name="titulo" value="{{ promocion.titulo }}"  required>
 
 
-                    <input type="submit" value="Editar Promo" style="width: 100%;">
+                        <label for="last_name">Descripcion:</label>
+                        <!-- <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required> -->
+                        <textarea value="{{ promocion.descripcion }}" id="descripcion" name="descripcion" rows="4" required>{{ promocion.descripcion }}</textarea>
+
+                        <label for="foto">Agregar Imagen Promo:</label>
+                        {% get_media_prefix as media_prefix %}
+                        <div class="generated-credentials">
+                            <div class="custom-file">
+                                <div class="upload-preview">
+                                    <div id="imagePreview">
+                                        <img src="{{ media_prefix }}{{ promocion.imagen }}"  >
+                                    </div>
+                                </div>
+                                <input type="file" class="custom-file-input" id="imagen" name="imagen"
+                                    onchange="previewImage(event)">
+                                <label class="custom-file-label" for="id_foto_perfil">Seleccionar imagen</label>
+                            </div>
+                        </div>
+
+                        <label for="evidencia">Evidencia (PDF):</label>
+                        <input accept="application/pdf" type="file" id="evidencia" name="evidencia" value="{{ promocion.evidencia }}">
+
+
+                        
+                        <input hidden type="date" id="fecha_inicio" name="fecha_inicio"
+                            value="{{ promocion.fecha_inicio|date:'Y-m-d'}}" >
+                        
+
+                        <input hidden type="date" id="fecha_fin" name="fecha_fin"
+                            value="{{ promocion.fecha_fin|date:'Y-m-d'}}" >
+
+                        <input type="hidden" id="estado" name="estado" value="1">
+                    {% endif %}
+                    <input type="submit" value="Guardar" style="width: 100%;">
                     <a href="/promociones"> <input type="button" value="Cancelar"
                             style="width: 100%; background-color: red;"></a>
-
                 </form>
             </div>
         </div>
@@ -85,6 +129,28 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const evidenciaInput = document.getElementById('evidencia');
+
+            evidenciaInput.addEventListener('change', function () {
+
+                if (evidenciaInput.files.length > 0) {
+                    const selectedFile = evidenciaInput.files[0];
+
+                    if (selectedFile.type !== 'application/pdf') {
+                        evidenciaInput.value = ''; 
+                        Swal.fire({
+                            title: 'Formato no permitido',
+                            text: 'Por favor, seleccione un archivo en formato PDF.',
+                            icon: 'error',
+                        });
+                    }
+                }
+            });
+        });
+
+
         function previewImage(event) {
             var reader = new FileReader();
             reader.onload = function () {
@@ -120,7 +186,8 @@
             inputElement.value = selectedOption.text;
         });
 
-
+    </script>
+    <script>
         var promocionId = "{{ promocion.id }}";
         $(document).ready(function () {
         $('#edit-promo').on('submit', function (event) {
@@ -143,7 +210,7 @@
                         })
                     } else if (response.status === 'success') {
                         Swal.fire({
-                            "title": "¿Desea guardar los cambios de esta promoción?",
+                            "title": "¿Desea guardar los cambios?",
                             "text": "Esta acción no se puede deshacer",
                             "icon": "question",
                             "showCancelButton": true,
@@ -166,6 +233,7 @@
         });
     });
     </script>
+    
 </body>
 
 </html>

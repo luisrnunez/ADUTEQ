@@ -34,39 +34,44 @@
 <div class="content-menu">
 
     <div class="header">
-        <h1>Promociones</h1>
+        <h1>Promociones y  Comunicados</h1>
     </div>
     <div class="socios-content ">
         <div class="botones-sup">
-            <a href="{% url 'aggpromo' %}"> <button class="add-socio-btn"> Agregar Nueva Promo</button></a>
+            <a href="{% url 'aggpromo' %}"> <button class="add-socio-btn"> Agregar Nueva Promo o Comunicado</button></a>
             <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
                 <div class="search-form">
 
-                    <select id="criterio" name="criterio">
+                    <!-- <select id="criterio" name="criterio">
                         <option value="titulo">Titulo</option>
                         <option value="proveedor">Proveedor</option>
                     </select>
-                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar promo...">
+                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar promo..."> -->
                     <!-- <button type="submit">Buscar</button> -->
 
+                    <select name="tipo_seleccionado" id="tipo_seleccionado" style="width:95%;" onchange="filtrarTabla()">
+                        <option value="1">Promociones</option>
+                        <option value="0">Comunicados</option>
+                    </select>
                 </div>
-
 
             <!-- </form> -->
 
         </div>
 
 
-        <table id="tablaSocios" class="socios-table">
+        <table id="tablaSocios" class="socios-table dataTable">
             <thead>
                 <tr>
+                    <th>Tipo</th>
                     <th>Titulo</th>
                     <th>Descripción</th>
-                    <th>Proveedor</th>
+                    <th class="col-proveedor">Proveedor</th>
                     <th>Imagen</th>
-                    <th>Fecha Inicio</th>
-                    <th>Fecha Fin</th>
-                    <th>Estado</th>
+                    <th>Evidencia</th>
+                    <th class="col-f-ini">Fecha Inicio</th>
+                    <th class="col-f-fin">Fecha Fin</th>
+                    <th class="col-estado">Estado</th>
                     <th>Editar</th>
                     <th>Eliminar</th>
                     <th>Notificar</th>
@@ -76,19 +81,32 @@
             <tbody id="socios-body">
                 <!-- {% include 'tabla_parcialSocios.html' %} -->
                 {% for promocion in promociones %}
+                {% if promocion.tipo %}
                 <tr>
+                    <td><strong>Promoción</strong></td>
                     <td>{{ promocion.titulo }}</td>
                     <td>{{ promocion.descripcion }}</td>
-                    <td>{{ promocion.proveedor.nombre }}</td>
+                    <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
                     <td>
                         {% if promocion.imagen %}
                         <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image">
                         {% else %}
-                        No hay foto disponible.
+                        No hay imagen disponible.
                         {% endif %}
                     </td>
-                    <td>{{ promocion.fecha_inicio|date:"j - n - Y" }}</td>
-                    <td>{{ promocion.fecha_fin|date:"j - n - Y" }}</td>
+                    <td>
+
+                        {% if promocion.evidencia %}
+                        <a href="{{ promocion.evidencia.url }}" target="_blank">
+                            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                        </a>
+                        {% else %}
+                        Sin evidencia
+                        {% endif %}
+
+                    </td>
+                    <td>{{ promocion.fecha_inicio }}</td>
+                    <td>{{ promocion.fecha_fin }}</td>
                     <!-- <td>{{ socio.categoria }}</td> -->
                     <td>
                         {% if promocion.estado %}
@@ -117,15 +135,61 @@
                     </td>
                     <td>
                         <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
-                            class="edit-btn notify" style="text-decoration: none;"> Notificar
+                        title="Notificar de esto a todos los socios" class="edit-btn notify" style="text-decoration: none;"> Notificar
                         </a>
                     </td>
                 </tr>
+
+                {% else %}
+                <tr class="comunicado">
+                    <td><strong>Comunicado</strong></td>
+                    <td>{{ promocion.titulo }}</td>
+                    <td>{{ promocion.descripcion }}</td>
+                    <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
+                    <td>
+                        {% if promocion.imagen %}
+                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image">
+                        {% else %}
+                        No hay imagen disponible.
+                        {% endif %}
+                    </td>
+                    <td>
+
+                        {% if promocion.evidencia %}
+                        <a href="{{ promocion.evidencia.url }}" target="_blank">
+                            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                        </a>
+                        {% else %}
+                        Sin evidencia
+                        {% endif %}
+
+                    </td>
+                    <td>{{ promocion.fecha_inicio }}</td>
+                    <td class="col-f-fin">{{ promocion.fecha_fin }}</td>
+                    <!-- <td>{{ socio.categoria }}</td> -->
+                    <td>
+                        <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
+                            <button class="edit-btn">
+                                Editar
+                            </button></a>
+                        </a>
+                    </td>
+                    <td>
+                        <button id="delete" class="edit-btn delete" data-promo-id="{{ promocion.id }}">Eliminar</button>
+                    </td>
+                    <td>
+                        <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
+                            class="edit-btn notify" style="text-decoration: none;" title="Notificar de esto a todos los socios"> Notificar
+                        </a>
+                    </td>
+                </tr>
+
+                {% endif %}
                 {% endfor %}
             </tbody>
         </table>
 
-        <div class="pagination-container">
+        <!-- <div class="pagination-container">
             <nav aria-label="...">
                 <ul class="pagination">
                     {% if promociones.has_previous %}
@@ -143,7 +207,7 @@
                     {% endif %}
                 </ul>
             </nav>
-        </div>
+        </div> -->
 
     </div>
     <!-- Resto del contenido de la página -->
@@ -194,7 +258,7 @@ $(document).ready(function () {
                             error: function (xhr, errmsg, err) {
                                 Swal.fire({
                                     title: 'Error',
-                                    text: 'Ocurrió un error al enviar la promoción',
+                                    text: `Ocurrió un error al enviar la promoción: ${xhr.status} (${xhr.statusText})`,
                                     icon: 'error',
                                 });
                             },
@@ -347,7 +411,7 @@ $(document).ready(function() {
     function confirmarEdicion(promo_id, nombrepromo) {
         Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Deseas editar la promo ' + nombrepromo,
+            text: 'Deseas editar ' + nombrepromo,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí',
@@ -360,8 +424,94 @@ $(document).ready(function() {
             }
         });
     }
+
+    function filtrarTabla() {
+    var tipoSeleccionado = document.getElementById("tipo_seleccionado").value;
+    var filas = document.querySelectorAll("#socios-body tr");
+
+    // Ocultar todas las filas primero
+    filas.forEach(function (fila) {
+        fila.style.display = "none";
+    });
+
+    // Ocultar las celdas de encabezado y datos de la columna "Proveedor" y "Estado"
+    var columnasProveedor = document.querySelectorAll(".col-proveedor");
+    columnasProveedor.forEach(function (columna) {
+        columna.style.display = "none";
+    });
+    var columnasEstado = document.querySelectorAll(".col-estado");
+    columnasEstado.forEach(function (columna1) {
+        columna1.style.display = "none";
+    });
+
+    var columnasFin = document.querySelectorAll(".col-f-fin");
+    columnasFin.forEach(function (columna2) {
+        columna2.style.display = "none";
+    });
+
+    var columnasIni = document.querySelectorAll(".col-f-ini");
+    columnasIni.forEach(function (columna) {
+        columna.textContent = (tipoSeleccionado === "1") ? "Fecha Inicio" : "Fecha";
+    });
+
+    if (tipoSeleccionado === "0") {
+        // Mostrar solo las filas de "Comunicado"
+        filas.forEach(function (fila) {
+            if (fila.querySelector("td:first-child").textContent === "Comunicado") {
+                fila.style.display = "table-row";
+            }
+        });
+    } else if (tipoSeleccionado === "1") {
+        // Mostrar solo las filas de "Promoción"
+        filas.forEach(function (fila) {
+            if (fila.querySelector("td:first-child").textContent === "Promoción") {
+                fila.style.display = "table-row";
+            }
+        });
+
+        // Mostrar las celdas de encabezado y datos de las columnas "Proveedor", "Estado", "Fecha Inicio" y "Fecha Fin"
+        columnasProveedor.forEach(function (columna) {
+            columna.style.display = "table-cell";
+        });
+        columnasEstado.forEach(function (columna1) {
+            columna1.style.display = "table-cell";
+        });
+        columnasFin.forEach(function (columna2) {
+            columna2.style.display = "table-cell";
+        });
+        columnasIni.forEach(function (columna) {
+            columna.style.display = "table-cell";
+        });
+    } 
+}
+
+
 </script>
+<script>
+    function ocultarComunicados() {
+        // Oculta los elementos relacionados con los comunicados
+        var comunicadoElements = document.querySelectorAll(".comunicado");
+        for (var i = 0; i < comunicadoElements.length; i++) {
+            comunicadoElements[i].style.display = "none";
+        }
+    }
+    // Ejecuta la función cuando la página se carga
+    window.addEventListener("load", ocultarComunicados);
+
+    </script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var table = $('#tablaSocios tbody');
+        var rows = table.find('tr').get();
+    
+        rows.reverse(); // Invertir el orden de las filas
+    
+        $.each(rows, function (index, row) {
+            table.append(row);
+        });
+    });
+    </script>
 
 {% endblock %}

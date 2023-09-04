@@ -143,24 +143,64 @@
             <!-- Sección: Período Activo -->
             
             <div class="card-container">
-                <div class="card">
-                    <div class="header" style="margin-bottom: 20px;">
-                        <h1>AJUSTES GENERALES</h1>
-                    </div>
-                    <div class="card-content">
-                        <div class="periodo-actual" style="width: min-content; ">
-                            <label for="Correo">Correo aduteq:</label>
-                            <input type="email" id="Correo" name="Correo" >
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card">
+                        <div class="header" style="margin-bottom: 20px;">
+                            <h1>AJUSTES GENERALES</h1>
+                        </div>
+                        <button style="background-color: orange;" type="button" id="agregarCorreoButton">Agregar otro correo</button>
+                        <div class="card-content">
+                            <table id="tablaSocios" class="socios-table">
+                                <thead>
+                                    <tr>
+                                        <th>Correo</th>
+                                        <th>Estado</th>
+                                        <th>Editar</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="socios-body">
+                                    <!-- {% include 'tabla_parcialSocios.html' %} -->
+                                    {% for correo in correos %}
+                                    <tr>
+                                        <td>{{ correo.direccion_email }}</td>
+                                        <td>
+                                            {% if correo.estado %}
+                                            <button class="green-button"
+                                                onclick="confirmarEliminacion('{{ correo.id }}','{{ correo.direccion_email }}','{{ correo.estado }}')">
+                                                <span class="visto-icon"></span>
+                                                Activo
+                                            </button>
+                                            {% else %}
+                                            <button class="red-button"
+                                                onclick="confirmarEliminacion('{{ correo.id }}','{{ correo.direccion_email }}','{{ correo.estado }}')">
+                                                <span class="no-visto-icon"></span> Inactivo
+                                            </button>
+                                            {% endif %}
+                    
+                                        </td>
+                                        <td>
+                                            <button class="edit-btn"
+                                                onclick="confirmarEdicion('{{ correo.id }}','{{ correo.direccion_email }}')">
+                                                Editar
+                                            </button>
+                                        </td>
 
-                        </div>
-                        <div class="agregar-periodo">
-                            <label for="Correo">Correo aduteq:</label>
-                            <input type="email" id="Correo" name="Correo" >
+                                        <td>
+                                            <button class="edit-btn"
+                                                onclick="confirmarEliminar('{{ correo.id }}','{{ correo.direccion_email }}')">
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
-            
             <br>
 
         </div>

@@ -949,6 +949,154 @@ def obtener_suma_total(apps, schema_editor):
                 """
             )
 
+def obtener_informe_mensual2(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_informe_mensual2')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_informe_mensual2(
+                    id_socio bigint,
+                    numero_mes integer,
+                    anio integer)
+                RETURNS TABLE(columna1 character varying, columna2 numeric, columna3 date, columna4 character varying) 
+                LANGUAGE 'plpgsql'
+                COST 100
+                VOLATILE PARALLEL UNSAFE
+                ROWS 1000
+
+                AS $BODY$
+                DECLARE
+                    total numeric := 0;
+                BEGIN
+                    -- Crear tabla temporal para almacenar los resultados de la subconsulta
+                    CREATE TEMP TABLE temp_result AS
+                    SELECT proveedor_nombre, valor, fecha_transaccion, tipo_transaccion FROM (
+                        SELECT proveedor_nombre, consumo_total as valor, fecha_consumo as fecha_transaccion, 'Pago Consumo Proveedor'::character varying as tipo_transaccion, 1 as orden FROM (
+                            SELECT pr.nombre AS proveedor_nombre, SUM(pa.consumo_total) AS consumo_total, MAX(pa.fecha_consumo) as fecha_consumo
+                            FROM public."Pagos_pagos" pa
+                            INNER JOIN public.proveedores_proveedor pr ON pa.proveedor_id = pr.id
+                            WHERE pa.socio_id = id_socio
+                                AND EXTRACT(MONTH FROM pa.fecha_consumo) = numero_mes
+                                AND EXTRACT(YEAR FROM pa.fecha_consumo) = anio
+                            GROUP BY pr.nombre
+                        ) cp
+                        UNION ALL
+                        SELECT proveedor_nombre, valor_cuota, fecha_cuota as fecha_transaccion, 'Pago Cuota Consumo'::character varying as tipo_transaccion, 2 as orden FROM (
+                            SELECT pc.fecha_descuento AS fecha_cuota, pr.nombre AS proveedor_nombre, pc.valor_cuota AS valor_cuota
+                            FROM public."Pagos_pagos_cuotas" pc
+                            INNER JOIN public.proveedores_proveedor pr ON pc.proveedor_id = pr.id
+                            INNER JOIN public."Pagos_detalle_cuotas" dc ON pc.id = dc.pago_cuota_id
+                            WHERE pc.socio_id = id_socio
+                                AND EXTRACT(MONTH FROM dc.fecha_descuento) = numero_mes
+                                AND EXTRACT(YEAR FROM dc.fecha_descuento) = anio
+                        ) cu
+                        UNION ALL
+                        SELECT tipo_aportacion, montoa_aportacion, sa.fecha as fecha_transaccion, 'Aportación'::character varying as tipo_transaccion, 3 as orden FROM (
+                            SELECT tipo_aportacion, monto AS montoa_aportacion, fecha
+                            FROM public.socios_aportaciones
+                            WHERE socio_id = id_socio
+                                AND EXTRACT(MONTH FROM fecha) = numero_mes
+                                AND EXTRACT(YEAR FROM fecha) = anio
+                        ) sa
+                        UNION ALL
+                        SELECT descripcion, valor_aportado, ae.fecha as fecha_transaccion, 'Ayuda Económica'::character varying as tipo_transaccion, 4 as orden FROM (
+                            SELECT ae.descripcion, da.valor AS valor_aportado, ae.fecha
+                            FROM public.ayudas_econ_ayudaseconomicas ae
+                            INNER JOIN public.ayudas_econ_detallesayuda da ON ae.id = da.ayuda_id
+                            WHERE da.socio_id = id_socio
+                                AND EXTRACT(MONTH FROM ae.fecha) = numero_mes
+                                AND EXTRACT(YEAR FROM ae.fecha) = anio
+                                AND EXTRACT(MONTH FROM da.fecha) = numero_mes
+                                AND EXTRACT(YEAR FROM da.fecha) = anio
+                                AND da.cancelado = true
+                        ) ae
+                    ) AS subquery;
+
+                    -- Calcular la suma total desde la tabla temporal
+                    SELECT SUM(valor) INTO total FROM temp_result;
+
+                    -- Devolver los resultados de la subconsulta
+                    RETURN QUERY
+                    SELECT proveedor_nombre, valor, fecha_transaccion, tipo_transaccion FROM temp_result
+                    ORDER BY proveedor_nombre;
+
+                    -- Agregar fila "Total"
+                    RETURN QUERY
+                    SELECT 'Total'::character varying as columna1, total as columna2, null::date as columna3, null::character varying as columna4;
+                    
+                    -- Eliminar la tabla temporal al finalizar
+                    DROP TABLE IF EXISTS temp_result;
+                END;
+                $BODY$;
+
+                """
+            )
+
+create_function1="""
+CREATE OR REPLACE FUNCTION crear_detalles_cupo_nuevo_socio()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.proveedores_detallescupos (cupo, fechaccupo, proveedor_id, socio_id, permanente)
+    SELECT p.cupo, CURRENT_DATE, p.id, NEW.id, false
+    FROM public.proveedores_proveedor p;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function2="""
+CREATE OR REPLACE FUNCTION crear_detalles_cupo_nuevo_proveedor()
+RETURNS TRIGGER AS $$
+DECLARE
+    socio_id bigint;
+BEGIN
+    FOR socio_id IN (SELECT id FROM public.socios_socios) -- Obtener todos los IDs de socios
+    LOOP
+        INSERT INTO public.proveedores_detallescupos (cupo, fechaccupo, proveedor_id, socio_id, permanente)
+        VALUES (NEW.cupo, CURRENT_DATE, NEW.id, socio_id, false);
+    END LOOP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function3="""
+CREATE OR REPLACE FUNCTION actualizar_detalles_cupo_cambio_cupo()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE public.proveedores_detallescupos
+    SET cupo = NEW.cupo
+    WHERE proveedor_id = NEW.id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_trigger1="""
+CREATE TRIGGER trigger_nuevo_socio
+AFTER INSERT ON public.socios_socios
+FOR EACH ROW
+EXECUTE FUNCTION crear_detalles_cupo_nuevo_socio();
+"""
+
+create_trigger2="""
+CREATE TRIGGER trigger_nuevo_proveedor
+AFTER INSERT ON public.proveedores_proveedor
+FOR EACH ROW
+EXECUTE FUNCTION crear_detalles_cupo_nuevo_proveedor();
+"""
+
+create_trigger3="""
+CREATE TRIGGER trigger_cambio_cupo
+AFTER UPDATE OF cupo ON public.proveedores_proveedor
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_detalles_cupo_cambio_cupo();
+"""
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -976,4 +1124,11 @@ class Migration(migrations.Migration):
         migrations.RunPython(obtener_suma_descuento_cuotas_func),
         migrations.RunPython(obtener_suma_prestamo_total_func),
         migrations.RunPython(obtener_suma_total),
+        migrations.RunPython(obtener_informe_mensual2),
+        migrations.RunSQL(create_function1),
+        migrations.RunSQL(create_function2),
+        migrations.RunSQL(create_function3),
+        migrations.RunSQL(create_trigger1),
+        migrations.RunSQL(create_trigger2),
+        migrations.RunSQL(create_trigger3),
     ]

@@ -12,13 +12,11 @@ from socios.models import Socios
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
+from django.core.paginator import Paginator, EmptyPage, Page
 import os
 from PIL import Image
 from django.template.loader import render_to_string
 from io import BytesIO
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import smtplib
 
@@ -70,13 +68,33 @@ def formRegistro(request):
 @login_required
 def aggPromo(request):
     if request.method == 'POST':
+        tipo=request.POST.get('selectipo')
         titulo = request.POST.get('titulo')
         descripcion = request.POST.get('descripcion')
-        imagen = request.FILES.get('imagen')  # Usar FILES en mayúsculas
-        fecha_inicio = request.POST.get('fecha_inicio')
-        fecha_fin = request.POST.get('fecha_fin')
+        if 'imagen' in request.FILES:
+            imagen = request.FILES.get('imagen')
+        else:
+            imagen=None
+        if 'fecha_inicio' in request.POST:
+            fecha_inicio = request.POST.get('fecha_inicio')
+        else:
+            fecha_fin=None
+
+        if 'fecha_fin'in request.POST:
+            fecha_fin = request.POST.get('fecha_fin')
+        else:
+            fecha_fin=None
         estado = request.POST.get('estado')
-        proveedor_id = request.POST.get('proveedor')
+
+        if 'proveedor' in request.POST:
+            proveedor_id = request.POST.get('proveedor')
+        else:
+            proveedor_id=None
+
+        if 'evidencia' in request.FILES:
+            evidenciaa = request.FILES['evidencia']
+        else:
+            evidenciaa=None
 
         if userexist(titulo):
             response = {
@@ -85,13 +103,15 @@ def aggPromo(request):
             }
         else:
             promocion = models.Promocion(
+                tipo=tipo,
                 titulo=titulo,
                 descripcion=descripcion,
                 imagen=imagen,
                 fecha_inicio=fecha_inicio,
                 fecha_fin=fecha_fin,
                 estado=estado,
-                proveedor_id=proveedor_id
+                proveedor_id=proveedor_id,
+                evidencia=evidenciaa
             )
             promocion.save()
 
@@ -125,10 +145,17 @@ def editar_promo(request, promo_id):
            
             if 'imagen' in request.FILES:
                 promocion.imagen = request.FILES['imagen']
+            
+            if 'evidencia' in request.FILES:
+                promocion.evidencia=request.FILES['evidencia']
               
             promocion.titulo = request.POST.get('titulo')
-            proveedor_id = request.POST.get('proveedor')
-            promocion.proveedor = get_object_or_404(models.Proveedor, id=proveedor_id)
+            if 'proveedor' in request.POST and request.POST['proveedor']:
+                proveedor_id = request.POST['proveedor']
+                promocion.proveedor = get_object_or_404(models.Proveedor, id=proveedor_id)
+            else:
+                promocion.proveedor = None
+            promocion.tipo=request.POST.get('tipo')
             promocion.descripcion=request.POST.get('descripcion')
             promocion.fecha_inicio = request.POST.get('fecha_inicio')
             promocion.fecha_fin = request.POST.get('fecha_fin')
@@ -146,6 +173,7 @@ def editar_promo(request, promo_id):
                     'status': 'success',
                     'message': 'Promoción editada correctamente'
                 }
+
             return JsonResponse(response)
     else:
         return render(request, 'edit_promocion.html', {'promocion':promocion, 'proveedores':proveedores})
@@ -164,41 +192,66 @@ def eliminarpromo(request, promo_id):
 def enviar_promocion_a_todos(request, promo_id):
     socios = Socios.objects.filter(user__is_active=True)
     promocion = models.Promocion.objects.get(id=promo_id)
-    
+
     try:
         for socio in socios:
             template = get_template('correo_promo.html')
-            context = {'promocion': promocion}
-            content = template.render(context)
-            
+            contexto = {'promocion': promocion}
+            contenido = template.render(contexto)
+
+            emisor_personalizado = 'williamvera210@gmail.com'
+            if(promocion.tipo):
+                asunto='Nueva Promoción'
+            else:
+                asunto='Nuevo Comunicado'
+
             email = EmailMultiAlternatives(
-                'Nueva Promoción: ' + promocion.titulo,
+                asunto+': ' + promocion.titulo,
                 'Nueva promoción disponible',
                 settings.EMAIL_HOST_USER,
                 [socio.user.email])
-            
-            # agregamos el contenido HTML
-            email.attach_alternative(content, 'text/html')
-            
-            # redimensionar la imagen y convertirla a formato JPEG
-            imagen = Image.open(promocion.imagen)
-            imagen = imagen.convert("RGB")  # convertir a modo RGB
-            imagen = imagen.resize((800, 600))  # cambia las dimensiones
-            imagen_io = BytesIO()
-            imagen.save(imagen_io, format='JPEG')
-            
-            # agregamos la imagen redimensionada al correo
-            imagen_adjunta = MIMEImage(imagen_io.getvalue())
-            imagen_adjunta.add_header('Content-ID', '<promocion_imagen>')
-            email.attach(imagen_adjunta)
-            
+
+            email.attach_alternative(contenido, 'text/html')
+
+            if promocion.imagen:
+                # Redimensionar la imagen manteniendo la relación de aspecto
+                maximo_ancho = 800  # Puedes ajustar esto según tus necesidades
+                imagen_original = Image.open(promocion.imagen.path)
+                
+                if imagen_original.mode == 'RGBA':
+                    imagen_original = imagen_original.convert('RGB')
+                
+                ancho_original, alto_original = imagen_original.size
+                nuevo_ancho = min(ancho_original, maximo_ancho)
+                nuevo_alto = int(nuevo_ancho * (alto_original / ancho_original))
+                imagen_redimensionada = imagen_original.resize((nuevo_ancho, nuevo_alto))
+
+                imagen_io = BytesIO()
+                imagen_redimensionada.save(imagen_io, format='JPEG')
+
+
+                imagen_adjunta = MIMEImage(imagen_io.getvalue())
+                nombre_imagen=promocion.imagen
+                imagen_adjunta.add_header('Content-ID', '<promocion_imagen>')
+                imagen_adjunta.add_header('Content-Disposition', f'inline; filename="{nombre_imagen}"')
+                email.attach(imagen_adjunta)
+
+            # Verificamos si hay un PDF adjunto
+            if promocion.evidencia:
+                nombrepdf = os.path.basename(promocion.evidencia.path) 
+
+
+                with open(promocion.evidencia.path, 'rb') as archivo_pdf:
+                    email.attach('Comunicado.pdf', archivo_pdf.read(), 'application/pdf')
+
             email.send()
-            
-        response = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
+
+        respuesta = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
     except Exception as e:
-        response = {'status': 'error', 'message': str(e)}
-    
-    return JsonResponse(response)
+        respuesta = {'status': 'error', 'message': str(e)}
+
+    return JsonResponse(respuesta)
+
 
 def buscar_promo(request):
     if request.method == "POST":
@@ -216,3 +269,23 @@ def buscar_promo(request):
         return JsonResponse({"rendered_table": rendered_table})
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
+
+
+def obtener_resultados(request):
+    seleccion = request.GET.get('seleccion')
+    page_number = request.GET.get('page', 1)
+
+    if seleccion == 'promociones':
+        resultados = models.Promocion.objects.filter(tipo=True)
+    elif seleccion == 'comunicados':
+        resultados = models.Promocion.objects.filter(tipo=False)
+    else:
+        resultados = []
+
+    paginator = Paginator(resultados, 10)
+    try:
+        page = paginator.page(page_number)
+    except EmptyPage:
+        page = Page([])
+
+    return render(request, 'promociones.html', {'page': page, 'seleccion': seleccion})

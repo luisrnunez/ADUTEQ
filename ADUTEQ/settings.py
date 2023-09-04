@@ -55,9 +55,6 @@ INSTALLED_APPS = [
     'Periodo',
     'cuentas',
 ]
-CRONJOBS = [
-    ('0 0 1 * *', 'socios.views.registrar_aportaciones_mensuales'),
-]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

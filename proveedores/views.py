@@ -36,7 +36,7 @@ def aggProveedor(request):
     comisionp=request.POST.get['comision']
     estadop=request.POST.get['estado']'''
     
-    proveedor=Proveedor(nombre=request.POST['nombre'], telefono=request.POST['telefono'], direccion=request.POST['direccion'], RUC=request.POST['ruc'], comision=request.POST['comision'], cupo=request.POST['cupo'], estado=request.POST['estado'])
+    proveedor=Proveedor(nombre=request.POST['nombre'], telefono=request.POST['telefono'], direccion=request.POST['direccion'], ruc=request.POST['ruc'], comision=request.POST['comision'], cupo=request.POST['cupo'], estado=request.POST['estado'])
 
     if(userexist(request.POST['nombre'],request.POST['ruc'])):
         response = {
@@ -79,7 +79,7 @@ def aggProveedor(request):
 #Metodos verificar si existe o no proveedor
 def userexist(nombre, ruc):
     try:
-        proveedor = Proveedor.objects.get(nombre=nombre, RUC=ruc)
+        proveedor = Proveedor.objects.get(nombre=nombre, ruc=ruc)
         return True
     except Proveedor.DoesNotExist:
         return False
@@ -92,7 +92,7 @@ def userexistn(nombre):
         return False    
 def userexistr(ruc):
     try:
-        proveedor = Proveedor.objects.get(RUC=ruc)
+        proveedor = Proveedor.objects.get(ruc=ruc)
         return True
     except Proveedor.DoesNotExist:
         return False   
@@ -207,13 +207,38 @@ def busqueda(request):
             elif criterio == 'telefono':
                 prov = Proveedor.objects.filter(telefono__icontains=valor)
             elif criterio == 'ruc':
-                prov = Proveedor.objects.filter(RUC__icontains=valor)
+                prov = Proveedor.objects.filter(ruc__icontains=valor)
             elif criterio == '1':
                 prov = Proveedor.objects.filter(estado=True)
             elif criterio == '0':
                 prov = Proveedor.objects.filter(estado=False)
         rendered_table = render_to_string("busqueda.html", {"proveedores": prov})
         
+        return JsonResponse({"rendered_table": rendered_table})
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
+
+
+def busqueda_detalles_cupos(request):
+    if request.method == "POST":
+        criterio = request.POST.get('criterio')
+        valor = request.POST.get('query')
+        detalles_cupos = []
+
+        if criterio:
+            # Filtrar detalles de cupos según el criterio y el valor ingresados
+            if criterio == 'nombres':
+                detalles_cupos = detallesCupos.objects.filter(socio__user__first_name__icontains=valor)
+            # elif criterio == 'telefono':
+            #     detalles_cupos = detallesCupos.objects.filter(socio__telefono__icontains=valor)
+            # elif criterio == 'ruc':
+            #     detalles_cupos = detallesCupos.objects.filter(socio__RUC__icontains=valor)
+            # elif criterio == '1':
+            #     detalles_cupos = detallesCupos.objects.filter(proveedor__estado=True)
+            # elif criterio == '0':
+            #     detalles_cupos = detallesCupos.objects.filter(proveedor__estado=False)
+
+        rendered_table = render_to_string("table_cupos.html", {"detalles_cupos": detalles_cupos})
         return JsonResponse({"rendered_table": rendered_table})
 
     return JsonResponse({"error": "Método no permitido"}, status=400)

@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe Mensual</title>
     <style>
+
+        /* @page {
+            size: a4;
+            background-image: url('informes\static\img\descarga.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-color: rgba(150, 150, 150, 0.1);
+            margin: auto;
+        } */
+
         h1,h2{
             text-align: center;
         }
@@ -26,10 +36,6 @@
             background-color: #f2f2f2;
         }
 
-        .page-break {
-        page-break-before: always;
-    }
-
     /* Estilo para la última tabla */
     .last-table {
         page-break-before: always;
@@ -41,8 +47,8 @@
     </style>
 </head>
 <body>
-    <h1>Informe Mensual</h1>
-    {% if not hide_consumos_proveedor %}
+    <h1>Informe Mensual <strong>ADUTEQ</strong> {{ mes }}</h1>
+    <!-- {% if not hide_consumos_proveedor %}
         <h2>Consumos por proveedor</h2>
         <table>
             <tr>
@@ -123,24 +129,42 @@
         </tr>
         {% endfor %}
     </table>
-    {% endif %}
+    {% endif %} -->
 
-    {% if not hide_consumos_totales %}
-    <div class="last-table">
+    <div>
         <h2>Tabla general de gastos</h2>
         <table>
             <tr>
                 <th>Motivo</th>
                 <th>Valor</th>
+                <th>Fecha</th>
+                <th>Descripción</th>
             </tr>
             {% for consumo in consumos_totales %}
             <tr {% if forloop.last %}class="last-row"{% endif %} >
-                <td>{{ consumo.0 }}</td>
-                <td>{{ consumo.1 }}</td>
+
+                {% if forloop.last %}
+                    <td>{{ consumo.0 }}</td>
+                    <td>{{ consumo.1 }}</td>
+                    <td>----</td>
+                    <td>----</td>
+                {% else %}
+                {% if consumo.0 == "AE" %}
+                    <td>Ayuda Permanente</td>
+                {% else %}
+                    {% if consumo.0 == "CO" %}
+                        <td>Cuota Ordianria</td>
+                        {% else %}
+                        <td>{{ consumo.0 }}</td>
+                    {% endif %}
+                {% endif %}
+                    <td>{{ consumo.1 }}</td>
+                    <td>{{ consumo.2 }}</td>
+                    <td>{{ consumo.3 }}</td>
+                {% endif %}
             </tr>
             {% endfor %}
         </table>
     </div>
-    {% endif %}
 </body>
 </html>

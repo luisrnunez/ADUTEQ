@@ -27,51 +27,51 @@ class detallesCupos(models.Model):
     fechaccupo=models.DateField(null=True)
 
 #SE ACTIVA AL CREAR UN PROVEEDOR CON EL FIN DE ASIGNAR EL CUPO A CADA SOCIO YA EXISTENTE
-@receiver(post_save, sender=Proveedor)
-def crear_detalles_cupos(sender, instance, created, **kwargs):
-    if created:
-        # Obtén el valor del cupo del proveedor recién creado
-        valor_cupo = instance.cupo
+# @receiver(post_save, sender=Proveedor)
+# def crear_detalles_cupos(sender, instance, created, **kwargs):
+#     if created:
+#         # Obtén el valor del cupo del proveedor recién creado
+#         valor_cupo = instance.cupo
 
-        # Obtén todos los socios existentes
-        socios = Socios.objects.all()
+#         # Obtén todos los socios existentes
+#         socios = Socios.objects.all()
 
-        # Crea un objeto detallesCupos para cada socio
-        for socio in socios:
-            detalles_cupos = detallesCupos(
-                socio=socio,
-                proveedor=instance,
-                cupo=valor_cupo,
-                fechaccupo=date.today()
-            )
-            detalles_cupos.save()
-post_save.connect(crear_detalles_cupos, sender=Proveedor)
+#         # Crea un objeto detallesCupos para cada socio
+#         for socio in socios:
+#             detalles_cupos = detallesCupos(
+#                 socio=socio,
+#                 proveedor=instance,
+#                 cupo=valor_cupo,
+#                 fechaccupo=date.today()
+#             )
+#             detalles_cupos.save()
+# post_save.connect(crear_detalles_cupos, sender=Proveedor)
 
-#SE ACTIVA AL ACTUALIZAR LOS CUPOS DE LOS PROVEEDORES
-@receiver(post_save, sender=Proveedor)
-def actualizar_cupo_detalles_cupos(sender, instance, **kwargs):
-    detalles_cupos = detallesCupos.objects.filter(proveedor=instance)
+# #SE ACTIVA AL ACTUALIZAR LOS CUPOS DE LOS PROVEEDORES
+# @receiver(post_save, sender=Proveedor)
+# def actualizar_cupo_detalles_cupos(sender, instance, **kwargs):
+#     detalles_cupos = detallesCupos.objects.filter(proveedor=instance)
 
-    for detalle_cupo in detalles_cupos:
-        detalle_cupo.cupo = instance.cupo
-        detalle_cupo.fechaccupo=timezone.now().date()
-        detalle_cupo.save()
-post_save.connect(actualizar_cupo_detalles_cupos, sender=Proveedor)
+#     for detalle_cupo in detalles_cupos:
+#         detalle_cupo.cupo = instance.cupo
+#         detalle_cupo.fechaccupo=timezone.now().date()
+#         detalle_cupo.save()
+# post_save.connect(actualizar_cupo_detalles_cupos, sender=Proveedor)
 
 #SE ACTIVA CADA QUE AGREGAMOS UN NUEVO SOCIO
-@receiver(post_save, sender=Socios)
-def crear_detalles_cupos_socios(sender, instance, created, **kwargs):
-    if created:
-        proveedores = Proveedor.objects.all()
+# @receiver(post_save, sender=Socios)
+# def crear_detalles_cupos_socios(sender, instance, created, **kwargs):
+#     if created:
+#         proveedores = Proveedor.objects.all()
 
-        for proveedor in proveedores:
-            detallesCupos.objects.create(
-                socio=instance,
-                proveedor=proveedor,
-                cupo=proveedor.cupo,
-                fechaccupo=timezone.now().date()
-            )
-post_save.connect(crear_detalles_cupos_socios, sender=Socios)
+#         for proveedor in proveedores:
+#             detallesCupos.objects.create(
+#                 socio=instance,
+#                 proveedor=proveedor,
+#                 cupo=proveedor.cupo,
+#                 fechaccupo=timezone.now().date()
+#             )
+# post_save.connect(crear_detalles_cupos_socios, sender=Socios)
 
 
 

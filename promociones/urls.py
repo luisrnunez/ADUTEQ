@@ -10,6 +10,8 @@ urlpatterns = [
     path('promociones/', views.ListaPromociones),
     path('habilitar_desabilitar/<int:promo_id>/<int:valor>/', views.habilitar_desabilitar_promocion, name='hab_des' ),
 
+    path('resultados/', views.obtener_resultados, name='resultados'),
+
     path('aggpromo/', views.formRegistro, name='aggpromo' ),
     path('agregarpromo/', views.aggPromo, name='agregarpromo' ),
 

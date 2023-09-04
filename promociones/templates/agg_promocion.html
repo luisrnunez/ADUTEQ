@@ -30,10 +30,16 @@
                 <form id="registro-promo" action="/agregarpromo/" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
 
-                    <label for="first_name">Titulo:</label>
+                    <label id="tipe" for="tipo">Seleccione el tipo: (Promo o comunicado)</label>
+                    <select name="selectipo" id="selectipo" style="width:95%;" onchange="mostrarCampos()">
+                        <option value="1">Promoción</option>
+                        <option value="0">Comunicado</option>
+                    </select>
+
+                    <label id="title" for="titulo">Titulo:</label>
                     <input type="text" id="titulo" name="titulo" value="{{ socio.first_name }}"  required>
 
-                    <label for="proveedor">Buscar o seleccionar proveedor:</label>
+                    <label id="pro" for="proveedor">Buscar o seleccionar proveedor:</label>
                     <input autocomplete="off" type="text" id="proveedorInput" style="width:95%;" placeholder="Buscar proveedor...">
                     <select id="proveedorSelect" name="proveedor" style="width:95%;" size="4">
                         {% for proveedor in proveedores %}
@@ -41,16 +47,18 @@
                         {% endfor %}
                     </select>
 
-                    <label for="last_name">Descripcion:</label>
-                    <input type="text" id="descripcion" name="descripcion" value="{{ promocion.descripcion }}"   required>
+                    <label id="description" for="descripcion">Descripcion:</label>
+                    <textarea id="descripcion" name="descripcion" rows="4" required>{{ promoción.descripcion }}</textarea>
 
-                    <label for="foto">Agregar Imagen Promo:</label>
+                    <label id="image" for="foto">Agregar Imagen Promo:</label>
                     {% get_media_prefix as media_prefix %}
                     <div class="generated-credentials">
                         <div class="custom-file">
                             <div class="upload-preview">
                                 <div id="imagePreview">
-                                    <img src="{{ media_prefix }}{{ promocion.imagen }}"  >
+                                    {% if promocion.imagen %}
+                                        <img src="{{ media_prefix }}{{ promocion.imagen }}">
+                                    {% endif %}
                                 </div>
                             </div>
                             <input type="file" class="custom-file-input" id="imagen" name="imagen"
@@ -59,18 +67,21 @@
                         </div>
                     </div>
 
+                    <label id="evi" for="evidencia">Evidencia (PDF):</label>
+                    <input accept="application/pdf" type="file" id="evidencia" name="evidencia" value="{{ promocion.evidencia }}">
 
-                    <label for="fecha_nacimiento">Fecha de Inicio:</label>
+
+                    <label id="f_ini" for="fecha_nacimiento">Fecha de Inicio:</label>
                     <input type="date" id="fecha_inicio" name="fecha_inicio"
-                        value="{{ promocion.fecha_inicio}}" required>
+                        value="{{ promocion.fecha_inicio}}">
                     
-                    <label for="fecha_nacimiento">Fecha Final:</label>
+                    <label id="f_fin" for="fecha_nacimiento">Fecha Final:</label>
                     <input type="date" id="fecha_fin" name="fecha_fin"
-                        value="{{ promocion.fecha_fin}}" required>
+                        value="{{ promocion.fecha_fin}}">
 
                     <input type="hidden" id="estado" name="estado" value="1">
 
-                    <input type="submit" value="Agregar Promo" style="width: 100%;">
+                    <input id="botonAgregar" type="submit" value="Agregar Promo" style="width: 100%;">
                     <a href="/promociones"> <input type="button" value="Cancelar"
                             style="width: 100%; background-color: red;"></a>
 
@@ -81,6 +92,27 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        
+        document.addEventListener('DOMContentLoaded', function () {
+    const evidenciaInput = document.getElementById('evidencia');
+
+    evidenciaInput.addEventListener('change', function () {
+
+        if (evidenciaInput.files.length > 0) {
+            const selectedFile = evidenciaInput.files[0];
+
+            if (selectedFile.type !== 'application/pdf') {
+                evidenciaInput.value = ''; 
+                Swal.fire({
+                    title: 'Formato no permitido',
+                    text: 'Por favor, seleccione un archivo en formato PDF.',
+                    icon: 'error',
+                });
+            }
+        }
+    });
+});
+
         function previewImage(event) {
             var reader = new FileReader();
             reader.onload = function () {
@@ -155,6 +187,64 @@
             inputElement.value = selectedOption.text;
         });
     </script>
+
+<script>
+    function mostrarCampos() {
+        var tipoSeleccionado = document.getElementById("selectipo").value;
+        
+        // Ocultar todos los campos primero
+        document.getElementById("titulo").style.display = "none";
+        document.getElementById("descripcion").style.display = "none";
+        document.getElementById("proveedorInput").style.display = "none";
+        document.getElementById("proveedorSelect").style.display = "none";
+        document.getElementById("imagen").style.display = "none";
+        document.getElementById("evidencia").style.display = "none";
+        document.getElementById("fecha_inicio").style.display = "none";
+        document.getElementById("fecha_fin").style.display = "none";
+        var imagen=document.getElementById("image");
+        var fechaInicio = document.getElementById("fecha_inicio");
+        var fechaFin = document.getElementById("fecha_fin");
+        var proveedor=document.getElementById("proveedorSelect");
+
+        var botonAgregar = document.getElementById("botonAgregar");
+        document.getElementById("pro").style.display = "none";
+        document.getElementById("f_ini").style.display = "none";
+        document.getElementById("f_fin").style.display = "none";
+    
+        if (tipoSeleccionado === "1") {
+
+            document.getElementById("pro").style.display = "block";
+            document.getElementById("description").style.display = "block";
+            document.getElementById("f_ini").style.display = "block";
+            document.getElementById("f_fin").style.display = "block";
+
+            document.getElementById("titulo").style.display = "block";
+            document.getElementById("descripcion").style.display = "block";
+            document.getElementById("proveedorInput").style.display = "block";
+            document.getElementById("proveedorSelect").style.display = "block";
+            document.getElementById("imagen").style.display = "block";
+            document.getElementById("evidencia").style.display = "block";
+            document.getElementById("fecha_inicio").style.display = "block";
+            document.getElementById("fecha_fin").style.display = "block";
+            botonAgregar.value = "Agregar Promo";
+        } else if (tipoSeleccionado === "0") {
+            document.getElementById("pro").style.display = "none";
+            document.getElementById("f_ini").style.display = "none";
+            document.getElementById("f_fin").style.display = "none";
+
+            document.getElementById("titulo").style.display = "block";
+            document.getElementById("descripcion").style.display = "block";
+            document.getElementById("imagen").style.display = "block";
+            document.getElementById("evidencia").style.display = "block";
+            var fechaActual = new Date().toISOString().split('T')[0];
+            fechaInicio.value = fechaActual;
+            fechaFin.value = fechaActual;
+            botonAgregar.value = "Agregar Comunicado";
+            imagen.textContent="Agregar imagen del comunicado";
+        }
+    }
+    </script>
+    
 </body>
 
 </html>

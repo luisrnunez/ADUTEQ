@@ -20,6 +20,19 @@
         <div class="socios-content ">
             <div class="botones-sup">
                 <a href="/proveedores/"> <button class="add-socio-btn"> Atras</button></a>
+                <div class="search-form">
+
+                    <select id="criterio" name="criterio">
+                        <option value="nombres">Nombre</option>
+                        <!-- <option value="ruc">RUC</option>
+                        <option value="telefono">Telefono</option>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option> -->
+                    </select>
+                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar proveedor...">
+                    <!-- <button type="submit">Buscar</button> -->
+    
+                </div>
 
             </div>
             <table class="socios-table">
@@ -33,7 +46,7 @@
                         <th scope="col">Editar</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="detalles-body">
                     {% for cupo in cupos %}
                     <tr>
                         <td>{{ cupo.socio.user.first_name }} {{ cupo.socio.user.last_name }}</td>
@@ -112,6 +125,48 @@
                 }
             }
 
+        </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#buscador_input").on("input", function () {
+                    var query = $(this).val();
+                    var criterio = document.getElementById('criterio').value;
+                    console.log(criterio)
+                    console.log(query)
+                    $.ajax({
+                        url: '{% url "searchcupo" %}',  // Cambia esto a la URL de tu vista de búsqueda
+                        type: "POST",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                            query: query,
+                            criterio: criterio
+                        },
+                        success: function (data) {  // Verifica los datos devueltos por el servidor
+                            $("#detalles-body").html(data.rendered_table);
+                        }
+                    });
+                });
+            });
+        
+            $(document).ready(function () {
+                $("#criterio").on("change", function () {
+                    var criterio = $(this).val();
+                    $.ajax({
+                        url: '{% url "searchcupo" %}',
+                        type: "POST",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            query: "",
+                            criterio: criterio
+                        },
+                        success: function (data) {
+                            $("#detalles-body").html(data.rendered_table);
+                        }
+                    });
+                });
+            });
+        
         </script>
 
         {% endblock %}
