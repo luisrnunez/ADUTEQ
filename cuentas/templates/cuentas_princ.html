@@ -53,7 +53,7 @@
         }
 
         .caja {
-            border: 2px solid black;
+            border: 1px solid black;
             font-weight: bold;
             overflow: hidden;
         }
@@ -198,7 +198,7 @@
             margin-left: 25px;
         }
 
-        button {
+        .button1 {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -215,10 +215,34 @@
             font-weight: bold;
             font-size: small;
         }
+
+        .buscar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-flow: row wrap;
+            margin-bottom: 30px;
+            flex-direction: row;
+        }
+
+        .buscar input,
+        .buscar button {
+            flex: 0.2;
+            margin: 5px;
+        }
     </style>
 </head>
 
 <body>
+
+    <form method="post" action="{% url 'cuentas' %}">
+        {% csrf_token %}
+        <div class="buscar">
+            <button style="width: 30%;" class="add-socio-btn">Buscar</button>
+            <input style="width: 30%;" class="form-control mb-2" type="date" name="fechacuentas" required>
+        </div>
+    </form>
+
     <div class="contenedorvm">
         <div class="caja c1">
             Asocion de Docentes Univerdidad Tecnica Estatal de Quevedo
@@ -263,14 +287,17 @@
         <!-- <div class="caja c19"><p>50.567.00</p></div> -->
         <div class="caja c6">fecha: {{fecha_actual}}</div>
         <div class="caja c20">Detalle</div>
-        <div class="caja c21"><button class="btn btn-info" data-bs-toggle="modal" data-funcion="comision" data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span
-                    class="button-text">Ver Detalle</span></button>
+        <div class="caja c21"><button class="button1 btn btn-info" data-bs-toggle="modal" data-funcion="comision"
+                data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span class="button-text">Ver
+                    Detalle</span></button>
         </div>
-        <div class="caja c22"><button class="btn btn-info" data-bs-toggle="modal" data-funcion="comision_cuotas" data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span
-                    class="button-text">Ver Detalle</span></button>
+        <div class="caja c22"><button class="button1 btn btn-info" data-bs-toggle="modal" data-funcion="comision_cuotas"
+                data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span class="button-text">Ver
+                    Detalle</span></button>
         </div>
-        <div class="caja c23"><button class="btn btn-info" data-bs-toggle="modal" data-funcion="prestamos" data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span
-                    class="button-text">Ver Detalle</span></button>
+        <div class="caja c23"><button class="button1 btn btn-info" data-bs-toggle="modal" data-funcion="prestamos"
+                data-mes="{{mes}}" data-anio="{{anio}}" data-bs-target="#detalleModal"><span class="button-text">Ver
+                    Detalle</span></button>
         </div>
         <div class="caja c24">
             <p>{{total_com}}</p>
@@ -293,7 +320,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabla-body">
-                            
+
                         </tbody>
                     </table>
                 </div>
@@ -333,10 +360,10 @@
                     url = `/obtener_informacion_prestamos/${mes}/${anio}/`;
                 } else if (funcion === 'comision') {
                     url = `/obtener_comision_descuentos/${mes}/${anio}/`;
-                }else if (funcion === 'comision_cuotas') {
+                } else if (funcion === 'comision_cuotas') {
                     url = `/obtener_comision_descuentos_cuotas/${mes}/${anio}/`;
                 }
-                
+
 
                 $.ajax({
                     type: "GET",
@@ -346,11 +373,11 @@
                             cargarDatosEnModal(response.data);
                             $('#detalleModal').modal('show');
                         } else {
-                            
+
                         }
                     },
                     error: function () {
-                        
+
                     }
                 });
             });

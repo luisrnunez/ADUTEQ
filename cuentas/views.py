@@ -16,25 +16,36 @@ def cuentas(request):
         fecha_actual = datetime.strptime(fecha_actual_str, '%Y-%m-%d')
         mes = fecha_actual.month
         anio = fecha_actual.year
-        suma_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio)
-        suma_des_cuo = obtener_suma_descuento_cuotas_func(mes, anio)
-        suma_prestamos = obtener_suma_prestamo_total_func(mes, anio)
+        suma_consumo = obtener_suma_consumo_total_descuentos_Pagados_func(mes, anio) or 0
+        suma_des_cuo = obtener_suma_descuento_cuotas_pagados_func(mes, anio) or 0
+        suma_prestamos = obtener_suma_prestamo_total_Pagados_func(mes, anio) or 0
         sum_total = suma_prestamos+suma_consumo+suma_des_cuo
+        comision_descuentos = obtener_total_comisiones(mes, anio) or 0
+        comision_descuentos_cuotas = obtener_total_comisiones_desc(mes, anio) or 0
+        suma_interes_prest = obtener_suma_intereses_prestamos(mes, anio) or 0
+        total_com = comision_descuentos+comision_descuentos_cuotas+suma_interes_prest
         return render(request, 'cuentas_princ.html', {'suma_consumo': suma_consumo,
                                                       'suma_des_cuo': suma_des_cuo,
                                                       'suma_prestamos': suma_prestamos,
-                                                      'sum_total': sum_total})
+                                                      'sum_total': sum_total,
+                                                      'comision_descuentos': comision_descuentos,
+                                                      'comision_descuentos_cuotas': comision_descuentos_cuotas,
+                                                      'suma_interes_prest': suma_interes_prest,
+                                                      'fecha_actual': fecha_actual,
+                                                      'mes': mes,
+                                                      'anio': anio,
+                                                      'total_com': total_com})
     else:
         fecha_actual = datetime.now()
         mes = fecha_actual.month
         anio = fecha_actual.year
-        suma_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio)
-        suma_des_cuo = obtener_suma_descuento_cuotas_func(mes, anio)
-        suma_prestamos = obtener_suma_prestamo_total_func(mes, anio)
+        suma_consumo = obtener_suma_consumo_total_descuentos_Pagados_func(mes, anio) or 0
+        suma_des_cuo = obtener_suma_descuento_cuotas_pagados_func(mes, anio) or 0
+        suma_prestamos = obtener_suma_prestamo_total_Pagados_func(mes, anio) or 0
         sum_total = suma_prestamos+suma_consumo+suma_des_cuo
-        comision_descuentos = obtener_total_comisiones(mes, anio)
-        comision_descuentos_cuotas = obtener_total_comisiones_desc(mes, anio)
-        suma_interes_prest = obtener_suma_intereses_prestamos(mes, anio)
+        comision_descuentos = obtener_total_comisiones(mes, anio) or 0
+        comision_descuentos_cuotas = obtener_total_comisiones_desc(mes, anio) or 0
+        suma_interes_prest = obtener_suma_intereses_prestamos(mes, anio) or 0
         total_com = comision_descuentos+comision_descuentos_cuotas+suma_interes_prest
         return render(request, 'cuentas_princ.html', {'suma_consumo': suma_consumo,
                                                       'suma_des_cuo': suma_des_cuo,
@@ -53,6 +64,27 @@ def obtener_total_comisiones(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT obtener_total_comisiones(%s, %s);", [mes, anio])
+        suma_comision = cursor.fetchone()[0]
+    return suma_comision
+
+def obtener_suma_prestamo_total_Pagados_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT obtener_suma_prestamo_total_Pagados_func(%s, %s);", [mes, anio])
+        suma_comision = cursor.fetchone()[0]
+    return suma_comision
+
+def obtener_suma_descuento_cuotas_pagados_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT obtener_suma_descuento_cuotas_pagados_func(%s, %s);", [mes, anio])
+        suma_comision = cursor.fetchone()[0]
+    return suma_comision
+
+def obtener_suma_consumo_total_descuentos_Pagados_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT obtener_suma_consumo_total_descuentos_Pagados_func(%s, %s);", [mes, anio])
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
