@@ -75,14 +75,20 @@
                             {% if periodo.activo == True %}
                             <p style="color: green;">Período Activo</p>
                             {% else %}
-                            <p style="color: red;">Período Inactivo</p>
+                            <p style="color: red;">No Existe Período Actualmente</p>
                             {% endif %}
                             <p>Dias restantes:
                                 {% if dias_restantes %} 
                                 {% if dias_restantes >= 0 %} 
+<<<<<<< HEAD
                                 {{ dias_restantes }}
                                  {% endif %}
                                  {% endif %}
+=======
+                                    {{ dias_restantes }}   
+                                {% endif %}
+                                {% endif %}
+>>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
                             </p>
                             {% if periodo.descripcion %} 
                             <p>Descripcion: </p>
@@ -168,6 +174,7 @@
             <!-- Sección: Período Activo -->
             
             <div class="card-container">
+<<<<<<< HEAD
                 <div class="card">
                     <div class="header" style="margin-bottom: 20px;">
                         <h1>AJUSTES GENERALES</h1>
@@ -186,6 +193,66 @@
                 </div>
             </div>
             
+=======
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card">
+                        <div class="header" style="margin-bottom: 20px;">
+                            <h1>AJUSTES GENERALES</h1>
+                        </div>
+                        <button style="background-color: orange;" type="button" id="agregarCorreoButton">Agregar otro correo</button>
+                        <div class="card-content">
+                            <table id="tablaSocios" class="socios-table">
+                                <thead>
+                                    <tr>
+                                        <th>Correo</th>
+                                        <th>Estado</th>
+                                        <th>Editar</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="socios-body">
+                                    <!-- {% include 'tabla_parcialSocios.html' %} -->
+                                    {% for correo in correos %}
+                                    <tr>
+                                        <td>{{ correo.direccion_email }}</td>
+                                        <td>
+                                            {% if correo.estado %}
+                                            <button class="green-button"
+                                                onclick="confirmarEliminacion('{{ correo.id }}','{{ correo.direccion_email }}','{{ correo.estado }}')">
+                                                <span class="visto-icon"></span>
+                                                Activo
+                                            </button>
+                                            {% else %}
+                                            <button class="red-button"
+                                                onclick="confirmarEliminacion('{{ correo.id }}','{{ correo.direccion_email }}','{{ correo.estado }}')">
+                                                <span class="no-visto-icon"></span> Inactivo
+                                            </button>
+                                            {% endif %}
+                    
+                                        </td>
+                                        <td>
+                                            <button class="edit-btn"
+                                                onclick="confirmarEdicion('{{ correo.id }}','{{ correo.direccion_email }}')">
+                                                Editar
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <button class="edit-btn"
+                                                onclick="confirmarEliminar('{{ correo.id }}','{{ correo.direccion_email }}')">
+                                                Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+>>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
             <br>
 
         </div>

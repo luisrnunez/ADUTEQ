@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Esto asegurará que ocupe al menos toda la altura de la ventana gráfica del navegador. */
+            margin: 0;
+        }
+
+        .contenedorvm {
+            display: grid;
+            grid-template-areas:
+                'cabecera cabecera cabecera'
+                'ingresos ingresos fecha'
+                'descripcion valor comision'
+                'des1 valor1 comision1'
+                'des2 valor2 comision2'
+                'des3 valor3 comision3 '
+                'valortotal valortotal valorfin'
+                'footer footer footer';
+            width: 100%;
+            margin: auto;
+            padding: 20px;
+            border: 2px solid black;
+            grid-template-rows: 50px 40px 40px 40px 40px  40px 40px 30px;
+            text-align: center;
+        }
+
+        .caja {
+            border: 2px solid black;
+            font-weight: bold;
+            overflow: hidden;
+        }
+
+        .c1 {
+            grid-area: cabecera;
+            font-size: xx-large;
+        }
+
+        .c2 {
+            grid-area: ingresos;
+            font-size: medium;
+        }
+
+        .c3 {
+            grid-area: fecha;
+            font-size: medium;
+        }
+
+        .c4 {
+            grid-area: descripcion;
+        }
+
+        .c5 {
+            grid-area: valor;
+        }
+
+        .c6 {
+            grid-area: footer;
+        }
+
+        .c7 {
+            grid-area: comision;
+        }
+        .c8 {
+            grid-area: des1;
+        }
+
+        .c9 {
+            grid-area: valor1;
+        }
+
+        .c10 {
+            grid-area: comision1;
+        }
+        .c11 {
+            grid-area: des2;
+        }
+
+        .c12 {
+            grid-area: valor2;
+        }
+
+        .c13 {
+            grid-area: comision2;
+        }
+        .c14 {
+            grid-area: des3;
+        }
+
+        .c15 {
+            grid-area: valor3;
+        }
+
+        .c16 {
+            grid-area: comision3;
+        }
+
+        .c17 {
+            grid-area: valortotal;
+        }
+
+        .c18 {
+            grid-area: valorfin;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+            margin-right: 25px;
+            text-align: right;
+        }
+        .alig_der{
+            text-align: left;
+            margin-left: 25px;
+        }
+    </style>
+</head>
+<body>
+    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+        <tr>
+            <td style="width: 200px; text-align: left; border: none;">
+                <img src="{{ image_path }}" alt="Logo" style="max-width: 180px; max-height: 180px;">
+            </td>
+            <td style="text-align: center; border: none;">
+                <h1 style="font-size: xx-large;">Asociación de Docentes Universidad Tecnica Estatal de Quevedo</h1>
+                <h1>Reporte Cuentas Mensuales - {{ mes }}/{{ anio }}</h1>
+            </td>
+            <td style="width: 200px; text-align: right; border: none;">
+                <h2>Fecha de generación: {{fecha_gen}}</h4>
+            </td>
+        </tr>
+    </table>
+    <div class="contenedorvm">
+        <div class="caja c1">
+            Asocion de Docentes Univerdidad Tecnica Estatal de Quevedo
+        </div>
+        <div class="caja c2">Ingresos registrados del mes -- año --</div>
+        <div class="caja c3">fecha 00/00/000</div>
+        <div class="caja c4">Detalles de Ingresos</div>
+        <div class="caja c5">valor</div>
+        <div class="caja c7">Comision</div>
+        <div class="caja c8"> <p class="alig_der">Consumo de los proveedores</p></div>
+        <div class="caja c9"><p>120.45</p></div>
+        <div class="caja c10"><p>27.45</p></div>
+        <div class="caja c11"><p class="alig_der">Consumo Descuentos por Cuotas Proveedores</p></div>
+        <div class="caja c12"><p>3002.45</p></div>
+        <div class="caja c13"><p>288.45</p></div>
+        <div class="caja c14"><p class="alig_der">Descuento Prestamos</p></div>
+        <div class="caja c15"><p>3744</p></div>
+        <div class="caja c16"><p>3744</p></div>
+
+        <div class="caja c17">Total</div>
+        <div class="caja c18"><p>50.567.00</p></div>
+        <div class="caja c6">00/00/0000 - 00/00/0000</div>
+    </div>
+</body>
+</html>

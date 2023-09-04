@@ -52,8 +52,8 @@
 
     .image-card img {
       margin-bottom: 10px;
-      width: 200px;
-      height: 200px;
+      width: 100px;
+      height: 100px;
     }
 
     .text {
@@ -143,6 +143,20 @@
         <div class="text">
           <p>Descuento Total</p>
           <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpgds" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'reportes_datos_socios' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
+        <div class="text">
+          <p>Datos de socios</p>
+          <input disabled style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpgds" required>
           <button style="margin-top: 10px;" class="add-socio-btn"> Generar
             Reporte
           </button>

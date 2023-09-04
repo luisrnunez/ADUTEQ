@@ -58,7 +58,10 @@ INSTALLED_APPS = [
     'Periodo',
     'cuentas',
 ]
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

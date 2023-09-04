@@ -17,6 +17,12 @@ import os
 from PIL import Image
 from django.template.loader import render_to_string
 from io import BytesIO
+<<<<<<< HEAD
+=======
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+>>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
 from email.mime.image import MIMEImage
 import smtplib
 

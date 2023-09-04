@@ -34,6 +34,10 @@ from django.template import Context
 import os
 import calendar
 
+<<<<<<< HEAD
+=======
+from .models import Periodo
+>>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
 
 # Create your views here.
 

@@ -185,23 +185,25 @@
                                     Agregar nueva Facultad
                                 </h1>
                             </div>
-
-                            <div class="modal-body">
-                                <label class="fw-bold" for="nom_facu">Nombre de la facultad:</label>
-                                <input class="form-control mb-2" type="text" name="nom_facu" id="nom_facu"
-                                    placeholder="Ingrese el nombre de la facultad" required />
-                                <label class="fw-bold" for="descripcion">Descripción:</label>
-                                <textarea maxlength="70" class="form-control mb-2" name="descripcion_facu"
-                                    id="descripcion_facu" rows="3" placeholder="Ingrese una descripcion"></textarea>
-                            </div>
-                            <div class="modal-footer" style="display: inline-block; width: 100%;">
-                                <button id="btnAgregarFacultad" class="btn btn-success"
-                                    style="width: 45%;">Aceptar</button>
-                                <button style="width: 48%; background-color: red; right: 0px;" type="button"
-                                    class="btn btn-secondary" data-bs-dismiss="modal">
-                                    Cerrar
-                                </button>
-                            </div>
+                            
+                            <form action="">
+                                <div class="modal-body">
+                                    <label class="fw-bold" for="nom_facu">Nombre de la facultad:</label>
+                                    <input class="form-control mb-2" type="text" name="nom_facu" id="nom_facu"
+                                        placeholder="Ingrese el nombre de la facultad" required />
+                                    <label class="fw-bold" for="descripcion">Descripción:</label>
+                                    <textarea maxlength="70" class="form-control mb-2" name="descripcion_facu"
+                                        id="descripcion_facu" rows="3" placeholder="Ingrese una descripcion"></textarea>
+                                </div>
+                                <div class="modal-footer" style="display: inline-block; width: 100%;">
+                                    <button id="btnAgregarFacultad" class="btn btn-success"
+                                        style="width: 45%;">Aceptar</button>
+                                    <button style="width: 48%; background-color: red; right: 0px;" type="button"
+                                        class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Cerrar
+                                    </button>
+                                </div>
+                            </form>
 
                             <div class="modal-header" style="background-color: white">
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
