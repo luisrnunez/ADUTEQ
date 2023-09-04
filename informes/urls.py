@@ -1,12 +1,20 @@
 from django.urls import path
+<<<<<<< HEAD
 from .views import enviar_correo_todos, nuevo_enviar_correo,reportes, generar_reporte_pdf_total_usuarios,cerrar_periodo,actualizar_cancelados,actualizar_estados, actualizar_descuentos,generar_reporte_consumo_todos, reportes_socios_general
+=======
+from .views import enviar_correo_todoss, nuevo_enviar_correo,reportes, generar_reporte_pdf_total_usuarios,cerrar_periodo,actualizar_cancelados,actualizar_estados, actualizar_descuentos,generar_reporte_consumo_todos, reportes_socios_general
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 from .views import reportes_datos_socios
 
 urlpatterns = [
 
     path('enviar_gastos/<int:socio_id>/', nuevo_enviar_correo, name='enviar_gastos'),
     # correo para todos
+<<<<<<< HEAD
     path('enviar_gastos_todos/', enviar_correo_todos, name='enviar_gastos_todos'),
+=======
+    path('enviar_gastos_todos/', enviar_correo_todoss, name='enviar_gastos_todos'),
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     path('reportes/', reportes, name='reportes'),
     path('reportes_datos_socios/', reportes_datos_socios, name='reportes_datos_socios'),
     path('cerrar_periodo/', cerrar_periodo, name='cerrar_periodo'),

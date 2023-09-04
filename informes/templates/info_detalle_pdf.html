@@ -1,10 +1,15 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
 <html lang="es">
+=======
+<html lang="en">
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe Mensual</title>
     <style>
+<<<<<<< HEAD
 
         /* @page {
             size: a4;
@@ -15,6 +20,8 @@
             margin: auto;
         } */
 
+=======
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
         h1,h2{
             text-align: center;
         }
@@ -36,6 +43,13 @@
             background-color: #f2f2f2;
         }
 
+<<<<<<< HEAD
+=======
+        .page-break {
+        page-break-before: always;
+    }
+
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     /* Estilo para la última tabla */
     .last-table {
         page-break-before: always;
@@ -47,8 +61,13 @@
     </style>
 </head>
 <body>
+<<<<<<< HEAD
     <h1>Informe Mensual <strong>ADUTEQ</strong> {{ mes }}</h1>
     <!-- {% if not hide_consumos_proveedor %}
+=======
+    <h1>Informe Mensual</h1>
+    {% if not hide_consumos_proveedor %}
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
         <h2>Consumos por proveedor</h2>
         <table>
             <tr>
@@ -129,14 +148,22 @@
         </tr>
         {% endfor %}
     </table>
+<<<<<<< HEAD
     {% endif %} -->
 
     <div>
+=======
+    {% endif %}
+
+    {% if not hide_consumos_totales %}
+    <div class="last-table">
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
         <h2>Tabla general de gastos</h2>
         <table>
             <tr>
                 <th>Motivo</th>
                 <th>Valor</th>
+<<<<<<< HEAD
                 <th>Fecha</th>
                 <th>Descripción</th>
             </tr>
@@ -162,9 +189,20 @@
                     <td>{{ consumo.2 }}</td>
                     <td>{{ consumo.3 }}</td>
                 {% endif %}
+=======
+            </tr>
+            {% for consumo in consumos_totales %}
+            <tr {% if forloop.last %}class="last-row"{% endif %} >
+                <td>{{ consumo.0 }}</td>
+                <td>{{ consumo.1 }}</td>
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
             </tr>
             {% endfor %}
         </table>
     </div>
+<<<<<<< HEAD
+=======
+    {% endif %}
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 </body>
 </html>

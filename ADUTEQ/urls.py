@@ -34,7 +34,10 @@ urlpatterns = [
     path('', include('promociones.urls')),
     path('', include('Periodo.urls')),
     path('', include('cuentas.urls')),
+<<<<<<< HEAD
     path('tinymce/', include('tinymce.urls')),
+=======
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

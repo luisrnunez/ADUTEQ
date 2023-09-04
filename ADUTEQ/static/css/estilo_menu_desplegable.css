@@ -14,7 +14,11 @@ body {
     left: 0;
     top: 0;
     padding: 18px;
+<<<<<<< HEAD
     z-index: 100;
+=======
+    z-index: 1000;
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     box-sizing: border-box;
     transition: width 0.3s;
 }
@@ -41,6 +45,10 @@ body {
 .sidebar .logo {
     text-align: center;
     margin-bottom: 20px;
+<<<<<<< HEAD
+=======
+    position: relative;
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 }
 
 .sidebar .logo img {
@@ -56,6 +64,10 @@ body {
     margin: 0;
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 .sidebar li {
     margin-bottom: 10px;
     margin-left: 8px;
@@ -88,7 +100,10 @@ body {
 .sidebar .profile {
     position: fixed;
     bottom: 20px;
+<<<<<<< HEAD
     
+=======
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     display: flex;
     align-items: center;
     transition: width 0.3s;
@@ -97,6 +112,23 @@ body {
 .sidebar:hover .profile {
     width: 200px;
 }
+<<<<<<< HEAD
+=======
+.sidebar .hidden-div {
+    display: none; /* Inicialmente oculto */
+}
+
+/* Mostrar el div oculto cuando se pasa el cursor sobre el sidebar */
+.sidebar:hover .hidden-div {
+    display: block;
+    z-index: 1;
+    text-align: center;
+    opacity: 100%; /* Mostrar el div con opacidad completa */
+    pointer-events: none;
+    margin-bottom: 0%;
+    padding-bottom: 0%;
+}
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
 .sidebar .profile img {
     width: 40px;
@@ -118,11 +150,18 @@ body {
     height: 100px;
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 .sidebar .profile-lg img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
+<<<<<<< HEAD
    
+=======
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
     transition: width 0.3s, height 0.3s;
 }
 

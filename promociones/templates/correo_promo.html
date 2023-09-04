@@ -47,6 +47,7 @@
 </head>
 <body>
     <div class="container">
+<<<<<<< HEAD
         <h2>
             {% if promocion.tipo %}
                 Nueva Promoción: {{ promocion.titulo }}
@@ -82,10 +83,31 @@
         {% else %}
             <p>Por favor, revisa el comunicado para más detalles.</p>
         {% endif %}
+=======
+        <h2>Nueva Promoción: {{ promocion.titulo }}</h2>
+        <p><b>Estimado socio,</b></p>
+        <p>¡Tenemos una nueva promoción que podría interesarte!</p>
+
+        <h3>Detalles de la Promoción:</h3>
+        <ul>
+            <li><h3>Proveedor:</h3> <b>{{ promocion.proveedor }}</b></li>
+            <li><h3>Descripción:</h3> <b>{{ promocion.descripcion }}</b></li>
+            <li><h3>Fecha de Inicio:</h3> <b>{{ promocion.fecha_inicio }}</b></li>
+            <li><h3>Fecha de Fin:</h3> <b>{{ promocion.fecha_fin }}</b></li>    
+        </ul>
+
+        <img src="cid:promocion_imagen" alt="{{ promocion.titulo }}">
+
+        <p>¡No te pierdas esta oportunidad!</p>
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
 
         <p class="footer">Saludos,<br>ADUTEQ</p>
     </div>
 </body>
 </html>
+<<<<<<< HEAD
 {% endblock %}
 
+=======
+{% endblock %}
+>>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
