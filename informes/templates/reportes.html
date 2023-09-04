@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pantalla con Imágenes y Texto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      /* align-items: center; */
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #eee8e8;
+    }
+
+    .image-container {
+      display: flex;
+      /* align-items: flex-start; */
+      justify-content: center;
+      flex-flow: row wrap;
+      margin-bottom: 20px;
+      width: 80%;
+      margin: auto;
+      background-color: #eee8e8;
+      border-width: 1px;
+      border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134);
+      padding: 20px;
+    }
+
+    .image-card {
+      display: flex;
+      /* flex-direction: column; */
+      align-items: center;
+      margin: 15px 20px;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134);
+      border-width: 1px;
+      border-color: #b4b1b1;
+      padding: 10px;
+    }
+
+    .image-card img {
+      margin-bottom: 10px;
+      width: 200px;
+      height: 200px;
+    }
+
+    .text {
+      text-align: center;
+      font-size: 14px;
+      color: #000000;
+      font-weight: bold;
+    }
+
+    .text p {
+      margin: 0;
+      margin-bottom: 10px;
+    }
+
+    button {
+      margin-bottom: 10px;
+    }
+
+    .image-header {
+      margin-bottom: 20px;
+      background-color: #eee8e8;
+      width: 80%;
+      margin: auto;
+      text-align: center;
+      /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+    }
+
+    h3 {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="image-container">
+    <div class="image-header">
+      <h3>Generar Reportes de Descuentos Socios ADUTEQ</h3>
+    </div>
+    <form method="post" action="{% url 'reportes_socios_todos' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">
+        <div class="text">
+          <p>Descuentos Detalle</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpdts" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'reportes_socios' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">
+        <div class="text">
+          <p>Descuento Pendientes</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpdps" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'generar_reporte' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 2">
+        <div class="text">
+          <p>Consumo Proveedores.</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpcmp" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'reportes_socios_general' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
+        <div class="text">
+          <p>Descuento Total</p>
+          <input style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpgds" required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <!-- <div class="image-container">
+      
+    </div> -->
+</body>
+
+</html>
+
+
+
+{% endblock %}

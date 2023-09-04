@@ -1,0 +1,51 @@
+{% for promocion in promos %}
+<tr>
+    <td>{{ promocion.titulo }}</td>
+    <td>{{ promocion.descripcion }}</td>
+    <td>{{ promocion.proveedor.nombre }}</td>
+    <td>
+        {% if promocion.imagen %}
+        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="rounded-image">
+        {% else %}
+        No hay foto disponible.
+        {% endif %}
+    </td>
+    <td>{{ promocion.fecha_inicio|date:"j - n - Y" }}</td>
+    <td>{{ promocion.fecha_fin|date:"j - n - Y" }}</td>
+    <!-- <td>{{ socio.categoria }}</td> -->
+    <td>
+        {% if promocion.estado %}
+        <button class="green-button"
+            onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
+            <span class="visto-icon"></span>
+            Activo
+        </button>
+        {% else %}
+        <button class="red-button"
+            onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
+            <span class="no-visto-icon"></span> Inactivo
+        </button>
+        {% endif %}
+
+    </td>
+    <td>
+        <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
+            <button class="edit-btn">
+                Editar
+            </button></a>
+        </a>
+    </td>
+    <td>
+        <button id="delete" class="edit-btn delete" data-promo-id="{{ promocion.id }}">Eliminar</button>
+    </td>
+    <td>
+        <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
+            class="edit-btn notify" style="text-decoration: none;"> Notificar
+        </a>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="9">No se encontraron resultados.</td>
+</tr>
+{% endfor %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Editar Empleado</title>
+</head>
+
+<body>
+    <div class="content-menu" style="padding-top: 0%;">
+        <div class="header">
+            <h1>INFORMACION PERSONAL</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form id="socio-form" action="{% url 'editar_perfil' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input readonly type="hidden" name="user_id" value="{{ request.user.empleado.id }}">
+                    <label for="username">Usuario:</label>
+                    <input disabled type="text" id="usuario" name="username " value="{{ empleado.user.username }}"
+                        required>
+
+                    <label for="nombres">Nombre:</label>
+                    <input disabled type="text" id="nombres" name="nombres" value="{{ empleado.nombres }}" required>
+
+                    <label for="apellidos">Apellido:</label>
+                    <input disabled type="text" id="apellidos" name="apellidos" value="{{ empleado.apellidos }}"
+                        required>
+
+                    <label for="cedula">Cedula:</label>
+                    <input disabled type="text" maxlength="10" value="{{ empleado.cedula }}" id="cedula" name="cedula"
+                        required>
+
+                    <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                    <input disabled type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                        value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}" required>
+
+                    <label for="correo_electronico">Correo Electrónico:</label>
+                    <input disabled type="email" id="correo_electronico" name="correo_electronico"
+                        value="{{ empleado.correo_electronico }}" required>
+
+                    <label for="numero_telefonico">Teléfono:</label>
+                    <input disabled type="text" id="numero_telefonico" name="numero_telefonico"
+                        value="{{ empleado.numero_telefonico }}" required>
+
+                    <label for="direccion_domiciliaria">Dirección Domiciliaria:</label>
+                    <input disabled type="text" id="direccion_domiciliaria" name="direccion_domiciliaria"
+                        value="{{ empleado.direccion_domiciliaria }}" required>
+
+                    <label for="fecha_ingreso">Fecha de Ingreso a la Universidad:</label>
+                    <input disabled type="date" id="fecha_ingreso" name="fecha_ingreso"
+                        value="{{ empleado.fecha_ingreso|date:'Y-m-d' }}" required>
+
+                    <label for="titulo">Título:</label>
+                    <input disabled type="text" id="titulo" name="titulo" value="{{ empleado.titulo }}" required>
+                    <br>
+                    <br>
+                    <input type="submit" id="guardarBtn" value="Guardar" style="width: 100%; display: none;">
+                    <input type="button" id="cancelarBtn" value="Cancelar" style="width: 100%; background-color: red; display: none;">
+
+                </form>
+                <button id="editarBtn" class="add-socio-btn">Editar</button>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var campoNumerico = document.getElementById("cedula");
+        campoNumerico.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });
+        campoNumerico = document.getElementById("numero_telefonico");
+        campoNumerico.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });
+        campoNumerico = document.getElementById("numero_convencional");
+        campoNumerico.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });
+    </script>
+
+    <script>
+        const editarBtn = document.getElementById("editarBtn");
+        const guardarBtn = document.getElementById("guardarBtn");
+        const cancelarBtn = document.getElementById("cancelarBtn");
+        const inputs = document.querySelectorAll("#socio-form input");
+
+        editarBtn.addEventListener("click", () => {
+            Swal.fire({
+                icon: 'info',
+                title: 'Seguro?',
+                text: 'Esta seguro que desea editar la informacion de perfil?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                for (const input of inputs) {
+                    input.removeAttribute("disabled");
+                }
+                guardarBtn.style.display = "block";
+                cancelarBtn.style.display = "block";
+                editarBtn.style.display = "none";
+            });
+          
+        });
+
+        cancelarBtn.addEventListener("click", () => {
+            for (const input of inputs) {
+                input.setAttribute("disabled", "true");
+            }
+            guardarBtn.style.display = "none";
+            cancelarBtn.style.display = "none";
+            editarBtn.style.display = "block";
+        });
+    </script>
+
+
+</body>
+
+</html>
+
+{% endblock %}

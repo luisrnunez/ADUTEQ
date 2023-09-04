@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+<body>
+
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>PAGOS</h1>
+        </div>
+        <div class="socios-content ">
+            <div class="botones-sup">
+                <div style="display: flex; justify-content: center; width: min-content;">
+                    <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
+                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
+                        aria-placeholder="Asño" required>
+                        {% for anio in anos %}
+                        <option value="{{ anio }}">{{ anio }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
+                        aria-placeholder="Periodo" required>
+                        {% for periodo in periodos %}
+                        {% if periodo.anio == anos.0 %}
+                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                            {{ periodo.nombre }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div id="lista-pagos">
+                <table class="socios-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Valor de deuda</th>
+                            <th scope="col">Fecha creacion</th>
+                            <th scope="col">Fecha de pago</th>
+                            <th scope="col">Evidencia</th>
+                            <th scope="col">Cancelado</th>
+                            <th scope="col">Accion</th>
+                            <th scope="col">Evidencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pagosproveedo in pagosproveedor %}
+                        <tr>
+                            <td>{{ pagosproveedo.proveedor.nombre }}</td>
+                            <td>{{ pagosproveedo.valor_total }}$</td>
+                            <td>{{ pagosproveedo.fecha_creacion|date:"j - n - Y" }}</td>
+                            <td>{{ pagosproveedo.fecha_pago|date:"j - n - Y" }}</td>
+                            <td>
+                                
+                                {% if pagosproveedo.evidencia %}
+                                <a href="{{ pagosproveedo.evidencia.url }}" target="_blank">
+                                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                </a>
+                                {% else %}
+                                Sin evidencia
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if pagosproveedo.valor_cancelado %}
+                                <button class="green-button">
+                                    SI
+                                </button>
+                                {% else %}
+                                <button class="red-button">
+                                    NO
+                                </button>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="edit-btn"
+                                    onclick="confirmarPago('{{ pagosproveedo.id }}','{{ pagosproveedo.proveedor.nombre }}','{{ pagosproveedo.valor_cancelado }}')">
+                                    Registrar pago
+                                </button>
+                            </td>
+                         
+                            <td>
+                                {% if pagosproveedo.valor_cancelado %}
+                                <form action="{% url 'prop_presagregar_pdf' pagosproveedo.id %}">
+                                    <button class="edit-btn">Editar</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                         
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+           
+
+        </div>
+        <script>
+            $(document).ready(function () {
+                $("#select-periodo").on("click", function () {
+                    console.log('ENTRAR AL SELECT')
+                    var periodoid = $(this).val();
+                    $.ajax({
+                        url: '{% url "listar_pagosp" %}',
+                        type: "POST",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            periodoid: periodoid
+                        },
+                        success: function (data) {
+                            $("#lista-pagos").html(data.rendered_table);
+                        }
+                    });
+                });
+            });
+        </script>
+        <script>
+
+            function confirmarPago(proveedorId, proveedorNombre, cancelado) {
+                var valor;
+    
+                if (cancelado == 'False') {
+                    valor = 0;
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: 'Registrar el pago al proveedor ' + proveedorNombre,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí',
+                        cancelButtonText: 'Cancelar',
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // El usuario ha confirmado la edición, redirigir a la página de edición
+                            window.location.href = '/aplicar_pago/' + proveedorId + '/' + valor + '/';
+                            print(valor)
+                        }
+                    });
+    
+                }
+            }
+    
+        </script>
+    
+    </div>
+
+  
+</body>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% for proveedor in proveedores%}
+<tr>
+    <td>{{proveedor.nombre}}</td>
+    <td>{{proveedor.telefono}}</td>
+    <td>{{proveedor.direccion}}</td>
+    <td>{{proveedor.RUC}}</td>
+    <td>{{proveedor.comision}}%</td>
+    <td>{{proveedor.cupo}}</td>
+    <td>
+        {% if proveedor.estado %}
+        <button class="green-button" onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
+            <span class="visto-icon"></span>
+            Activo
+        </button>
+        {% else %}
+        <button class="red-button" onclick="eliminarProveedor('{{proveedor.id}}','{{proveedor.estado}}')">
+            <span class="no-visto-icon"> </span>Inactivo
+        </button>
+        {% endif %}
+
+    </td>
+    <td>
+
+        <a href="/editProveedor/{{proveedor.id}}">
+            <button class="edit-btn">
+                Editar
+            </button></a>
+        </a>
+    </td> 
+    <td>
+
+        <a href="/verdetallescupo/{{proveedor.id}}">
+            <button class="edit-btn">
+                Detalles Cupo
+            </button></a>
+        </a>
+    </td>
+    <td>
+
+        <a href='{% url "agregarCuenta" proveedor.id %}'>
+            <button class="edit-btn">
+                Cuentas
+            </button></a>
+        </a>
+    </td>  
+</tr>
+{% empty %}
+<tr>
+    <td colspan="9">No se encontraron resultados.</td>
+</tr>
+{% endfor %}

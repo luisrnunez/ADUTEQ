@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Agregar cuenta bancaria a <b>{{ proveedor.nombre }}</b></h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form id="registro-cuenta" action="{% url 'agregarnuevacuentabancaria' proveedor.id %}" method="POST">
+                    {% csrf_token %}
+                    <label for="banco">Nombre de banco:</label>
+                    <input maxlength="50" type="text" id="banco" placeholder="BANCO GUAYAQUIL" name="banco" required>
+
+                    <label for="n_cuenta">Numero de cuenta:</label>
+                    <input maxlength="50" type="number" id="n_cuenta" name="n_cuenta" placeholder="6875645356543" required>
+
+                    <label for="titular">Titular de cuenta:</label>
+                    <input maxlength="50" type="text" id="titular" name="titular" placeholder="Jose Luis" required>
+
+                    <label for="tipo">Tipo de cuenta:</label>
+                    <select name="tipo" id="tipo" aria-placeholder="seleccionar tipo de cuenta" required>
+                        <option value="corriente">Corriente</option>
+                        <option value="ahorro">Ahorro</option>
+                    </select>
+
+                    <label for="cedula_ruc">Cedula o ruc:</label>
+                    <input type="number" maxlength="15" id="cedula_ruc" name="cedula_ruc"  required>
+
+                    <input type="submit" value="Agregar cuenta bancaria">
+
+                    <a href='{% url "agregarCuenta" proveedor.id %}'> <input type="button" value="Cancelar"
+                        style="background-color: red;"></a>
+                </form>
+            </div>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    
+    <script>
+           var campoNumerico = document.getElementById("ruc");
+        campoNumerico.addEventListener("input", function() {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 13);
+        });
+        campoNumerico = document.getElementById("telefono");
+        campoNumerico.addEventListener("input", function() {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });
+    </script>
+    <script>
+        
+$(document).ready(function () {
+    $('#registro-form').on('submit', function (event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: '/registrarproveedor/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.status === 'error') {
+                    Swal.fire({
+                        "title": "Falló",
+                        "text": response.message,
+                        "icon": "warning"
+                    })
+                } else if (response.status === 'success') {
+                    Swal.fire({
+                        "title": "Éxito",
+                        "text": response.message,
+                        "icon": "success"
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            window.location.href = "/proveedores/"
+                        }
+                    })
+
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                Swal.fire('Error', 'Ocurrió un error al procesar la solicitud.', 'error');
+            }
+        });
+    });
+});
+    </script>
+    {% endblock %}
+</body>
+</html>

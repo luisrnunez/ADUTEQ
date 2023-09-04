@@ -1,0 +1,70 @@
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            border-radius: 10px;
+        }
+        h2 {
+            color: #00b300;
+        }
+        h3 {
+            color: #00b300;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        img {
+            width: 100%;
+            height: auto;
+            margin-top: 20px;
+            max-height: 400px;
+        }
+        .footer {
+            margin-top: 20px;
+            color: #00b300;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Nueva Promoción: {{ promocion.titulo }}</h2>
+        <p><b>Estimado socio,</b></p>
+        <p>¡Tenemos una nueva promoción que podría interesarte!</p>
+
+        <h3>Detalles de la Promoción:</h3>
+        <ul>
+            <li><h3>Proveedor:</h3> <b>{{ promocion.proveedor }}</b></li>
+            <li><h3>Descripción:</h3> <b>{{ promocion.descripcion }}</b></li>
+            <li><h3>Fecha de Inicio:</h3> <b>{{ promocion.fecha_inicio }}</b></li>
+            <li><h3>Fecha de Fin:</h3> <b>{{ promocion.fecha_fin }}</b></li>    
+        </ul>
+
+        <img src="cid:promocion_imagen" alt="{{ promocion.titulo }}">
+
+        <p>¡No te pierdas esta oportunidad!</p>
+
+        <p class="footer">Saludos,<br>ADUTEQ</p>
+    </div>
+</body>
+</html>
+{% endblock %}

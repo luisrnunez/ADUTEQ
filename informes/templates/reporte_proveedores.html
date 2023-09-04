@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte PDF</title>
+    <style>
+        @page {
+            /* size: 900mm 210mm; */
+            size: a1 landscape;
+            /* size: landscape; */
+            /* width: 4000mm; */
+            margin: 20mm 10mm;
+        }
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-size: 160%;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        h4{
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div class="header">
+        <div class="logo">
+            <img src="{{ image_path }}" alt="Logo" width="150" height="150">
+        </div>
+        <div class="fecha">
+            <h1>Reporte de Consumo de Proveedores - {{ mes }}/{{ anio }}</h1>
+        </div>
+    </div> -->
+    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+        <tr>
+            <td style="width: 300px; text-align: left; border: none;">
+                <img src="{{ image_path }}" alt="Logo" style="max-width: 150px; max-height: 150px;">
+            </td>
+            <td style="text-align: center; border: none;">
+                <h1 style="font-size: 400%;">Asociación de Docentes Universidad Tecnica Estatal de Quevedo</h1>
+                <h1 style="font-size: 300%;">Reporte de Consumo de Proveedores - {{ mes }}/{{ anio }}</h1>
+            </td>
+            <td style="width: 300px; text-align: right; border: none;">
+                <h2 style="font-size: 200%;">Fecha de generación: {{fecha_gen}}</h4>
+            </td>
+        </tr>
+    </table>
+
+    <table style="width: 100%;">
+        <tr>
+            <th>N</th>
+            <th>Cedula</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            {% for proveedor in proveedores %}
+            <th>{{ proveedor.nombre }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in datos_reporte %}
+        <tr>
+            <td style="text-align: center; width: 2%;">{{ forloop.counter }}</td>
+            {% for value in row %}
+            <td>
+                {% if value %}
+                {{ value }}
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>

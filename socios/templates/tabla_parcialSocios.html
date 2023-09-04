@@ -1,0 +1,52 @@
+
+{% for socio in socios %}
+<tr>
+    <td>{{ socio.cedula }}</td>
+    <td>{{ socio.user.first_name }}</td>
+    <td>{{ socio.user.last_name }}</td>
+    <td>
+        {% if socio.foto %}
+        <img src="{{ socio.foto.url }}" alt="Foto del socio" class="rounded-image"
+        onclick="openModal('{{ socio.foto.url }}')">
+        {% else %}
+        No hay foto disponible.
+        {% endif %}
+    </td>
+    <td>{{ socio.numero_telefonico }}</td>
+    <td>{{ socio.user.email }}</td>
+    <td>
+        {% if socio.user.is_active %}
+        <button class="green-button"
+            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+            <span class="visto-icon"></span>
+            Activo
+        </button>
+        {% else %}
+        <button class="red-button"
+            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+            <span class="no-visto-icon"></span> Inactivo
+        </button>
+        {% endif %}
+    </td>
+    <td>
+        <button class="edit-btn"
+            onclick="confirmarEdicion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+            Editar
+        </button>
+    </td>
+    <td>
+        <a onclick="confirmarEnvioCorreo('{{socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')"
+            class="edit-btn" style="text-decoration: none;"> Notificar
+        </a>
+    </td>
+    <td>
+        <a href="/aportaciones_socio/{{socio.id}}"
+            class="edit-btn" style="text-decoration: none;"> Aportación
+        </a>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="9">No se encontraron resultados.</td>
+</tr>
+{% endfor %}

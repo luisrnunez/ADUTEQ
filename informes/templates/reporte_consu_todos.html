@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: landscape;
+            margin: 20mm 10mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            /* Añadido para espaciar los elementos */
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+
+        .fecha {
+            display: flex;
+            align-items: flex-start;
+            text-align: center;
+        }
+
+        table {
+            width: 90%;
+            border-collapse: collapse;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .green-button {
+            background-color: #62c562;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* Estilos para el botón rojo */
+        .red-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            width: max-content;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div class="header">
+        <div class="logo">
+            <img src="{{ image_path }}" alt="Logo" width="150" height="150">
+        </div>
+        <div class="fecha">
+            <h1>Reporte de Consumo Total de Socios - {{ mes }}/{{ anio }}</h1>
+            <h1>Total: {{total}}</h1>
+        </div>
+    </div> -->
+    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+        <tr>
+            <td style="width: 200px; text-align: left; border: none;">
+                <img src="{{ image_path }}" alt="Logo" style="max-width: 180px; max-height: 180px;">
+            </td>
+            <td style="text-align: center; border: none;">
+                <h1 style="font-size: xx-large;">Asociación de Docentes Universidad Tecnica Estatal de Quevedo</h1>
+                <h1>Reporte de Consumo Total de Socios - {{ mes }}/{{ anio }}</h1>
+                <h1 style="font-size: xx-large;">Total: {{total}}</h1>
+            </td>
+            <td style="width: 200px; text-align: right; border: none;">
+                <h2>Fecha de generación: {{fecha_gen}}</h4>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Nombre</th>
+                <th>Cédula</th>
+                <th>Cuota préstamos</th>
+                <th>Cuota descuentos</th>
+                <th>Aportación</th>
+                <th>Descuento Proveedores</th>
+                <th>Aportación Ayudas</th>
+                <th>Consumo total</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in resultados %}
+            <tr>
+                <td style="text-align: center; width: 5%;">{{ forloop.counter }}</td>
+                <td style="text-align: left; width: 30%;">{{ row.0 }}</td>
+                <td style="text-align: right;">{{ row.1 }}</td>
+                <td style="text-align: right;">{{ row.2 }}</td>
+                <td style="text-align: right;">{{ row.3 }}</td>
+                <td style="text-align: right;">{{ row.4 }}</td>
+                <td style="text-align: right;">{{ row.5 }}</td>
+                <td style="text-align: right;">{{ row.6 }}</td>
+                <td style="text-align: right;">{{ row.7 }}</td>
+                <td>
+                    {% if row.8 %}
+                    <button class="green-button">
+                        Cancelado
+                    </button>
+                    {% else %}
+                    <button class="red-button">
+                        Pendiente
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <td style="text-align: center;">Total</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>----</td>
+            <td>{{total}}</td>
+            <td>----</td>
+    </table>
+</body>
+
+</html>

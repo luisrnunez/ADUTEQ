@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .socios-content select,
+        .socios-content input[type="date"],
+        .socios-content input[type="file"],
+        .socios-content input[type="text"],
+        .socios-content input[type="email"],
+        .socios-content input[type="number"] {
+            background-color: white;
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+
+        }
+
+        .socios-content label {
+            display: block;
+            margin-bottom: 10px;
+            width: max-content;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .left {
+            width: 50%;
+            padding: 10px;
+        }
+
+        .right {
+            width: 50%;
+            padding: 10px;
+        }
+
+        .fila-roja {
+            background-color: red;
+        }
+
+        .fila-normal {
+            background-color: white;
+        }
+
+        .boton-checkbox-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Agregar descuentos desde un archivo</h1>
+        </div>
+        <div class="socios-content ">
+            <div class="container">
+                <div class="left">
+                    <h4>Subir Archivo</h4>
+                    <div class="form-container" style="width: 90%;">
+                        <form action="{% url 'extraer_pdf' %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="custom-file">
+                                <input type="file" style="width: auto;" id="pdf_file" name="pdf_file" accept=".pdf"
+                                    required>
+                            </div>
+                            <button class="add-socio-btn" type="submit">CARGAR DATOS</button>
+                            <br><br>
+
+
+                        </form>
+
+                        <div class="boton-checkbox-container">
+                            <button id="boton-validar" class="add-socio-btn" onclick="verificarRegistros()">
+                                <span id="texto-boton">Verificar registros</span>
+                                <i id="icono-validacion"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="right">
+                    <h4>Seleccionar Proveedor</h4>
+                    <select name="proveedor" id="proveedor" required>
+                        {% for proveedor in proveedores %}
+                        <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <h4>Seleccionar Fecha</h4>
+
+                    <input type="date" name="fecha" id="fecha" required>
+                    <button id="btn_guardar" class="add-socio-btn" style="width: 100%; height: 30px;" type="button"
+                        onclick="guardarTodoLosRegistros()">GUARDAR TODO</button>
+                </div>
+            </div>
+            <br><br>
+            <form id="miFormulario" hidden="True">
+                {% csrf_token %}
+                <table id="miTabla" class="socios-table" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            {% for columna in datos_tabla.0 %}
+                            <th scope="col">
+                                <select required placeholder="Seleccionar" holder="Seleccionar"
+                                    onchange="cambiarNombre(this)">
+                                    <option value="">Seleccionar</option>
+                                    <option value="ide">Identificador</option>
+                                    <option value="des">Descuento</option>
+                                </select>
+                            </th>
+                            {% endfor %}
+
+                            <th scope="col">
+                                <button id="btn_delete_reg" class="delete-btn" type="button"
+                                    onclick="eliminarRegistroAll(this)">Eliminar</button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        {% for datos in datos_tabla %}
+                        <tr>
+                            {% for valor in datos %}
+                            <td>
+                                <input name="" type="text" value="{{ valor|cut:'$' }}">
+                            </td>
+                            {% endfor %}
+                            <td>
+                                <button class="delete-btn" type="button"
+                                    onclick="eliminarRegistro(this)">Eliminar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+
+
+        </div>
+    </div>
+
+    <script>
+             function verificarRegistros() {
+
+const boton = document.getElementById('boton-validar');
+const boton_guardar = document.getElementById('btn_guardar');
+const icono = document.getElementById("icono-validacion");
+const formulario = document.getElementById('miFormulario');
+const textoBoton = document.getElementById("texto-boton");
+// Si el checkbox no está marcado, obtener los datos del formulario y realizar la verificación
+const formData = new FormData(formulario);
+fetch('/verificar_registros/', {
+    method: 'POST',
+    body: formData,
+    headers: {
+        'X-CSRFToken': '{{ csrf_token }}'  // Agrega el token CSRF a la cabecera de la solicitud
+    }
+})
+    .then(response => response.json())
+    .then(data => {
+        if (data.status) {
+            // No se encontraron errores en los registros, puedes mostrar un mensaje o realizar otras acciones
+            //console.log(data.message);
+
+            // icono.classList.add("fas", "fa-check");
+            const filasErroneas = document.querySelectorAll('.socios-table tbody tr');
+            for (let i = 0; i < filasErroneas.length; i++) {
+                if (data.registros[i].estilo_color === 'normal') {
+                    filasErroneas[i].classList.remove('fila-roja');
+                    filasErroneas[i].classList.add('fila-normal');
+                }
+                if (data.registros[i].estilo_color === 'rojo') {
+                    filasErroneas[i].classList.remove('fila-normal');
+                    filasErroneas[i].classList.add('fila-roja');
+                }
+            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: data.message,
+            });
+            // Acciones adicionales con los registros, si es necesario
+
+
+            textoBoton.textContent = "REGISTROS SIN ERRORES";
+            boton.style.backgroundColor = "#ECB932";
+            icono.classList.remove("fas", "fa-times");
+            icono.classList.add("fas", "fa-check");
+            boton_guardar.disabled = False;
+        } else {
+
+            const filasErroneas = document.querySelectorAll('.socios-table tbody tr');
+            for (let i = 0; i < filasErroneas.length; i++) {
+                if (data.registros[i].estilo_color === 'rojo') {
+                    filasErroneas[i].classList.remove('fila-normal');
+                    filasErroneas[i].classList.add('fila-roja');
+                }
+                if (data.registros[i].estilo_color === 'normal') {
+                    filasErroneas[i].classList.remove('fila-roja');
+                    filasErroneas[i].classList.add('fila-normal');
+                }
+            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.message,
+            });
+            textoBoton.textContent = "REGISTROS CON ERRORES";
+            boton.style.backgroundColor = "red";
+            icono.classList.remove("fas", "fa-check");
+            icono.classList.add("fas", "fa-times");
+            boton_guardar.disabled = True;
+
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+    });
+
+}
+    </script>
+    <script>
+        function guardarTodoLosRegistros() {
+            const proveedor = document.getElementById('proveedor');
+            const Fecha = document.getElementById('fecha');
+            const formulario = document.getElementById('miFormulario');
+            const formData = new FormData(formulario);
+            const textoBoton = document.getElementById("texto-boton");
+            if (textoBoton.textContent != "REGISTROS SIN ERRORES") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Por favor, verifique los registros antes de guardar',
+                });
+                return;
+            }
+            console.log(Fecha.value)
+            if (proveedor.value !== "" && Fecha.value !== "") {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Deseas agregar los registros al proveedor ' + proveedor.options[proveedor.selectedIndex].text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    cancelButtonText: 'Cancelar',
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        fetch('/guardar_descuentos_prov' + '/' + proveedor.value + '/' + Fecha.value + '/', {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => response.json()) // Convertir la respuesta a JSON
+                            .then(data => {
+                                // Verificar el estado (status) de la respuesta JSON
+                                if (data.status) {
+                                    // Si el estado es verdadero (True), mostrar el mensaje de éxito
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Éxito',
+                                        text: data.message,
+                                    }).then(() => {
+                                        // Redireccionar después de mostrar el mensaje de éxito
+                                        window.location.href = '/listar_pagos/';
+                                    });
+                                } else {
+                                    // Si el estado es falso (False), mostrar el mensaje de error
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: data.message,
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                // Manejar errores
+                            });
+                    }
+                });
+            }
+            else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Agrege correctamente el proveedor y la fecha.',
+                });
+            }
+
+        }
+    </script>
+    <script>
+        function cambiarNombreBoton() {
+            var checkbox = document.getElementById("validar-checkbox");
+            var boton = document.getElementById("boton-validar");
+
+            if (checkbox.checked) {
+                boton.innerText = "Datos Verificados";
+                boton.disabled = true; // Deshabilitar el botón para evitar más clics
+            } else {
+                boton.innerText = "Validar Registros";
+                boton.disabled = false; // Habilitar el botón nuevamente
+            }
+        }
+    </script>
+
+    <script>
+        function cambiarNombre(selectElement) {
+
+            // Obtenemos el índice de la columna seleccionada
+            var index = selectElement.parentElement.cellIndex;
+
+            // Obtenemos el nombre de la opción seleccionada
+            var nombreColumna = selectElement.value;
+
+            // Obtenemos todas las filas de la tabla
+            var filas = document.getElementsByTagName('tr');
+            // Recorremos todas las filas y cambiamos el nombre del campo input en la columna correspondiente
+            for (var i = 1; i < filas.length; i++) {
+                var fila = filas[i];
+                var inputElement = fila.cells[index].getElementsByTagName('input')[0];
+                inputElement.name = nombreColumna;
+
+
+            }
+        }
+    </script>
+    <script>
+        mostrarBotonEliminar();
+        function mostrarBotonEliminar() {
+            var tbody = document.getElementById('tbody');
+            var formulario = document.getElementById('miFormulario');
+
+            if (tbody.rows.length > 0) {
+                formulario.removeAttribute('hidden');
+            } else {
+                formulario.setAttribute('hidden', 'true');
+            }
+        }
+
+        function eliminarRegistro(btn) {
+            var fila = btn.parentNode.parentNode;
+            fila.parentNode.removeChild(fila);
+        }
+        function eliminarRegistroAll(btn) {
+            var tabla = document.getElementById('miTabla');
+            var tbody = tabla.getElementsByTagName('tbody')[0];
+            Swal.fire({
+                icon: 'info',
+                title: 'Seguro?',
+                text: 'Esta seguro que desea eliminar todos los registros?',
+            }).then(() => {
+                while (tbody.hasChildNodes()) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+            });
+
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Obtener el elemento input de fecha
+            var inputFecha = document.getElementById("fecha");
+
+            // Obtener la fecha actual
+            var fechaActual = new Date();
+
+            // Formatear la fecha actual en formato YYYY-MM-DD
+            var yyyy = fechaActual.getFullYear();
+            var mm = String(fechaActual.getMonth() + 1).padStart(2, '0');
+            var dd = String(fechaActual.getDate()).padStart(2, '0');
+            var fechaFormateada = yyyy + "-" + mm + "-" + dd;
+
+            // Establecer la fecha actual en el atributo value del input
+            inputFecha.value = fechaFormateada;
+        });
+
+    </script>
+
+    <script> var campoNumerico = document.getElementById("cedula");
+        campoNumerico.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "").substring(0, 10);
+        });</script>
+</body>
+{% endblock %}
