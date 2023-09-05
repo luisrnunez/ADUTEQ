@@ -31,6 +31,18 @@
                     <!-- <a style="margin-left: 10px;" href="/generar_reporte/"> <button class="add-socio-btn"> Generar
                             Reporte</button></a> -->
                 </div>
+                <div style="display: inline-flex; justify-content: end; width: max-content;">
+                    <div class="search-form">
+    
+                        <select id="criterio" name="criterio">
+                            <option value="nombres">Nombre</option>
+                            <option value="apellidos">Apellido</option>
+                        </select>
+                        <input type="text" id="buscador_input" name="valor" placeholder="Buscar por socio...">
+                        <!-- <button type="submit">Buscar</button> -->
+    
+                    </div>
+            </div>
 
                 <div style="display: flex; justify-content: center; width: min-content;">
                     <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>
@@ -74,7 +86,7 @@
 
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="pagos-body">
                         {% for pago in pagos %}
                         <tr>
                             <td>{{pago.id}}</td>
@@ -129,23 +141,78 @@
                         <ul class="pagination">
                             {% if pagos.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ pagos.previous_page_number }}">anterior</a>
+                                <a class="page-link" href="?page=1" aria-label="Primero">
+                                    Primero
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pagos.previous_page_number }}" aria-label="Anterior">
+                                    Anterior
+                                </a>
                             </li>
                             {% endif %}
-                            <li class="pagination-item active">
-                                <span style="border-radius: 5px;" class="page-link">{{ pagos.number }}</span>
+                            <li class="page-item active">
+                                <span class="page-link">{{ pagos.number }}</span>
                             </li>
                             {% if pagos.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ pagos.next_page_number }}">siguiente</a>
+                                <a class="page-link" href="?page={{ pagos.next_page_number }}" aria-label="Siguiente">
+                                    Siguiente
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ pagos.paginator.num_pages }}" aria-label="Último">
+                                    Último
+                                </a>
                             </li>
                             {% endif %}
                         </ul>
                     </nav>
-                </div>
+                </div>                
             </div>
 
             <script>
+
+$(document).ready(function() {
+    $("#buscador_input").on("input", function() {
+        var query = $(this).val();
+        var criterio = document.getElementById('criterio').value; 
+        console.log(criterio);
+        console.log(query);
+        $.ajax({
+            url: '{% url "buscar_pagos" %}',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                query: query,
+                criterio: criterio
+            },
+            success: function(data) { 
+                $(".socios-table").html(data.rendered_table); 
+            }
+        });
+    });
+});
+
+$(document).ready(function () {
+    $("#criterio").on("change", function () {
+        var criterio = $(this).val();
+
+        $.ajax({
+            url: '{% url "buscar_pagos" %}',  // Cambia esto a la URL de tu vista de búsqueda
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                query: "",
+                criterio: criterio
+            },
+            success: function (data) {  // Verifica los datos devueltos por el servidor
+                $(".socios-table").html(data.rendered_table);
+            }
+        });
+    });
+});
+
                 $(document).ready(function () {
                     $("#select-periodo").on("click", function () {
                         console.log('ENTRAR AL SELECT')

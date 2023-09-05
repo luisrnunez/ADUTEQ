@@ -11,46 +11,58 @@ from .models import Periodo
 from django.template.loader import render_to_string
 
 def guardar_prestamo(request):
+    
     if request.method == 'POST':
-        monto = request.POST.get('monto')
-        fecha_prestamo = request.POST.get('fecha_prestamo')
-        fecha_pago = request.POST.get('fecha_pago')
-        plazo_meses = request.POST.get('plazo_meses')
-        tasa_interes = request.POST.get('tasa_interes')
-        descripcion = request.POST.get('descripcion')
-        socio_id = request.POST.get('socio')
-        socios = Socios.objects.get(id=socio_id)
-        monto_total=float(monto)+((float(monto)*(float(tasa_interes)/100)))
-        prestamo = Prestamo(socio=socios,monto=monto,fecha_pago=fecha_pago,fecha_prestamo=fecha_prestamo,total=monto_total, plazo_meses=plazo_meses, tasa_interes=tasa_interes, descripcion=descripcion)
-        monto_pago_mensual=monto_total/float(plazo_meses)
-        fecha_actual = datetime.now().date()
-        # Calcular las fechas de pago para los próximos 8 meses
+        fecha = request.POST.get('fecha_prestamo')
+        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+        if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+            monto = request.POST.get('monto')
+            fecha_prestamo = request.POST.get('fecha_prestamo')
+            fecha_pago = request.POST.get('fecha_pago')
+            plazo_meses = request.POST.get('plazo_meses')
+            tasa_interes = request.POST.get('tasa_interes')
+            descripcion = request.POST.get('descripcion')
+            socio_id = request.POST.get('socio')
+            socios = Socios.objects.get(id=socio_id)
+            monto_total=float(monto)+((float(monto)*(float(tasa_interes)/100)))
+            prestamo = Prestamo(socio=socios,monto=monto,fecha_pago=fecha_pago,fecha_prestamo=fecha_prestamo,total=monto_total, plazo_meses=plazo_meses, tasa_interes=tasa_interes, descripcion=descripcion)
+            monto_pago_mensual=monto_total/float(plazo_meses)
+            fecha_actual = datetime.now().date()
+            # Calcular las fechas de pago para los próximos 8 meses
 
-        fecha_actual_str = str(request.POST.get('fecha_prestamo'))
-        fecha_actual = datetime.strptime(fecha_actual_str, "%Y-%m-%d")
-        fechas_pago = [fecha_actual + timedelta(days=(30 * (i+1))) for i in range(int(plazo_meses))]
+            fecha_actual_str = str(request.POST.get('fecha_prestamo'))
+            fecha_actual = datetime.strptime(fecha_actual_str, "%Y-%m-%d")
+            fechas_pago = [fecha_actual + timedelta(days=(30 * (i+1))) for i in range(int(plazo_meses))]
 
-        if Prestamo.objects.filter(socio_id=socios, cancelado=False).exists():
-            messages.warning(request,'Este socio ya tiene un prestamo activo por lo que no es posible registrar el prestamo')
-            socios =  Socios.objects.select_related('user').all()
-            return render(request, 'agregar_prestamo.html',{'socios' :socios,'prestamo' :prestamo})  
-        
-        prestamo.save()
+            if Prestamo.objects.filter(socio_id=socios, cancelado=False).exists():
+                messages.warning(request,'Este socio ya tiene un prestamo activo por lo que no es posible registrar el prestamo')
+                socios =  Socios.objects.select_related('user').all()
+                return render(request, 'agregar_prestamo.html',{'socios' :socios,'prestamo' :prestamo})  
+            
+            prestamo.save()
 
-        for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
-            pago_mensual = PagoMensual(
-                socio=socios,
-                prestamo=prestamo,
-                numero_cuota=numero_cuota,
-                monto_pago=monto_pago_mensual,
-                cancelado=False,
-                fecha_pago=fecha_pago
-            )
-            pago_mensual.save()
+            for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                pago_mensual = PagoMensual(
+                    socio=socios,
+                    prestamo=prestamo,
+                    numero_cuota=numero_cuota,
+                    monto_pago=monto_pago_mensual,
+                    cancelado=False,
+                    fecha_pago=fecha_pago
+                )
+                pago_mensual.save()
 
-        messages.success(request,'EL prestamo fue creado exitosamente!!')
+            messages.success(request,'EL prestamo fue creado exitosamente!!')
 
-        return redirect('mostrar_prestamo')
+            return redirect('mostrar_prestamo')
+        else:
+            messages.warning(request, f'La fecha que ingresaste no esta dentro del periodo actual de {periodo_seleccionado.nombre}')
+            prestamo = Prestamo(socio=socios,monto=monto,fecha_pago=fecha_pago,fecha_prestamo=fecha_prestamo,total=monto_total, plazo_meses=plazo_meses, tasa_interes=tasa_interes, descripcion=descripcion)
+          
+            users = User.objects.filter(is_active=True)
+            socios = Socios.objects.filter(user__in=users)
+            
+            return render(request, 'agregar_prestamo.html', {'prestamo': prestamo,'socios' : socios })
     else:
         prestamo = Prestamo.objects.all()
         users = User.objects.filter(is_active=True)
@@ -78,7 +90,8 @@ def editar_prestamo(request, prestamo_id):
         prestamos.save()
 
         return redirect('mostrar_prestamo')
-    
+
+from django.db.models import Q
 def mostrar_prestamo(request):
     socios =  Socios.objects.select_related('user').all()
 
@@ -94,7 +107,10 @@ def mostrar_prestamo(request):
                 'fecha_inicio': periodo_seleccionado.fecha_inicio,
                 'fecha_fin': periodo_seleccionado.fecha_fin
             }
-            prestamos = Prestamo.objects.filter(fecha_prestamo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-fecha_prestamo", "socio")
+            prestamos = Prestamo.objects.filter(
+                Q(fecha_prestamo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
+                Q(fecha_prestamo__lt=fechas_periodo['fecha_inicio'], cancelado="False")
+                ).order_by("-fecha_prestamo", "socio")
             context = {
                 'prestamos': prestamos,
                 'socios' : socios ,
@@ -113,7 +129,10 @@ def mostrar_prestamo(request):
             'fecha_inicio': periodo_seleccionado.fecha_inicio,
             'fecha_fin': periodo_seleccionado.fecha_fin
         }
-        prestamos = Prestamo.objects.filter(fecha_prestamo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("-fecha_prestamo", "socio")
+        prestamos = Prestamo.objects.filter(
+                Q(fecha_prestamo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
+                Q(fecha_prestamo__lt=fechas_periodo['fecha_inicio'], cancelado="False")
+                ).order_by("-fecha_prestamo", "socio")
         items_por_pagina = 8
         paginator = Paginator(prestamos, items_por_pagina)
         numero_pagina = request.GET.get('page')

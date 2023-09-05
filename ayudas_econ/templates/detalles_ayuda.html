@@ -19,12 +19,23 @@
     <div class="content-menu" style="padding-top: 0%;">
 
         <div class="header">
-            <h1>Detalles de aportaciones</b></h1>
+            <h1>Detalles de aportaciones de ayudas económicas</b></h1>
         </div>
         <div class="socios-content ">
             <div class="botones-sup">
                 <a href="/verayudas/"> <button class="add-socio-btn"> Atras</button></a>
-
+                <div style="display: inline-flex; justify-content: end; width: max-content;">
+                    <div class="search-form">
+    
+                        <select id="criterio" name="criterio">
+                            <option value="nombres">Nombre</option>
+                            <option value="apellidos">Apellido</option>
+                        </select>
+                        <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
+                        <!-- <button type="submit">Buscar</button> -->
+    
+                    </div>
+            </div>
             </div>
             <table class="socios-table">
                 <thead>
@@ -39,7 +50,7 @@
                         <th scope="col">Evidencia</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="socios-body">
                     {% for detalle in detalles %}
                     <tr>
                         <td>{{ detalle.ayuda.motivo }}</td>
@@ -99,7 +110,14 @@
                     <ul class="pagination">
                         {% if detalles.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ detalles.previous_page_number }}">anterior</a>
+                            <a class="page-link" href="?page=1" aria-label="Primero">
+                                Primero
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.previous_page_number }}" aria-label="Anterior">
+                                Anterior
+                            </a>
                         </li>
                         {% endif %}
                         <li class="pagination-item active">
@@ -107,12 +125,20 @@
                         </li>
                         {% if detalles.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ detalles.next_page_number }}">siguiente</a>
+                            <a class="page-link" href="?page={{ detalles.next_page_number }}" aria-label="Siguiente">
+                                Siguiente
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.paginator.num_pages }}" aria-label="Último">
+                                Último
+                            </a>
                         </li>
                         {% endif %}
                     </ul>
                 </nav>
             </div>
+            
 
         </div>
 
@@ -138,6 +164,61 @@
             </div>
         </div>
     </div>
+
+    <script>
+
+$(document).ready(function() {
+    $("#buscador_input").on("input", function() {
+        var query = $(this).val();
+        var criterio = document.getElementById('criterio').value;
+        console.log(criterio);
+        console.log(query);
+        $.ajax({
+            url: '{% url "buscar_detalle" %}',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                query: query,
+                criterio: criterio
+            },
+            success: function(data) {
+                $("#socios-body").html(data.rendered_table);
+            }
+        });
+    });
+    
+    $("#criterio").on("change", function() {
+        var criterio = $(this).val();
+
+        $.ajax({
+            url: '{% url "buscar_detalle" %}',
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                query: "",  // Deja el campo de búsqueda vacío al cambiar el criterio
+                criterio: criterio
+            },
+            success: function(data) {
+                $("#socios-body").html(data.rendered_table);
+            }
+        });
+    });
+});
+
+        $(document).ready(function () {
+            $('#filtro-nombre-socio').on('keyup', function () {
+                var filtro = $(this).val().toLowerCase();
+                $('.socios-table tbody tr').each(function () {
+                    var nombreSocio = $(this).find('td:eq(4)').text().toLowerCase();
+                    if (nombreSocio.includes(filtro)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+        });
+    </script>
 
         <script>
 

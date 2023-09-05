@@ -34,7 +34,7 @@ from django.template import Context
 import os
 import calendar
 
-from .models import Periodo
+from Periodo.models import Periodo
 
 # Create your views here.
 
@@ -227,6 +227,51 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
         return False
 
 
+# def enviar_correo_todos(request):
+#     selected_mes = request.POST.get('mes', 'mes_actual')  # Obtener el mes seleccionado del POST
+
+#     hoy = datetime.today()
+#     nombres_meses = [
+#         "-ENERO", "-FEBRERO", "-MARZO", "-ABRIL", "-MAYO", "-JUNIO",
+#         "-JULIO", "-AGOSTO", "-SEPTIEMBRE", "-OCTUBRE", "-NOVIEMBRE", "-DICIEMBRE"
+#     ]
+
+#     for socio in Socios.objects.all():
+#         if socio.user.is_active:
+#             try:
+#                 if selected_mes == 'mes_actual':
+#                     numero_mes = hoy.month
+#                     anio = hoy.year
+#                     nombre_mes = nombres_meses[numero_mes - 1]
+#                 else:
+#                     if hoy.month == 1: 
+#                         numero_mes = 12  
+#                     else:
+#                         numero_mes = hoy.month - 1 
+
+#                     anio = hoy.year if numero_mes != 12 else hoy.year - 1
+#                     nombre_mes = nombres_meses[numero_mes - 1]
+
+#                 template = get_template('gastosmensual.html')
+#                 resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
+#                 context = {'gastos': resultados}
+#                 content = template.render(context)
+
+#                 pdf_buffer = generar_pdf(datospdf(socio.id, numero_mes, anio))
+#                 if pdf_buffer:
+#                     email = EmailMultiAlternatives(
+#                         'Informe mensual ADUTEQ ' + nombre_mes,
+#                         'Gastos',
+#                         settings.EMAIL_HOST_USER,
+#                         [socio.user.email]
+#                     )
+#                     email.attach_alternative(content, 'text/html')
+#                     email.attach('informe.pdf', pdf_buffer, 'application/pdf')
+#                     email.send()
+#             except Exception as e:
+#                 print(str(e))
+#     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
+
 def enviar_correo_todos(request):
     selected_mes = request.POST.get('mes', 'mes_actual')  # Obtener el mes seleccionado del POST
 
@@ -236,18 +281,23 @@ def enviar_correo_todos(request):
         "-JULIO", "-AGOSTO", "-SEPTIEMBRE", "-OCTUBRE", "-NOVIEMBRE", "-DICIEMBRE"
     ]
 
-    for socio in Socios.objects.all():
-        if socio.user.is_active:
+    # Divide la lista de socios en bloques de tamaño 'tamano_bloque'
+    tamano_bloque = 25  # Puedes ajustar este valor según tus necesidades
+    socios = Socios.objects.filter(user__is_active=True)
+    bloques = [socios[i:i + tamano_bloque] for i in range(0, len(socios), tamano_bloque)]
+
+    for bloque in bloques:
+        for socio in bloque:
             try:
                 if selected_mes == 'mes_actual':
                     numero_mes = hoy.month
                     anio = hoy.year
                     nombre_mes = nombres_meses[numero_mes - 1]
                 else:
-                    if hoy.month == 1: 
-                        numero_mes = 12  
+                    if hoy.month == 1:
+                        numero_mes = 12
                     else:
-                        numero_mes = hoy.month - 1 
+                        numero_mes = hoy.month - 1
 
                     anio = hoy.year if numero_mes != 12 else hoy.year - 1
                     nombre_mes = nombres_meses[numero_mes - 1]
@@ -270,6 +320,7 @@ def enviar_correo_todos(request):
                     email.send()
             except Exception as e:
                 print(str(e))
+
     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
 

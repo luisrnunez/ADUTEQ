@@ -7,13 +7,28 @@ from django.contrib import messages
 from django.db import transaction
 from .models import Periodo
 from django.template.loader import render_to_string
+from django.contrib.auth.models import User
+from django.db.models import Q
 
 # Create your views here.
 def motivos(request):
-    motivos=AyudasMot.objects.all()
-    return render(request,'motivoayuda.html', {
-        'motivos': motivos
-    })
+    motivos = AyudasMot.objects.all()
+    items_por_pagina = 10
+    paginator = Paginator(motivos, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    
+    try:
+        motivos_pag = paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        motivos_pag = paginator.get_page(1)
+    
+  
+    contexto = {
+        'motivos': motivos_pag,
+        'periodo': {} 
+    }
+    
+    return render(request, 'motivoayuda.html', contexto)
 
 #metodo para agregar nuevos motivos
 def formRegistro(request):
@@ -88,32 +103,53 @@ def deleteMotivo(request, codigo):
 #     opciones = Socios.objects.all()
 #     return render(request, 'aggAyuda.html', {'opciones': opciones})
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 def viewayudas(request):
     periodos = Periodo.objects.all()  # Obtener todos los períodos
     anos = periodos.values_list('anio', flat=True).distinct()
-    #listar periodo por el select
+    
     periodoid = request.POST.get('periodoid')
     fechas_periodo = {}
+    
     if periodoid:
         periodo_seleccionado = Periodo.objects.filter(id=periodoid).first()
-        print(periodo_seleccionado)
         if periodo_seleccionado:
             fechas_periodo = {
                 'fecha_inicio': periodo_seleccionado.fecha_inicio,
                 'fecha_fin': periodo_seleccionado.fecha_fin
             }
-           
-            print(periodo_seleccionado)
+            
             ayudas = AyudasEconomicas.objects.filter(fecha__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("socio","fecha")
+            
+            # Configura la paginación
+            items_por_pagina = 10  # Número de elementos por página
+            paginator = Paginator(ayudas, items_por_pagina)
+            page = request.GET.get('page')  # Obtén el número de página de la solicitud GET
+            
+            try:
+                ayudas_paginadas = paginator.page(page)
+            except PageNotAnInteger:
+                # Si el número de página no es un entero, muestra la primera página
+                ayudas_paginadas = paginator.page(1)
+            except EmptyPage:
+                # Si el número de página está fuera de rango, muestra la última página
+                ayudas_paginadas = paginator.page(paginator.num_pages)
+            
             context = {
-                'ayudas': ayudas,
+                'ayudas': ayudas_paginadas,
                 'periodos': periodos,
                 'anos': anos,
                 'fechas_periodo': fechas_periodo,
                 'periodo_seleccionado': periodo_seleccionado,
             }
-            rendered_table = render_to_string("ayudasecon_partial.html",context)
+            
+            # Renderiza la tabla parcial con la paginación
+            rendered_table = render_to_string("ayudasecon_partial.html", context)
+            
+            # Devuelve la tabla parcial paginada como respuesta JSON
             return JsonResponse({"rendered_table": rendered_table})
+
     
     #listar periodo actual
     periodo_seleccionado = Periodo.objects.filter(activo=True).first()
@@ -185,7 +221,7 @@ def feditAyuda(request, codigo):
 def detallesAyuda(request, ayuda_id):
     ayuda=AyudasEconomicas.objects.get(id=ayuda_id)
     detalleAyuda=DetallesAyuda.objects.filter(ayuda=ayuda).order_by("cancelado")
-    items_por_pagina = 8
+    items_por_pagina = 10
     paginator = Paginator(detalleAyuda, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
@@ -262,5 +298,36 @@ def verificar_socio(request, detalle_id):
     detalle = DetallesAyuda.objects.get(id=detalle_id)
     socio_id_null = detalle.ayuda.socio_id is None
     return JsonResponse({'socio_id_null': socio_id_null})
+
+def buscar_detalle(request):
+    if request.method == "POST":
+        criterio = request.POST.get('criterio')
+        valor = request.POST.get('query')
+        detalles_ayuda = DetallesAyuda.objects.all().order_by("cancelado")
+
+        if criterio:
+            if criterio == 'nombres':
+                detalles_ayuda = detalles_ayuda.filter(
+                    Q(socio__user__first_name__icontains=valor) | Q(socio__user__last_name__icontains=valor)
+                )
+            elif criterio == 'apellidos':
+                detalles_ayuda = detalles_ayuda.filter(
+                    Q(socio__user__first_name__icontains=valor) | Q(socio__user__last_name__icontains=valor))
+
+        items_por_pagina = 10
+        paginator = Paginator(detalles_ayuda, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            detalles_paginados = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            detalles_paginados = paginator.get_page(1)
+
+        rendered_table = render_to_string("tabla_detalles.html", {"detalles": detalles_paginados})
+
+        return JsonResponse({"rendered_table": rendered_table})
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
+
+
 
         

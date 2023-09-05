@@ -13,28 +13,31 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, Page
+from proveedores.models import Proveedor
 import os
 from PIL import Image
 from django.template.loader import render_to_string
 from io import BytesIO
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import smtplib
+from html import unescape
+from bs4 import BeautifulSoup
 
 # Create your views here.
 @login_required
 def ListaPromociones(request):
-    promociones=models.Promocion.objects.all().order_by('estado')
-    
+    promociones = models.Promocion.objects.all().order_by('estado')
+
+    for promocion in promociones:
+        promocion.contiene_tabla = contiene_tabla(promocion.descripcion)
+
     items_por_pagina = 10
     paginator = Paginator(promociones, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
-         promociones_pag=paginator.get_page(numero_pagina)
+        promociones_pag = paginator.get_page(numero_pagina)
     except PageNotAnInteger:
-         promociones_pag=paginator.get_page(1)
+        promociones_pag = paginator.get_page(1)
     return render(request, "promociones.html", {'promociones': promociones_pag})
 
 @login_required
@@ -142,6 +145,7 @@ def userexist(titulo):
 @login_required
 def editar_promo(request, promo_id):
     promocion = models.Promocion.objects.get(id=promo_id)
+    promocion.descripcion=unescape(promocion.descripcion)
     proveedores=models.Proveedor.objects.all()
     if request.method == 'POST':
         #try:
@@ -191,27 +195,98 @@ def eliminarpromo(request, promo_id):
     return JsonResponse(response)
 
 
+# def enviar_promocion_a_todos(request, promo_id):
+#     socios = Socios.objects.filter(user__is_active=True)
+#     promocion = models.Promocion.objects.get(id=promo_id)
+
+#     try:
+#         for socio in socios:
+#             template = get_template('correo_promo.html')
+#             contexto = {'promocion': promocion}
+#             contenido = template.render(contexto)
+
+#             emisor_personalizado = 'williamvera210@gmail.com'
+#             if(promocion.tipo):
+#                 asunto='Nueva Promoción'
+#             else:
+#                 asunto='Nuevo Comunicado'
+
+#             email = EmailMultiAlternatives(
+#                 asunto+': ' + promocion.titulo,
+#                 'Nueva promoción disponible',
+#                 settings.EMAIL_HOST_USER,
+#                 [socio.user.email])
+
+#             email.attach_alternative(contenido, 'text/html')
+
+#             if promocion.imagen:
+#                 # Redimensionar la imagen manteniendo la relación de aspecto
+#                 maximo_ancho = 800  # Puedes ajustar esto según tus necesidades
+#                 imagen_original = Image.open(promocion.imagen.path)
+                
+#                 if imagen_original.mode == 'RGBA':
+#                     imagen_original = imagen_original.convert('RGB')
+                
+#                 ancho_original, alto_original = imagen_original.size
+#                 nuevo_ancho = min(ancho_original, maximo_ancho)
+#                 nuevo_alto = int(nuevo_ancho * (alto_original / ancho_original))
+#                 imagen_redimensionada = imagen_original.resize((nuevo_ancho, nuevo_alto))
+
+#                 imagen_io = BytesIO()
+#                 imagen_redimensionada.save(imagen_io, format='JPEG')
+
+
+#                 imagen_adjunta = MIMEImage(imagen_io.getvalue())
+#                 nombre_imagen=promocion.imagen
+#                 imagen_adjunta.add_header('Content-ID', '<promocion_imagen>')
+#                 imagen_adjunta.add_header('Content-Disposition', f'inline; filename="{nombre_imagen}"')
+#                 email.attach(imagen_adjunta)
+
+#             # Verificamos si hay un PDF adjunto
+#             if promocion.evidencia:
+#                 nombrepdf = os.path.basename(promocion.evidencia.path) 
+
+
+#                 with open(promocion.evidencia.path, 'rb') as archivo_pdf:
+#                     email.attach('Comunicado.pdf', archivo_pdf.read(), 'application/pdf')
+
+#             email.send()
+
+#         respuesta = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
+#     except Exception as e:
+#         respuesta = {'status': 'error', 'message': str(e)}
+
+#     return JsonResponse(respuesta)
+
 def enviar_promocion_a_todos(request, promo_id):
     socios = Socios.objects.filter(user__is_active=True)
     promocion = models.Promocion.objects.get(id=promo_id)
+    respuesta = {}
 
     try:
-        for socio in socios:
-            template = get_template('correo_promo.html')
-            contexto = {'promocion': promocion}
-            contenido = template.render(contexto)
+        template = get_template('correo_promo.html')
+        contexto = {'promocion': promocion}
+        contenido = template.render(contexto)
 
-            emisor_personalizado = 'williamvera210@gmail.com'
-            if(promocion.tipo):
-                asunto='Nueva Promoción'
-            else:
-                asunto='Nuevo Comunicado'
+        emisor_personalizado = 'williamvera210@gmail.com'
+        if promocion.tipo:
+            asunto = 'Nueva Promoción'
+        else:
+            asunto = '¡AVISO!'
 
+        # Lista de correos electrónicos de muestra (reemplaza con tus correos)
+        lista_correos = [socio.user.email for socio in socios]
+
+        tamano_bloque = 25
+        bloques = [lista_correos[i:i + tamano_bloque] for i in range(0, len(lista_correos), tamano_bloque)]
+
+        for bloque in bloques:
             email = EmailMultiAlternatives(
-                asunto+': ' + promocion.titulo,
+                asunto + ': ' + promocion.titulo,
                 'Nueva promoción disponible',
                 settings.EMAIL_HOST_USER,
-                [socio.user.email])
+                bloque  # Envía el bloque actual como destinatarios
+            )
 
             email.attach_alternative(contenido, 'text/html')
 
@@ -219,10 +294,10 @@ def enviar_promocion_a_todos(request, promo_id):
                 # Redimensionar la imagen manteniendo la relación de aspecto
                 maximo_ancho = 800  # Puedes ajustar esto según tus necesidades
                 imagen_original = Image.open(promocion.imagen.path)
-                
+
                 if imagen_original.mode == 'RGBA':
                     imagen_original = imagen_original.convert('RGB')
-                
+
                 ancho_original, alto_original = imagen_original.size
                 nuevo_ancho = min(ancho_original, maximo_ancho)
                 nuevo_alto = int(nuevo_ancho * (alto_original / ancho_original))
@@ -231,24 +306,23 @@ def enviar_promocion_a_todos(request, promo_id):
                 imagen_io = BytesIO()
                 imagen_redimensionada.save(imagen_io, format='JPEG')
 
-
                 imagen_adjunta = MIMEImage(imagen_io.getvalue())
-                nombre_imagen=promocion.imagen
+                nombre_imagen = promocion.imagen.name  # Usar el nombre del archivo
                 imagen_adjunta.add_header('Content-ID', '<promocion_imagen>')
                 imagen_adjunta.add_header('Content-Disposition', f'inline; filename="{nombre_imagen}"')
                 email.attach(imagen_adjunta)
 
             # Verificamos si hay un PDF adjunto
             if promocion.evidencia:
-                nombrepdf = os.path.basename(promocion.evidencia.path) 
-
+                nombrepdf = os.path.basename(promocion.evidencia.name)  # Usar el nombre del archivo
 
                 with open(promocion.evidencia.path, 'rb') as archivo_pdf:
-                    email.attach('Comunicado.pdf', archivo_pdf.read(), 'application/pdf')
+                    email.attach(nombrepdf, archivo_pdf.read(), 'application/pdf')
 
             email.send()
 
         respuesta = {'status': 'success', 'message': 'Promoción enviada a todos los socios'}
+
     except Exception as e:
         respuesta = {'status': 'error', 'message': str(e)}
 
@@ -291,3 +365,19 @@ def obtener_resultados(request):
         page = Page([])
 
     return render(request, 'promociones.html', {'page': page, 'seleccion': seleccion})
+
+def buscar_proveedores(request):
+    query = request.GET.get('query', '')  # Obtiene el texto de búsqueda
+    proveedores_sugeridos = []
+
+    if query:
+        # Realiza la búsqueda de proveedores en la base de datos
+        proveedores_sugeridos = Proveedor.objects.filter(nombre__icontains=query)[:10]
+
+    sugerencias = [{'id': proveedor.id, 'nombre': proveedor.nombre} for proveedor in proveedores_sugeridos]
+    return JsonResponse({'sugerencias': sugerencias})
+
+def contiene_tabla(descripcion):
+    soup = BeautifulSoup(descripcion, 'html.parser')
+    tablas = soup.find_all('table')
+    return len(tablas) > 0

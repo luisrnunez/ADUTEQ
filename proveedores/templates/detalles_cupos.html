@@ -29,7 +29,7 @@
                         <option value="1">Activo</option>
                         <option value="0">Inactivo</option> -->
                     </select>
-                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar proveedor...">
+                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
                     <!-- <button type="submit">Buscar</button> -->
     
                 </div>
@@ -83,20 +83,35 @@
                     <ul class="pagination">
                         {% if cupos.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ cupos.previous_page_number }}">anterior</a>
+                            <a class="page-link" href="?page=1" aria-label="Primero">
+                                Primero
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ cupos.previous_page_number }}" aria-label="Anterior">
+                                Anterior
+                            </a>
                         </li>
                         {% endif %}
-                        <li class="pagination-item active">
-                            <span style="border-radius: 5px;" class="page-link">{{ cupos.number }}</span>
+                        <li class="page-item active">
+                            <span class="page-link">{{ cupos.number }}</span>
                         </li>
                         {% if cupos.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ cupos.next_page_number }}">siguiente</a>
+                            <a class="page-link" href="?page={{ cupos.next_page_number }}" aria-label="Siguiente">
+                                Siguiente
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ cupos.paginator.num_pages }}" aria-label="Último">
+                                Último
+                            </a>
                         </li>
                         {% endif %}
                     </ul>
                 </nav>
             </div>
+            
 
         </div>
         <script>

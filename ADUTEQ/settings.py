@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+import django
+from django.utils.encoding import smart_str
+django.utils.encoding.smart_text = smart_str
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -66,7 +69,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
 ]
-
 ROOT_URLCONF = 'ADUTEQ.urls'
 
 TEMPLATES = [
@@ -142,6 +144,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+TINYMCE_JS_URL = os.path.join(STATIC_URL, "path/to/tiny_mce/tiny_mce.js")
 
 # Agregar estas líneas
 SELECT2_PATH = 'select2/'
@@ -183,8 +186,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.googlemail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'elenviacorreos28@gmail.com'
-EMAIL_HOST_PASSWORD = 'vyartmmmrtyoxlbs'
+EMAIL_HOST_USER = 'prctcorreo@gmail.com'
+EMAIL_HOST_PASSWORD = 'pnrriqutcefjsqnd'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
