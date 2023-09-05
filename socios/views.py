@@ -83,7 +83,8 @@ def Principal(request):
         if  periodo.fecha_fin == fecha_actual:
             messages.warning(request,'El periodo actual se cerrara mañana automaticamente, si no desea esta accion vaya a ajustes!')
     except :
-        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.')   
+        messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.') 
+        periodo={}
     return render(request, "base.html",{'periodo': periodo})
 
 
@@ -357,39 +358,43 @@ def buscar_socios(request):
         criterio = request.POST.get('criterio')
         valor = request.POST.get('query')
         socios = []
-        print(valor,criterio)
+
         if criterio:
-            # Filtrar socios según el criterio y el valor ingresados
+            # Realiza las consultas según el criterio y el valor ingresados
             if criterio == 'nombres':
                 users = User.objects.filter(first_name__icontains=valor)
                 socios = Socios.objects.filter(user__in=users)
-                users = User.objects.filter(socio__in=socios)
             elif criterio == 'apellidos':
                 users = User.objects.filter(last_name__icontains=valor)
                 socios = Socios.objects.filter(user__in=users)
-                users = User.objects.filter(socio__in=socios)
             elif criterio == 'categoria':
                 socios = Socios.objects.filter(categoria__icontains=valor)
-                users = User.objects.filter(socio__in=socios)
             elif criterio == 'facultad':
                 socios = Socios.objects.filter(facultad__icontains=valor)
-                users = User.objects.filter(socio__in=socios)
             elif criterio == 'cedula':
                 socios = Socios.objects.filter(cedula__icontains=valor)
-                users = User.objects.filter(socio__in=socios)
             elif criterio == '1':
                 users = User.objects.filter(is_active=True)
                 socios = Socios.objects.filter(user__in=users)
-                users = User.objects.filter(socio__in=socios)
             elif criterio == '0':
                 users = User.objects.filter(is_active=False)
                 socios = Socios.objects.filter(user__in=users)
-                users = User.objects.filter(socio__in=socios)
-        rendered_table = render_to_string("tabla_parcialSocios.html", {"socios": socios})
-        
+
+        items_por_pagina = 10  # Cambia esto según tus necesidades
+        paginator = Paginator(socios, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            socios_paginados = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            socios_paginados = paginator.get_page(1)
+
+        # Renderiza una tabla parcial con los resultados
+        rendered_table = render_to_string("tabla_parcialSocios.html", {"socios": socios_paginados})
+
         return JsonResponse({"rendered_table": rendered_table})
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
+
 
 def Recuperar_cuenta(request):
     return render(request, "recuperar_contra.html")
@@ -400,15 +405,16 @@ def Recuperar_cuenta(request):
 def ListaSocios(request):
     usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
     socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
-    
+    periodo={}
     items_por_pagina = 10
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:
-        periodo = Periodo.objects.get(activo=True)
+       # periodo = Periodo.objects.get(activo=True)
         socios_pag=paginator.get_page(numero_pagina)
     except PageNotAnInteger:
-         socios_pag=paginator.get_page(1)
+        
+        socios_pag=paginator.get_page(1)
     return render(request, "emp_socios.html", {'socios': socios_pag,'periodo': periodo})
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)

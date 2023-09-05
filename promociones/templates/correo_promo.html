@@ -33,15 +33,22 @@
             margin-bottom: 10px;
         }
         img {
-            width: 100%;
+            /* width: 100%; */
             height: auto;
             margin-top: 20px;
             max-height: 400px;
+            margin: auto;
         }
         .footer {
             margin-top: 20px;
             color: #00b300;
             text-align: center;
+        }
+        .image{
+            padding: 10px;
+            display: flex;
+            align-content: center;
+            flex-flow: row wrap;
         }
     </style>
 </head>
@@ -66,7 +73,7 @@
             <h3>Detalles de la Promoción:</h3>
             <ul>
                 <li><h3>Proveedor:</h3> <b>{{ promocion.proveedor }}</b></li>
-                <li><h3>Descripción:</h3> <b>{{ promocion.descripcion }}</b></li>
+                <li><h3>Descripción:</h3> <b>{{ promocion.descripcion|safe }}</b></li>
                 <li><h3>Fecha de Inicio:</h3> <b>{{ promocion.fecha_inicio }}</b></li>
                 <li><h3>Fecha de Fin:</h3> <b>{{ promocion.fecha_fin }}</b></li>    
             </ul>
@@ -74,7 +81,9 @@
             <b>{{ promocion.descripcion }}</b>
         {% endif %}
         {% if promocion.imagen %}
-            <img src="cid:promocion_imagen" alt="{{ promocion.titulo }}">
+        <div class="image">
+            <img src="cid:promocion_imagen" alt="{{ promocion.imagen}}">    
+        </div>
         {% endif %}
 
         {% if promocion.tipo %}

@@ -659,3 +659,37 @@ def convertir_cuotas(request, pago_id):
 
             messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
             return redirect('/lista_pagos_cuotas/')
+
+def buscar_pagos(request):
+    if request.method == "POST":
+        criterio = request.POST.get('criterio')
+        valor = request.POST.get('query')
+        pagos = []
+
+        if criterio:
+            # Realiza las consultas según el criterio y el valor ingresados
+            if criterio == 'nombres':
+                pagos = Pagos.objects.filter(socio__user__first_name__icontains=valor) | Pagos.objects.filter(socio__user__last_name__icontains=valor)
+            elif criterio == 'proveedor':
+                pagos = Pagos.objects.filter(proveedor__nombre__icontains=valor)
+            elif criterio == 'fecha':
+                pagos = Pagos.objects.filter(fecha_consumo__icontains=valor)
+            elif criterio == '1':
+                pagos = Pagos.objects.filter(estado=True)
+            elif criterio == '0':
+                pagos = Pagos.objects.filter(estado=False)
+
+        items_por_pagina = 10  # Cambia esto según tus necesidades
+        paginator = Paginator(pagos, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            pagos_paginados = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            pagos_paginados = paginator.get_page(1)
+
+        # Renderiza una tabla parcial con los resultados
+        rendered_table = render_to_string("lista_pagos_partial.html", {"pagos": pagos_paginados})
+
+        return JsonResponse({"rendered_table": rendered_table})
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)

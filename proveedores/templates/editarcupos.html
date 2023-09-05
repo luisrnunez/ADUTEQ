@@ -22,7 +22,7 @@
                     <input  data-valor="{{ cupo.proveedor.id }}" disabled maxlength="10" oninput="validarEspacios(this)" value="{{cupo.proveedor.nombre}}" type="text" id="proveedor" name="proveedor" required>
 
                     <label for="cupo">Cupo:</label>
-                    <input maxlength="13" value="{{cupo.cupo}}"   type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
+                    <input maxlength="13" value="{{cupo.cupo}}" type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
                         required>
                   
                     
@@ -34,18 +34,9 @@
 
 
 
-<<<<<<< HEAD
                     <label for="fecha">Fecha:</label>
                     <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
-=======
-<<<<<<< HEAD
-                    <label for="fecha">Fecha:</label>
-                    <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
-=======
-                        <label for="fecha">Fecha:</label>
-                        <input disabled value="{{cupo.fechaccupo|date:'Y-m-d'}}" type="date" maxlength="100" id="fecha" name="fecha" required>
->>>>>>> cde3a68da602feccd3bf8b767d51768a5c9531d0
->>>>>>> 6f6122ec39f6e7c3a939744af85d2bf9bf94f12f
+
                         
 
                     <input type="submit" value="Guardar cambios">

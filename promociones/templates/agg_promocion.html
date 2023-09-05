@@ -12,6 +12,9 @@
         h1 {
             text-align: center;
         }
+        /* .content2 .form-container{
+            width: 80%;
+        } */
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
@@ -26,7 +29,7 @@
             <h1>Agregar Promo</h1>
         </div>
         <div class="content">
-            <div class="form-container">
+            <div class="form-container2">
 
 
                 <form id="registro-promo" action="/agregarpromo/" method="POST" enctype="multipart/form-data">
@@ -50,7 +53,56 @@
                     </select>
 
                     <label id="description" for="descripcion">Descripcion:</label>
-                    <textarea id="descripcion" name="descripcion" rows="4" required>{{ promoción.descripcion }}</textarea>
+                    <textarea class="excluir" id="descripcion" name="descripcion" rows="4">{{ promoción.descripcion }}</textarea>
+
+                    <!-- <script src="{% static 'tinymce/js/tinymce/tinymce.min.js' %}"></script> -->
+                    <script src="https://cdn.tiny.cloud/1/xu0fvfj54zsd7w4r0fwe2nipfqh5pj3c3dpvdpakunvhhlsj/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+                    <script>
+                        tinymce.init({
+                          selector: 'textarea#descripcion',
+                          height: 300,
+                          language: 'es',
+                          plugins: 'tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen advtable advcode powerpaste a11ychecker',
+                          toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                          autocompleter_data: {
+                                source: '/proveedores-autocomplete/',
+                                min_chars: 1,
+                                trigger: '('
+                            },
+                          tinycomments_mode: 'embedded',
+                          tinycomments_author: 'Author name',
+                          mergetags_list: [
+                            { value: 'First.Name', title: 'First Name' },
+                            { value: 'Email', title: 'Email' },
+                          ],
+                          ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant"))
+                        });
+                        
+
+                        $('#descripcion').on('input', function() {
+                        var textoIngresado = $(this).val();
+                        
+                        $.ajax({
+                            url: '/buscar_proveedores/',  // URL de la vista de búsqueda de proveedores en Django
+                            method: 'GET',
+                            data: { query: textoIngresado },
+                            dataType: 'json',
+                            success: function(data) {
+                                var sugerenciasHTML = '';
+                                data.sugerencias.forEach(function(proveedor) {
+                                    sugerenciasHTML += `<div>${proveedor.nombre}</div>`;
+                                });
+                                // Muestra las sugerencias debajo del textarea
+                                $('#sugerencias').html(sugerenciasHTML);
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error al buscar proveedores:', error);
+                            }
+                        });
+                    });
+                      </script>
+
+                        <div id="sugerencias"></div>
 
                     <label id="image" for="foto">Agregar Imagen Promo:</label>
                     {% get_media_prefix as media_prefix %}
@@ -91,16 +143,6 @@
             </div>
         </div>
     </div>
-    <script>
-        tinyMCE.init({
-            selector: '#descripcion',
-            height: 360,
-            width: 800,
-            menubar: false,
-            plugins: 'advlist autolink lists link image charmap print preview anchor',
-            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image'
-        });
-    </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -203,7 +245,7 @@
 <script>
     function mostrarCampos() {
         var tipoSeleccionado = document.getElementById("selectipo").value;
-        
+
         // Ocultar todos los campos primero
         document.getElementById("titulo").style.display = "none";
         document.getElementById("descripcion").style.display = "none";
@@ -213,25 +255,23 @@
         document.getElementById("evidencia").style.display = "none";
         document.getElementById("fecha_inicio").style.display = "none";
         document.getElementById("fecha_fin").style.display = "none";
-        var imagen=document.getElementById("image");
+        var imagen = document.getElementById("image");
         var fechaInicio = document.getElementById("fecha_inicio");
         var fechaFin = document.getElementById("fecha_fin");
-        var proveedor=document.getElementById("proveedorSelect");
+        var proveedor = document.getElementById("proveedorSelect");
 
         var botonAgregar = document.getElementById("botonAgregar");
         document.getElementById("pro").style.display = "none";
         document.getElementById("f_ini").style.display = "none";
         document.getElementById("f_fin").style.display = "none";
-    
-        if (tipoSeleccionado === "1") {
 
+        if (tipoSeleccionado === "1") {
             document.getElementById("pro").style.display = "block";
-            document.getElementById("description").style.display = "block";
+            document.getElementById("description").style.display = "block"; // Mostrar el editor TinyMCE
             document.getElementById("f_ini").style.display = "block";
             document.getElementById("f_fin").style.display = "block";
 
             document.getElementById("titulo").style.display = "block";
-            document.getElementById("descripcion").style.display = "block";
             document.getElementById("proveedorInput").style.display = "block";
             document.getElementById("proveedorSelect").style.display = "block";
             document.getElementById("imagen").style.display = "block";
@@ -245,17 +285,19 @@
             document.getElementById("f_fin").style.display = "none";
 
             document.getElementById("titulo").style.display = "block";
-            document.getElementById("descripcion").style.display = "block";
+            document.getElementById("description").style.display = "block"; // Mostrar el editor TinyMCE
             document.getElementById("imagen").style.display = "block";
             document.getElementById("evidencia").style.display = "block";
             var fechaActual = new Date().toISOString().split('T')[0];
             fechaInicio.value = fechaActual;
             fechaFin.value = fechaActual;
             botonAgregar.value = "Agregar Comunicado";
-            imagen.textContent="Agregar imagen del comunicado";
+            imagen.textContent = "Agregar imagen del comunicado";
         }
     }
-    </script>
+</script>
+
+
     
 </body>
 

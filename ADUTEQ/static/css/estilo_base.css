@@ -44,7 +44,20 @@ body {
     width: 600px;
 }
 
+.form-container2 {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 600px;
+}
+
 .form-container label {
+    display: block;
+    margin-bottom: 10px;
+    width: max-content;
+}
+
+.form-container2 label {
     display: block;
     margin-bottom: 10px;
     width: max-content;
@@ -70,10 +83,41 @@ body {
     margin-bottom: 10px;
 }
 
+.form-container2 input[type="text"],
+.form-container2 input[type="email"],
+.form-container2 input[type="number"],
+.form-container2 input[type="date"],
+.form-container2 input[type="submit"],
+.form-container2 input[type="button"],
+.form-container2 input[type="file"],
+.form-container2 input[type="password"],
+.form-container2 select,
+.form-container2 textarea,
+.form-container2 button,
+.input#file-upload-button {
+    background-color: white;
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
 
 .form-container input[type="submit"],
 .form-container input[type="button"],
 .form-container button {
+    background-color: #34b234;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.form-container2 input[type="submit"],
+.form-container2 input[type="button"],
+.form-container2 button {
     background-color: #34b234;
     color: #fff;
     border: none;
@@ -89,6 +133,8 @@ body {
     background-color: #ECB932;
     width: 100%;
 }
+
+
 
 .upload-preview {
     margin-bottom: 10px;

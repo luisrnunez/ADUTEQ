@@ -28,6 +28,10 @@
             display: block;
             margin: 0 auto;
         }
+        .image-thumbnail {
+            max-width: 200px; 
+            height: auto; 
+        }
 </style>
 
 
@@ -58,8 +62,6 @@
             <!-- </form> -->
 
         </div>
-
-
         <table id="tablaSocios" class="socios-table dataTable">
             <thead>
                 <tr>
@@ -85,11 +87,15 @@
                 <tr>
                     <td><strong>Promoción</strong></td>
                     <td>{{ promocion.titulo }}</td>
-                    <td>{{ promocion.descripcion }}</td>
+                    {% if promocion.contiene_tabla %}
+                        <td><strong>Revisar:</strong> Hay una tabla en esta promoción</td>
+                    {% else %}
+                        <td>{{ promocion.descripcion|safe }}</td>
+                    {% endif %}
                     <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
                     <td>
                         {% if promocion.imagen %}
-                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image">
+                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image image-thumbnail">
                         {% else %}
                         No hay imagen disponible.
                         {% endif %}
@@ -144,7 +150,7 @@
                 <tr class="comunicado">
                     <td><strong>Comunicado</strong></td>
                     <td>{{ promocion.titulo }}</td>
-                    <td>{{ promocion.descripcion }}</td>
+                    <td>{{ promocion.descripcion|safe }}</td>
                     <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
                     <td>
                         {% if promocion.imagen %}

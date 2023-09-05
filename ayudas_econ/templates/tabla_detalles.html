@@ -1,0 +1,50 @@
+{% for detalle in detalles %}
+                    <tr>
+                        <td>{{ detalle.ayuda.motivo }}</td>
+                        <!-- <td>{{ detalle.valor}}</td> -->
+                        {% if detalle.valor|floatformat:2 == "0,00" %}
+                            <td>Voluntario</td>
+                        {% else %}
+                            <td>{{ detalle.valor }}</td>
+                        {% endif %}
+                        <td>
+
+                            {% if detalle.evidencia %}
+                            <a href="{{ cuota.evidencia.url }}" target="_blank">
+                                <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                            </a>
+                            {% else %}
+                            Sin evidencia
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {% if detalle.cancelado %}
+                            <button class="green-button">
+                                Cancelado
+                            </button>
+                            {% else %}
+                            <button class="red-button">
+                                Pendiente
+                            </button>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ detalle.socio.user.first_name }} {{ detalle.socio.user.last_name }}</td>
+                        <td>{{ detalle.fecha }}</td>
+                        <td>
+                            {% if detalle.cancelado == False %}
+                            <button class="edit-btn"
+                                onclick="confirmarregistro('{{ detalle.id }}','{{ detalle.ayuda.socio.user.first_name }}','{{ detalle.cancelado }}')">
+                                Registrar pago
+                            </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if detalle.cancelado %}
+                            
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}

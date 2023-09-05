@@ -1,7 +1,7 @@
 {% for promocion in promos %}
 <tr>
     <td>{{ promocion.titulo }}</td>
-    <td>{{ promocion.descripcion }}</td>
+    <td>{{ promocion.descripcion|striptags }}</td>
     <td>{{ promocion.proveedor.nombre }}</td>
     <td>
         {% if promocion.imagen %}

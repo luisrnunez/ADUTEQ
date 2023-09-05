@@ -26,6 +26,7 @@ urlpatterns = [
     path('guardar_aportacion/<int:detalle_id>/', views.guardar_aportacion, name='guardar_aportacion'),
     path('verificar_socio/<int:detalle_id>/', views.verificar_socio, name='verificar_socio'),
     #detallesayuda
+    path('buscar_detalle/', views.buscar_detalle, name='buscar_detalle'),
     path('detalleayuda/<int:ayuda_id>', views.detallesAyuda),
     path('registrarayuda/<int:detalle_id>/<int:valor>/', views.registro_ayuda),
     path('prestamo2/presagregar_pdf/<int:det_id>/',views.presagregar_pdf2, name = 'presagregar_pdf'),

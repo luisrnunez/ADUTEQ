@@ -80,15 +80,9 @@
                             <p>Dias restantes:
                                 {% if dias_restantes %} 
                                 {% if dias_restantes >= 0 %} 
-<<<<<<< HEAD
-                                {{ dias_restantes }}
-                                 {% endif %}
-                                 {% endif %}
-=======
                                     {{ dias_restantes }}   
                                 {% endif %}
                                 {% endif %}
->>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
                             </p>
                             {% if periodo.descripcion %} 
                             <p>Descripcion: </p>
@@ -174,26 +168,6 @@
             <!-- Sección: Período Activo -->
             
             <div class="card-container">
-<<<<<<< HEAD
-                <div class="card">
-                    <div class="header" style="margin-bottom: 20px;">
-                        <h1>AJUSTES GENERALES</h1>
-                    </div>
-                    <div class="card-content">
-                        <div class="periodo-actual" style="width: min-content; ">
-                            <label for="Correo">Correo aduteq:</label>
-                            <input type="email" id="Correo" name="Correo" >
-
-                        </div>
-                        <!-- <div class="agregar-periodo">
-                            <label for="Correo">Correo aduteq:</label>
-                            <input type="email" id="Correo" name="Correo" >
-                        </div> -->
-                    </div>
-                </div>
-            </div>
-            
-=======
                 <form method="post">
                     {% csrf_token %}
                     <div class="card">
@@ -252,7 +226,6 @@
                     </div>
                 </form>
             </div>
->>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
             <br>
 
         </div>

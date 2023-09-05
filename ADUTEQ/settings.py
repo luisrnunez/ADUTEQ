@@ -58,10 +58,6 @@ INSTALLED_APPS = [
     'Periodo',
     'cuentas',
 ]
-<<<<<<< HEAD
-
-=======
->>>>>>> 5af577c9ff530997f8dc704e5b9fc43890e5049e
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,7 +69,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
 ]
-
 ROOT_URLCONF = 'ADUTEQ.urls'
 
 TEMPLATES = [
@@ -191,8 +186,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.googlemail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'elenviacorreos28@gmail.com'
-EMAIL_HOST_PASSWORD = 'vyartmmmrtyoxlbs'
+EMAIL_HOST_USER = 'prctcorreo@gmail.com'
+EMAIL_HOST_PASSWORD = 'pnrriqutcefjsqnd'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 

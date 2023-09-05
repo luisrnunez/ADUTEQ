@@ -21,6 +21,7 @@ urlpatterns = [
     path('enviar_promocion_a_todos/<int:promo_id>/', views.enviar_promocion_a_todos, name='enviar_promocion_a_todos'),
 
     path('buscar_promos/', views.buscar_promo, name='buscar_promos'),
+    path('buscar_proveedores/', views.buscar_proveedores, name='buscar_proveedores'),
 ]
 
 if settings.DEBUG:
