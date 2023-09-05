@@ -32,6 +32,7 @@ class DetallesAyuda(models.Model):
     evidencia=models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
     fecha=models.DateField(null=True)
     cancelado = models.BooleanField(default=False)
+    pagado = models.BooleanField(default=False)
 
 @receiver(post_save, sender=DetallesAyuda)
 def actualizar_total_ayudas_economicas(sender, instance, **kwargs):

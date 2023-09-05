@@ -335,33 +335,83 @@
         </div>
     </form>
 
-    <div class="tabla-container">
-        <h2>Ayudas Externas</h2>
-        <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Fecha</th>
-                    <th>Valor Ayuda</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ayuda in ayudas_des %}
-                <tr>
-                    <td>{{ayuda.0}}</td>
-                    <td>{{ayuda.1}}</td>
-                    <td>{{ayuda.2}}</td>
-                    <td>{{ayuda.3}}</td>
-                </tr>
-                {% endfor %}
-                <th>total</th>
-                <th></th>
-                <th></th>
-                <th>{{suma_ayudas}}</th>
-            </tbody>
-        </table>
-    </div>
+    <form method="post" action="{% url 'actualizar_estados_ayudas' %}">
+        {% csrf_token %}
+        <div class="tabla-container">
+            <div class="tabla-header">
+                <h2>Ayudas Externas</h2>
+                {% if suma_ayudas > 0 %}
+                <button style="margin: 0% 0% 0% 50%;" type="button" class="red-button"
+                    id="toggleTableButton3">Ocultar</button>
+                <button class="tabla-button" type="submit">Registrar Descuento</button>
+                {% endif %}
+            </div>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cédula</th>
+                        <th>Fecha</th>
+                        <th>Valor Ayuda</th>
+                        <th>
+                            <label><input type="checkbox" id="marcar-todoayu"> Marcar Todo</label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="discountTable3">
+                    {% for ayuda in ayudas_des %}
+                    <tr>
+                        <td>{{ayuda.0}}</td>
+                        <td>{{ayuda.1}}</td>
+                        <td>{{ayuda.2}}</td>
+                        <td>{{ayuda.3}}</td>
+                        <td><input type="checkbox" name="ayuda_id[]" value="{{ ayuda.4 }}"></td>
+                    </tr>
+                    {% endfor %}
+                    <th>total</th>
+                    <th></th>
+                    <th></th>
+                    <th>{{suma_ayudas}}</th>
+                    <th></th>
+                </tbody>
+            </table>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var marcarTodoCheckbox = document.getElementById("marcar-todoayu");
+                    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="ayuda_id[]"]');
+
+                    marcarTodoCheckbox.addEventListener("change", function () {
+                        var isChecked = marcarTodoCheckbox.checked;
+
+                        checkboxes.forEach(function (checkbox) {
+                            checkbox.checked = isChecked;
+                        });
+                    });
+
+                    // Resto del código para enviar el formulario...
+                });
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    var toggleButton = document.getElementById("toggleTableButton3");
+                    var discountTable = document.getElementById("discountTable3");
+
+                    toggleButton.addEventListener("click", function () {
+                        discountTable.classList.toggle("hidden");
+
+                        if (discountTable.classList.contains("hidden")) {
+                            toggleButton.textContent = "Mostrar";
+                            toggleButton.style.backgroundColor = "hsl(133, 62%, 49%)";
+                        } else {
+                            toggleButton.textContent = "Ocultar";
+                            toggleButton.style.backgroundColor = "red";
+                        }
+                    });
+                });
+            </script>
+        </div>
+    </form>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var marcarTodoCheckbox = document.getElementById("marcar-todop");
@@ -400,7 +450,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             var searchInput = document.getElementById("searchInput");
             var clearButton = document.getElementById("clearButton");
-    
+
             clearButton.addEventListener("click", function () {
                 searchInput.value = "";  // Borra el contenido del campo de búsqueda
                 // Llama a la función para filtrar la tabla después de limpiar
@@ -408,7 +458,7 @@
             });
         });
     </script>
-    
+
 </body>
 
 </html>
