@@ -22,7 +22,7 @@
                     <input maxlength="10" oninput="validarEspacios(this)" value="{{proveedor.telefono}}" type="text" id="telefono" name="telefono" required>
 
                     <label for="ruc">RUC:</label>
-                    <input maxlength="13" oninput="validarEspacios(this)" value="{{proveedor.ruc}}" type="number" id="ruc" name="ruc" placeholder="6875645356543"
+                    <input maxlength="13"  value="{{proveedor.ruc}}" type="number" id="ruc" name="ruc" placeholder="6875645356543"
                         required>
 
                     <label for="direccion">Dirección:</label>
@@ -34,8 +34,8 @@
                         required>
 
                     <label for="cupo">Cupo:</label>
-                    <input value="{{proveedor.cupo}}" type="number" step="0.01" id="cupo" name="cupo"  required>
-                    <!--<input type="file" id="foto" name="foto" accept="image/*">-->
+                    <input value="{{proveedor.cupo}}" type="number" step="'any'" id="cupo" name="cupo"  required>
+                    
 
                     <label for="foto">Estado:</label>
                     <select value="{{proveedor.estado}}" name="estado" id="estado" aria-placeholder="seleccione estado">

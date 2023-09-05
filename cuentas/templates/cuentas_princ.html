@@ -238,14 +238,14 @@
     <form method="post" action="{% url 'cuentas' %}">
         {% csrf_token %}
         <div class="buscar">
-            <button style="width: 30%;" class="add-socio-btn">Buscar</button>
+            <button style="width: 30%;" class="btn btn-info"><span class="button-text">Buscar</span></button>
             <input style="width: 30%;" class="form-control mb-2" type="date" name="fechacuentas" required>
         </div>
     </form>
 
     <div class="contenedorvm">
         <div class="caja c1">
-            Asocion de Docentes Univerdidad Tecnica Estatal de Quevedo
+            Asociación de Docentes Universidad Técnica Estatal de Quevedo
         </div>
         <div class="caja c2">Ingresos registrados del mes {{mes}} año {{anio}}</div>
         <!-- <div class="caja c3"></div> -->
