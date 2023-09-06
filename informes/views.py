@@ -325,7 +325,8 @@ def enviar_correo_todos(request):
 
 
 def reportes(request):
-    return render(request, "reportes.html")
+    periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+    return render(request, "reportes.html",{'periodo':periodo_seleccionado})
 
 
 def obtener_consumo_total_func(mes, anio):

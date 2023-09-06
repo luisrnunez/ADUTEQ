@@ -17,8 +17,9 @@ def upload_to_evidencia(instance, filename):
 # Create your models here.
 class PagosProveedor(models.Model):
     proveedor=models.ForeignKey(Proveedor, on_delete=models.CASCADE)
-    valor_total=models.DecimalField(max_digits=8,decimal_places=2)
-    fecha_creacion=models.DateField(null=True)
+    valor_total=models.DecimalField(max_digits=8,decimal_places=2,null=True)
+    comision=models.DecimalField(max_digits=8,decimal_places=2,null=True)
+    fecha_creacion=models.DateField(null=True, blank=True)
     fecha_pago=models.DateField(null=True)
     valor_cancelado=models.BooleanField(null=True)
     evidencia=models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)

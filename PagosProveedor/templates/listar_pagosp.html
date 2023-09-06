@@ -40,12 +40,15 @@
                     <thead>
                         <tr>
                             <th scope="col">Proveedor</th>
-                            <th scope="col">Valor de deuda</th>
+                            <th scope="col">Deuda</th>
+                            <th scope="col">Comision</th>
                             <th scope="col">Fecha creacion</th>
                             <th scope="col">Fecha de pago</th>
                             <th scope="col">Evidencia</th>
                             <th scope="col">Cancelado</th>
+                            {% if periodo_seleccionado.activo %}
                             <th scope="col">Accion</th>
+                            {% endif %}
                             <th scope="col">Evidencia</th>
                         </tr>
                     </thead>
@@ -53,7 +56,10 @@
                         {% for pagosproveedo in pagosproveedor %}
                         <tr>
                             <td>{{ pagosproveedo.proveedor.nombre }}</td>
-                            <td>{{ pagosproveedo.valor_total }}$</td>
+                            <td>$ {{ pagosproveedo.valor_total }}</td>
+                            <td>{% if pagosproveedo.comision %}
+                            $ {{ pagosproveedo.comision }}
+                            {% endif %}</td>
                             <td>{{ pagosproveedo.fecha_creacion|date:"j - n - Y" }}</td>
                             <td>{{ pagosproveedo.fecha_pago|date:"j - n - Y" }}</td>
                             <td>
@@ -77,12 +83,15 @@
                                 </button>
                                 {% endif %}
                             </td>
+                            {% if periodo_seleccionado.activo %}
                             <td>
                                 <button class="edit-btn"
                                     onclick="confirmarPago('{{ pagosproveedo.id }}','{{ pagosproveedo.proveedor.nombre }}','{{ pagosproveedo.valor_cancelado }}')">
                                     Registrar pago
                                 </button>
                             </td>
+                        {% endif %}
+                         
                          
                             <td>
                                 {% if pagosproveedo.valor_cancelado %}

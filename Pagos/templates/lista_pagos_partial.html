@@ -7,9 +7,11 @@
             <th scope="col">Descuento</th>
             <th scope="col">Fecha</th>
             <th scope="col">Estado</th>
-            <th scope="col">Editar</th>
-            <th scope="col">Eliminar</th>
-            <th scope="col">Convertir Cuotas</th>
+            {% if periodo_seleccionado.activo %}
+                <th scope="col">Editar</th>
+                <th scope="col">Eliminar</th>
+                <th scope="col">Convertir Cuotas</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -31,6 +33,7 @@
                 </button>
                 {% endif %}
             </td>
+            {% if periodo_seleccionado.activo %}
             <td>
                 <form action="{% url 'editarpago' pago.id %}">
                     <button class="edit-btn">Editar</button>
@@ -50,6 +53,7 @@
                 </form>
                 {% endif %}
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

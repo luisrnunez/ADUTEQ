@@ -3,8 +3,10 @@ from django.db import migrations
 CREATE_FUNCTION = """
 CREATE OR REPLACE FUNCTION actualizar_pagosp()
 RETURNS TRIGGER AS $$
+Declare comi numeric(8,2);
 BEGIN
      IF TG_OP = 'INSERT' THEN
+	 	comi := (SELECT comision FROM "proveedores_proveedor" WHERE id = NEW.proveedor_id);
         -- Verificar si el registro existe en proveedor_pagos
         IF EXISTS (
             SELECT 1
@@ -12,19 +14,27 @@ BEGIN
             WHERE proveedor_id = NEW.proveedor_id
         ) THEN
             -- Actualizar el valor acumulado
-			IF (SELECT count(valor_cancelado) FROM "PagosProveedor_pagosproveedor" WHERE proveedor_id = NEW.proveedor_id and valor_cancelado = 'false') =  1 then
+			IF (SELECT count(valor_cancelado) FROM "PagosProveedor_pagosproveedor" WHERE proveedor_id = NEW.proveedor_id and valor_cancelado = 'false' ) =  1 then
 				UPDATE "PagosProveedor_pagosproveedor"
-				SET valor_total = valor_total + NEW.consumo_total
+				SET valor_total = valor_total + NEW.consumo_total,
+			    comision = ((valor_total + NEW.consumo_total) *  (comi/100))
 				WHERE proveedor_id = NEW.proveedor_id;
 			ELSE
-				INSERT INTO "PagosProveedor_pagosproveedor"  (proveedor_id, valor_total, fecha_creacion, valor_cancelado)
-            	VALUES (NEW.proveedor_id, NEW.consumo_total, current_date, 'false');	
+				INSERT INTO "PagosProveedor_pagosproveedor"  (proveedor_id, valor_total,comision, fecha_creacion, valor_cancelado)
+            	VALUES (NEW.proveedor_id,NEW.consumo_total, (NEW.consumo_total *  (comi/100)), current_date, 'false');	
 			END IF;
         ELSE
             -- Insertar un nuevo registro en proveedor_pago	
 			 INSERT INTO "PagosProveedor_pagosproveedor"  (proveedor_id, valor_total, fecha_creacion, valor_cancelado)
             VALUES (NEW.proveedor_id, NEW.consumo_total, current_date, 'false');
         END IF;
+    ELSIF TG_OP = 'DELETE' THEN
+		comi := (SELECT comision FROM "proveedores_proveedor" WHERE id = OLD.proveedor_id);
+        -- Actualizar el valor acumulado y la comisión al eliminar pagos
+        UPDATE "PagosProveedor_pagosproveedor"
+        SET valor_total = valor_total - OLD.consumo_total,
+            comision = ((valor_total - OLD.consumo_total) * (comi/100))
+        WHERE proveedor_id = OLD.proveedor_id;		
     END IF;
     RETURN NEW;
 END;
@@ -33,7 +43,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE_TRIGGER = """
 CREATE TRIGGER trigger_actualizar_pagosp
-AFTER INSERT ON "Pagos_pagos"
+AFTER INSERT OR DELETE ON "Pagos_pagos"
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_pagosp();
 """

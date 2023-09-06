@@ -409,13 +409,13 @@ def ListaSocios(request):
     items_por_pagina = 10
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
+    
     try:
-       # periodo = Periodo.objects.get(activo=True)
+        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
         socios_pag=paginator.get_page(numero_pagina)
-    except PageNotAnInteger:
-        
+    except PageNotAnInteger:   
         socios_pag=paginator.get_page(1)
-    return render(request, "emp_socios.html", {'socios': socios_pag,'periodo': periodo})
+    return render(request, "emp_socios.html", {'socios': socios_pag,'periodo': periodo_seleccionado})
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def AggSocio(request):
