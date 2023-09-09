@@ -22,7 +22,7 @@
                     <input  data-valor="{{ cupo.proveedor.id }}" disabled maxlength="10" oninput="validarEspacios(this)" value="{{cupo.proveedor.nombre}}" type="text" id="proveedor" name="proveedor" required>
 
                     <label for="cupo">Cupo:</label>
-                    <input maxlength="13" value="{{cupo.cupo}}" type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
+                    <input maxlength="13" value="{{cupo.cupo|stringformat:'s'}}" type="number" id="cupo" step="any" name="cupo" placeholder="6875645356543"
                         required>
                   
                     

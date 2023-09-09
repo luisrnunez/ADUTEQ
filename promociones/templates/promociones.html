@@ -22,342 +22,390 @@
     }
 
     .square-image {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            display: block;
-            margin: 0 auto;
-        }
-        .image-thumbnail {
-            max-width: 200px; 
-            height: auto; 
-        }
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .image-thumbnail {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .botones_arriba {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-right: 10px;
+        flex-flow: row wrap;
+        border: 1px solid rgb(187, 189, 186);
+        width: 100%;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgb(134, 134, 134);
+        margin: 5px;
+        border-radius: 1%;
+        background-color: #34b234;
+    }
+
+    .image-header {
+        margin-bottom: 20px;
+        background-color: #34b234;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 5px;
+        /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+    }
+
+    h3 {
+        font-weight: bold;
+        color: white;
+    }
+
+    table {
+        margin-top: 20px;
+    }
 </style>
 
 
 <div class="content-menu">
-
-    <div class="header">
-        <h1>Promociones y  Comunicados</h1>
-    </div>
-    <div class="socios-content ">
+    <div class="socios-content">
         <div class="botones-sup">
-            <a href="{% url 'aggpromo' %}"> <button class="add-socio-btn"> Agregar Nueva Promo o Comunicado</button></a>
-            <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
+            <div class="botones_arriba">
+                <div class="header">
+                    <h3>Promociones y Comunicados</h3>
+                </div>
+
+
+                <a href="{% url 'aggpromo' %}"> <button class="add-socio-btn"> Agregar Nueva Promo o
+                        Comunicado</button></a>
+                <!-- <form method="GET" action="{% url 'buscar_socios' %}"> -->
                 <div class="search-form">
 
                     <!-- <select id="criterio" name="criterio">
-                        <option value="titulo">Titulo</option>
-                        <option value="proveedor">Proveedor</option>
-                    </select>
-                    <input type="text" id="buscador_input" name="valor" placeholder="Buscar promo..."> -->
+                                    <option value="titulo">Titulo</option>
+                                    <option value="proveedor">Proveedor</option>
+                                </select>
+                                <input type="text" id="buscador_input" name="valor" placeholder="Buscar promo..."> -->
                     <!-- <button type="submit">Buscar</button> -->
 
-                    <select name="tipo_seleccionado" id="tipo_seleccionado" style="width:95%;" onchange="filtrarTabla()">
+                    <select name="tipo_seleccionado" id="tipo_seleccionado" style="width:95%;"
+                        onchange="filtrarTabla()">
                         <option value="1">Promociones</option>
                         <option value="0">Comunicados</option>
                     </select>
                 </div>
 
-            <!-- </form> -->
+                <!-- </form> -->
 
+
+                <table id="tablaSocios" class="socios-table dataTable">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Titulo</th>
+                            <th>Descripción</th>
+                            <th class="col-proveedor">Proveedor</th>
+                            <th>Imagen</th>
+                            <th>Evidencia</th>
+                            <th class="col-f-ini">Fecha Inicio</th>
+                            <th class="col-f-fin">Fecha Fin</th>
+                            <th class="col-estado">Estado</th>
+                            <th>Editar</th>
+                            <th>Eliminar</th>
+                            <th>Notificar</th>
+                            <!-- <th>Categoria</th> -->
+                        </tr>
+                    </thead>
+                    <tbody id="socios-body">
+                        <!-- {% include 'tabla_parcialSocios.html' %} -->
+                        {% for promocion in promociones %}
+                        {% if promocion.tipo %}
+                        <tr>
+                            <td><strong>Promoción</strong></td>
+                            <td>{{ promocion.titulo }}</td>
+                            {% if promocion.contiene_tabla %}
+                            <td><strong>Revisar:</strong> Hay una tabla en esta promoción</td>
+                            {% else %}
+                            <td>{{ promocion.descripcion|safe }}</td>
+                            {% endif %}
+                            <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
+                            <td>
+                                {% if promocion.imagen %}
+                                <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}"
+                                    class="square-image image-thumbnail">
+                                {% else %}
+                                No hay imagen disponible.
+                                {% endif %}
+                            </td>
+                            <td>
+
+                                {% if promocion.evidencia %}
+                                <a href="{{ promocion.evidencia.url }}" target="_blank">
+                                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                </a>
+                                {% else %}
+                                Sin evidencia
+                                {% endif %}
+
+                            </td>
+                            <td>{{ promocion.fecha_inicio }}</td>
+                            <td>{{ promocion.fecha_fin }}</td>
+                            <!-- <td>{{ socio.categoria }}</td> -->
+                            <td>
+                                {% if promocion.estado %}
+                                <button class="green-button"
+                                    onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
+                                    <span class="visto-icon"></span>
+                                    Activo
+                                </button>
+                                {% else %}
+                                <button class="red-button"
+                                    onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
+                                    <span class="no-visto-icon"></span> Inactivo
+                                </button>
+                                {% endif %}
+
+                            </td>
+                            <td>
+                                <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
+                                    <button class="edit-btn">
+                                        Editar
+                                    </button></a>
+                                </a>
+                            </td>
+                            <td>
+                                <button id="delete" class="edit-btn delete"
+                                    data-promo-id="{{ promocion.id }}">Eliminar</button>
+                            </td>
+                            <td>
+                                <a data-promo-id="{{ promocion.id }}"
+                                    onclick="confirmarEnvioCorreo('{{promocion.id }}')"
+                                    title="Notificar de esto a todos los socios" class="edit-btn notify"
+                                    style="text-decoration: none;"> Notificar
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% else %}
+                        <tr class="comunicado">
+                            <td><strong>Comunicado</strong></td>
+                            <td>{{ promocion.titulo }}</td>
+                            <td>{{ promocion.descripcion|safe }}</td>
+                            <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
+                            <td>
+                                {% if promocion.imagen %}
+                                <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image">
+                                {% else %}
+                                No hay imagen disponible.
+                                {% endif %}
+                            </td>
+                            <td>
+
+                                {% if promocion.evidencia %}
+                                <a href="{{ promocion.evidencia.url }}" target="_blank">
+                                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                </a>
+                                {% else %}
+                                Sin evidencia
+                                {% endif %}
+
+                            </td>
+                            <td>{{ promocion.fecha_inicio }}</td>
+                            <td class="col-f-fin">{{ promocion.fecha_fin }}</td>
+                            <!-- <td>{{ socio.categoria }}</td> -->
+                            <td>
+                                <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
+                                    <button class="edit-btn">
+                                        Editar
+                                    </button></a>
+                                </a>
+                            </td>
+                            <td>
+                                <button id="delete" class="edit-btn delete"
+                                    data-promo-id="{{ promocion.id }}">Eliminar</button>
+                            </td>
+                            <td>
+                                <a data-promo-id="{{ promocion.id }}"
+                                    onclick="confirmarEnvioCorreo('{{promocion.id }}')" class="edit-btn notify"
+                                    style="text-decoration: none;" title="Notificar de esto a todos los socios">
+                                    Notificar
+                                </a>
+                            </td>
+                        </tr>
+
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
         </div>
-        <table id="tablaSocios" class="socios-table dataTable">
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Titulo</th>
-                    <th>Descripción</th>
-                    <th class="col-proveedor">Proveedor</th>
-                    <th>Imagen</th>
-                    <th>Evidencia</th>
-                    <th class="col-f-ini">Fecha Inicio</th>
-                    <th class="col-f-fin">Fecha Fin</th>
-                    <th class="col-estado">Estado</th>
-                    <th>Editar</th>
-                    <th>Eliminar</th>
-                    <th>Notificar</th>
-                    <!-- <th>Categoria</th> -->
-                </tr>
-            </thead>
-            <tbody id="socios-body">
-                <!-- {% include 'tabla_parcialSocios.html' %} -->
-                {% for promocion in promociones %}
-                {% if promocion.tipo %}
-                <tr>
-                    <td><strong>Promoción</strong></td>
-                    <td>{{ promocion.titulo }}</td>
-                    {% if promocion.contiene_tabla %}
-                        <td><strong>Revisar:</strong> Hay una tabla en esta promoción</td>
-                    {% else %}
-                        <td>{{ promocion.descripcion|safe }}</td>
-                    {% endif %}
-                    <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
-                    <td>
-                        {% if promocion.imagen %}
-                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image image-thumbnail">
-                        {% else %}
-                        No hay imagen disponible.
-                        {% endif %}
-                    </td>
-                    <td>
-
-                        {% if promocion.evidencia %}
-                        <a href="{{ promocion.evidencia.url }}" target="_blank">
-                            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
-                        </a>
-                        {% else %}
-                        Sin evidencia
-                        {% endif %}
-
-                    </td>
-                    <td>{{ promocion.fecha_inicio }}</td>
-                    <td>{{ promocion.fecha_fin }}</td>
-                    <!-- <td>{{ socio.categoria }}</td> -->
-                    <td>
-                        {% if promocion.estado %}
-                        <button class="green-button"
-                            onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
-                            <span class="visto-icon"></span>
-                            Activo
-                        </button>
-                        {% else %}
-                        <button class="red-button"
-                            onclick="confirmarEliminacion('{{ promocion.id }}','{{ promocion.titulo }}','{{ promocion.estado }}')">
-                            <span class="no-visto-icon"></span> Inactivo
-                        </button>
-                        {% endif %}
-
-                    </td>
-                    <td>
-                        <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
-                            <button class="edit-btn">
-                                Editar
-                            </button></a>
-                        </a>
-                    </td>
-                    <td>
-                        <button id="delete" class="edit-btn delete" data-promo-id="{{ promocion.id }}">Eliminar</button>
-                    </td>
-                    <td>
-                        <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
-                        title="Notificar de esto a todos los socios" class="edit-btn notify" style="text-decoration: none;"> Notificar
-                        </a>
-                    </td>
-                </tr>
-
-                {% else %}
-                <tr class="comunicado">
-                    <td><strong>Comunicado</strong></td>
-                    <td>{{ promocion.titulo }}</td>
-                    <td>{{ promocion.descripcion|safe }}</td>
-                    <td class="col-proveedor">{{ promocion.proveedor.nombre }}</td>
-                    <td>
-                        {% if promocion.imagen %}
-                        <img src="{{ promocion.imagen.url }}" alt="{{ promocion.titulo }}" class="square-image">
-                        {% else %}
-                        No hay imagen disponible.
-                        {% endif %}
-                    </td>
-                    <td>
-
-                        {% if promocion.evidencia %}
-                        <a href="{{ promocion.evidencia.url }}" target="_blank">
-                            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
-                        </a>
-                        {% else %}
-                        Sin evidencia
-                        {% endif %}
-
-                    </td>
-                    <td>{{ promocion.fecha_inicio }}</td>
-                    <td class="col-f-fin">{{ promocion.fecha_fin }}</td>
-                    <!-- <td>{{ socio.categoria }}</td> -->
-                    <td>
-                        <a onclick="confirmarEdicion('{{promocion.id }}','{{ promocion.titulo }}')">
-                            <button class="edit-btn">
-                                Editar
-                            </button></a>
-                        </a>
-                    </td>
-                    <td>
-                        <button id="delete" class="edit-btn delete" data-promo-id="{{ promocion.id }}">Eliminar</button>
-                    </td>
-                    <td>
-                        <a data-promo-id="{{ promocion.id }}" onclick="confirmarEnvioCorreo('{{promocion.id }}')"
-                            class="edit-btn notify" style="text-decoration: none;" title="Notificar de esto a todos los socios"> Notificar
-                        </a>
-                    </td>
-                </tr>
-
-                {% endif %}
-                {% endfor %}
-            </tbody>
-        </table>
-
         <!-- <div class="pagination-container">
-            <nav aria-label="...">
-                <ul class="pagination">
-                    {% if promociones.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ promociones.previous_page_number }}">anterior</a>
-                    </li>
-                    {% endif %}
-                    <li class="pagination-item active">
-                        <span style="border-radius: 5px;" class="page-link">{{ promociones.number }}</span>
-                    </li>
-                    {% if promociones.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ promociones.next_page_number }}">siguiente</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div> -->
-
+                        <nav aria-label="...">
+                            <ul class="pagination">
+                                {% if promociones.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ promociones.previous_page_number }}">anterior</a>
+                                </li>
+                                {% endif %}
+                                <li class="pagination-item active">
+                                    <span style="border-radius: 5px;" class="page-link">{{ promociones.number }}</span>
+                                </li>
+                                {% if promociones.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ promociones.next_page_number }}">siguiente</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div> -->
     </div>
-    <!-- Resto del contenido de la página -->
 </div>
 {% block scripts %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 
-$(document).ready(function () {
-    $('.notify').on('click', function () {
-        const promoId = $(this).data('promo-id');
+    $(document).ready(function () {
+        $('.notify').on('click', function () {
+            const promoId = $(this).data('promo-id');
 
-        // mostrar un cuadro de confirmación con SweetAlert2
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: '¿Desea enviar esta promoción a todos los socios?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí',
-            cancelButtonText: 'Cancelar',
-            dangerMode: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // mostrar el mensaje flotante con imagen y texto de carga
-                Swal.fire({
-                    title: 'Enviando correos...',
-                    html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
-                        '<p style="margin-top: 10px;">Enviando correos a todos los socios...</p>',
-                    showConfirmButton: false,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    allowEnterKey: false,
-                    didOpen: () => {
-                        // realizar la acción de enviar correo mediante AJAX
-                        $.ajax({
-                            url: `/enviar_promocion_a_todos/${promoId}/`,
-                            type: 'POST',
-                            data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                            dataType: 'json',
-                            success: function (response) {
-                                Swal.fire({
-                                    title: response.status === 'success' ? 'Éxito' : 'Error',
-                                    text: response.message,
-                                    icon: response.status === 'success' ? 'success' : 'error',
-                                });
-                            },
-                            error: function (xhr, errmsg, err) {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: `Ocurrió un error al enviar la promoción: ${xhr.status} (${xhr.statusText})`,
-                                    icon: 'error',
-                                });
-                            },
-                        });
-                    },
-                });
-            }
+            // mostrar un cuadro de confirmación con SweetAlert2
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¿Desea enviar esta promoción a todos los socios?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // mostrar el mensaje flotante con imagen y texto de carga
+                    Swal.fire({
+                        title: 'Enviando correos...',
+                        html: '<img src="{% static "img/mail-download.gif" %}" alt="Cargando..." style="height: 100px;">' +
+                            '<p style="margin-top: 10px;">Enviando correos a todos los socios...</p>',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        didOpen: () => {
+                            // realizar la acción de enviar correo mediante AJAX
+                            $.ajax({
+                                url: `/enviar_promocion_a_todos/${promoId}/`,
+                                type: 'POST',
+                                data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                                dataType: 'json',
+                                success: function (response) {
+                                    Swal.fire({
+                                        title: response.status === 'success' ? 'Éxito' : 'Error',
+                                        text: response.message,
+                                        icon: response.status === 'success' ? 'success' : 'error',
+                                    });
+                                },
+                                error: function (xhr, errmsg, err) {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: `Ocurrió un error al enviar la promoción: ${xhr.status} (${xhr.statusText})`,
+                                        icon: 'error',
+                                    });
+                                },
+                            });
+                        },
+                    });
+                }
+            });
         });
     });
-});
 
 
 
-$(document).ready(function () {
-    $('.delete').on('click', function () {
-        const promoId = $(this).data('promo-id');
-        const botonEliminar = $(this); // Guardamos una referencia al botón
+    $(document).ready(function () {
+        $('.delete').on('click', function () {
+            const promoId = $(this).data('promo-id');
+            const botonEliminar = $(this); // Guardamos una referencia al botón
 
-        // Mostrar un cuadro de confirmación con SweetAlert2
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: 'Desea eliminar esta promoción?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí',
-            cancelButtonText: 'Cancelar',
-            dangerMode: true,
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Realizar la eliminación mediante AJAX
-                $.ajax({
-                    url: `/eliminarpromo/${promoId}/`,
-                    type: 'POST',
-                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
-                    dataType: 'json',
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            // Usamos la referencia al botón para encontrar la fila y eliminarla
-                            botonEliminar.closest('tr').remove();
-                        } else {
+            // Mostrar un cuadro de confirmación con SweetAlert2
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Desea eliminar esta promoción?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Realizar la eliminación mediante AJAX
+                    $.ajax({
+                        url: `/eliminarpromo/${promoId}/`,
+                        type: 'POST',
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                // Usamos la referencia al botón para encontrar la fila y eliminarla
+                                botonEliminar.closest('tr').remove();
+                            } else {
+                                Swal.fire('Error', 'Error al eliminar la promoción', 'error');
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
                             Swal.fire('Error', 'Error al eliminar la promoción', 'error');
                         }
-                    },
-                    error: function (xhr, errmsg, err) {
-                        Swal.fire('Error', 'Error al eliminar la promoción', 'error');
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
     });
-});
 
 
 
-    $(document).ready(function() {
-    $("#buscador_input").on("input", function() {
-        var query = $(this).val();
-        var criterio = document.getElementById('criterio').value; 
-        console.log(criterio)
-        console.log(query)
-        $.ajax({
-            url: '{% url "buscar_promos" %}',
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                query: query,
-                criterio: criterio
-            },
-            success: function(data) {
-                $("#socios-body").html(data.rendered_table); 
-            }
+    $(document).ready(function () {
+        $("#buscador_input").on("input", function () {
+            var query = $(this).val();
+            var criterio = document.getElementById('criterio').value;
+            console.log(criterio)
+            console.log(query)
+            $.ajax({
+                url: '{% url "buscar_promos" %}',
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    query: query,
+                    criterio: criterio
+                },
+                success: function (data) {
+                    $("#socios-body").html(data.rendered_table);
+                }
+            });
         });
     });
-});
 
-$(document).ready(function() {
-    $("#criterio").on("change", function() {
-        var criterio = $(this).val();
-       
-        $.ajax({
-            url: '{% url "buscar_promos" %}',  // Cambia esto a la URL de tu vista de búsqueda
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
-                query: "",
-                criterio: criterio
-            },
-            success: function(data) {  // Verifica los datos devueltos por el servidor
-                $("#socios-body").html(data.rendered_table); 
-            }
+    $(document).ready(function () {
+        $("#criterio").on("change", function () {
+            var criterio = $(this).val();
+
+            $.ajax({
+                url: '{% url "buscar_promos" %}',  // Cambia esto a la URL de tu vista de búsqueda
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
+                    query: "",
+                    criterio: criterio
+                },
+                success: function (data) {  // Verifica los datos devueltos por el servidor
+                    $("#socios-body").html(data.rendered_table);
+                }
+            });
         });
     });
-});
 
 
 
@@ -432,64 +480,64 @@ $(document).ready(function() {
     }
 
     function filtrarTabla() {
-    var tipoSeleccionado = document.getElementById("tipo_seleccionado").value;
-    var filas = document.querySelectorAll("#socios-body tr");
+        var tipoSeleccionado = document.getElementById("tipo_seleccionado").value;
+        var filas = document.querySelectorAll("#socios-body tr");
 
-    // Ocultar todas las filas primero
-    filas.forEach(function (fila) {
-        fila.style.display = "none";
-    });
-
-    // Ocultar las celdas de encabezado y datos de la columna "Proveedor" y "Estado"
-    var columnasProveedor = document.querySelectorAll(".col-proveedor");
-    columnasProveedor.forEach(function (columna) {
-        columna.style.display = "none";
-    });
-    var columnasEstado = document.querySelectorAll(".col-estado");
-    columnasEstado.forEach(function (columna1) {
-        columna1.style.display = "none";
-    });
-
-    var columnasFin = document.querySelectorAll(".col-f-fin");
-    columnasFin.forEach(function (columna2) {
-        columna2.style.display = "none";
-    });
-
-    var columnasIni = document.querySelectorAll(".col-f-ini");
-    columnasIni.forEach(function (columna) {
-        columna.textContent = (tipoSeleccionado === "1") ? "Fecha Inicio" : "Fecha";
-    });
-
-    if (tipoSeleccionado === "0") {
-        // Mostrar solo las filas de "Comunicado"
+        // Ocultar todas las filas primero
         filas.forEach(function (fila) {
-            if (fila.querySelector("td:first-child").textContent === "Comunicado") {
-                fila.style.display = "table-row";
-            }
-        });
-    } else if (tipoSeleccionado === "1") {
-        // Mostrar solo las filas de "Promoción"
-        filas.forEach(function (fila) {
-            if (fila.querySelector("td:first-child").textContent === "Promoción") {
-                fila.style.display = "table-row";
-            }
+            fila.style.display = "none";
         });
 
-        // Mostrar las celdas de encabezado y datos de las columnas "Proveedor", "Estado", "Fecha Inicio" y "Fecha Fin"
+        // Ocultar las celdas de encabezado y datos de la columna "Proveedor" y "Estado"
+        var columnasProveedor = document.querySelectorAll(".col-proveedor");
         columnasProveedor.forEach(function (columna) {
-            columna.style.display = "table-cell";
+            columna.style.display = "none";
         });
+        var columnasEstado = document.querySelectorAll(".col-estado");
         columnasEstado.forEach(function (columna1) {
-            columna1.style.display = "table-cell";
+            columna1.style.display = "none";
         });
+
+        var columnasFin = document.querySelectorAll(".col-f-fin");
         columnasFin.forEach(function (columna2) {
-            columna2.style.display = "table-cell";
+            columna2.style.display = "none";
         });
+
+        var columnasIni = document.querySelectorAll(".col-f-ini");
         columnasIni.forEach(function (columna) {
-            columna.style.display = "table-cell";
+            columna.textContent = (tipoSeleccionado === "1") ? "Fecha Inicio" : "Fecha";
         });
-    } 
-}
+
+        if (tipoSeleccionado === "0") {
+            // Mostrar solo las filas de "Comunicado"
+            filas.forEach(function (fila) {
+                if (fila.querySelector("td:first-child").textContent === "Comunicado") {
+                    fila.style.display = "table-row";
+                }
+            });
+        } else if (tipoSeleccionado === "1") {
+            // Mostrar solo las filas de "Promoción"
+            filas.forEach(function (fila) {
+                if (fila.querySelector("td:first-child").textContent === "Promoción") {
+                    fila.style.display = "table-row";
+                }
+            });
+
+            // Mostrar las celdas de encabezado y datos de las columnas "Proveedor", "Estado", "Fecha Inicio" y "Fecha Fin"
+            columnasProveedor.forEach(function (columna) {
+                columna.style.display = "table-cell";
+            });
+            columnasEstado.forEach(function (columna1) {
+                columna1.style.display = "table-cell";
+            });
+            columnasFin.forEach(function (columna2) {
+                columna2.style.display = "table-cell";
+            });
+            columnasIni.forEach(function (columna) {
+                columna.style.display = "table-cell";
+            });
+        }
+    }
 
 
 </script>
@@ -504,20 +552,20 @@ $(document).ready(function() {
     // Ejecuta la función cuando la página se carga
     window.addEventListener("load", ocultarComunicados);
 
-    </script>
+</script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
     $(document).ready(function () {
         var table = $('#tablaSocios tbody');
         var rows = table.find('tr').get();
-    
+
         rows.reverse(); // Invertir el orden de las filas
-    
+
         $.each(rows, function (index, row) {
             table.append(row);
         });
     });
-    </script>
+</script>
 
 {% endblock %}

@@ -28,16 +28,27 @@
                         </div>
                         <div class="card-body">
                             <label class="fw-bold" for="socio">Socio:</label>
-                            <input class="form-control mb-2" type="text" name="fecha_consumo" value="{{ pagos.socio.user.first_name }}"  required>
+                            <input class="form-control mb-2" type="text" name="socio"
+                                value="{{ pagos.socio.user.first_name }}" required>
 
                             <label class="fw-bold" for="proveedor">Proveedor:</label>
-                            <input class="form-control mb-2" type="text" name="fecha_consumo" value="{{ pagos.proveedor.nombre }}"  required>
+                            <input class="form-control mb-2" type="text" name="proveedor"
+                                value="{{ pagos.proveedor.nombre }}" required>
 
                             <label class="fw-bold" for="consumo_total">Descuento:</label>
-                            <input step="any" name="consumo_total" class="form-control mb-2" type="number" value="{{ pagos.consumo_total }}" placeholder="Ingrese el descuento" required>
-                            
+                            <input step="any" name="consumo_total" class="form-control mb-2" type="number"
+                                value="{{ pagos.consumo_total|stringformat:'s' }}" placeholder="Ingrese el descuento" required>
+
                             <label class="fw-bold" for="fecha_consumo">Fecha:</label>
-                            <input class="form-control mb-2" type="date" name="fecha_consumo" value="{{ pagos.fecha_consumo|date:'Y-m-d' }}"  required>
+                            <input class="form-control mb-2" type="date" name="fecha_consumo"
+                                value="{{ pagos.fecha_consumo|date:'Y-m-d' }}" required>
+
+                            <label class="fw-bold" for="estado">Estado:</label>
+                            <select  class="form-control mb-2"id="estado" name="estado">
+                                <option value="True" {% if pagos.estado %}selected{% endif %}>Pagado</option> 
+                                <option value="False" {% if not pagos.estado %}selected{% endif %}>Pendiente
+                                </option>
+                            </select>
                             <br>
                             <!-- <form method="post">
                                 {%csrf_token%} -->
@@ -56,7 +67,7 @@
 
 </body>
 <script>
-    oninput="validarPorcentaje(this)"
+    oninput = "validarPorcentaje(this)"
     function validarPorcentaje(input) {
         if (input.value < 0 || input.value > 100) {
             input.setCustomValidity("El valor debe ser un porcentaje entre 0 y 100.");
