@@ -1,0 +1,58 @@
+<table class="socios-table">
+    <thead>
+        <tr>
+            <!-- <th scope="col">ID</th> -->
+            <th scope="col">Socio</th>
+            <th scope="col">Descuento</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Editar</th>
+            <th scope="col">Eliminar</th>
+            <th scope="col">Convertir Cuotas</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pago in pagos %}
+        <tr>
+            <!-- <td>{{pago.id}}</td> -->
+            <td>{{ pago.socio.user.last_name }} {{ pago.socio.user.first_name }}</td>
+            <td>{{pago.consumo_total}}$</td>
+            <td>{{ pago.fecha_consumo|date:"j - n - Y" }}</td>
+            <td>
+                {% if pago.estado %}
+                <button class="green-button">
+                    Cancelado
+                </button>
+                {% else %}
+                <button class="red-button">
+                    Pendiente
+                </button>
+                {% endif %}
+            </td>
+            <td>
+                <form action="{% url 'editar_pago_pendiente' pago.id %}">
+                    <button class="edit-btn">Editar</button>
+                </form>
+            </td>
+
+            <td>
+                {% if pago.estado %}
+                {% else %}
+                <form action="{% url 'eliminar_pago_pendiente' pago.id %}">
+                    <button class="delete-btn">Eliminar</button>
+                </form>
+                {% endif %}
+            </td>
+            <td>
+                {% if pago.estado %}
+                {% else %}
+                <form action="{% url 'convertir_cuotas' pago.id %}"">
+                <button class=" delete-btn">Convertir</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
