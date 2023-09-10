@@ -1,5 +1,6 @@
 import datetime
 from gettext import translation
+from ipaddress import summarize_address_range
 import re
 import datetime
 import re
@@ -85,7 +86,8 @@ def Principal(request):
     except :
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.') 
         periodo={}
-    return render(request, "base.html",{'periodo': periodo})
+    return redirect('/principal/resumen/')
+    # return render(request, "principal.html",{'periodo': periodo})
 
 
 @login_required

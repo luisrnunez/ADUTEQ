@@ -1,10 +1,11 @@
 from django.urls import path
 from .views import lista_pagos,agrefar_pagos,editar_pago,eliminar_pago,extraer_datos_pdf,extraer_descuentos,guardar_descuentos_prov
 from .views import lista_pagos_cuotas,agregar_pagos_cuotas,detalles_cuota,registra_pago_cuota,eliminar_pago_cuota,agregar_pdf, verificar_registros,convertir_cuotas
-from .views import generar_reporte_pdf,obtener_periodos_por_anio,buscar_pagos
+from .views import generar_reporte_pdf,obtener_periodos_por_anio,buscar_pagos,principal_resumen
 
 
 urlpatterns = [
+    path('principal/resumen/', principal_resumen, name='principal_resumen'),
     path('listar_pagos/',lista_pagos, name='listar_pagos'),
     path('lista_pagos_cuotas/',lista_pagos_cuotas, name='listar_pagos_cuotas'),
     path('agregar_pago/',agrefar_pagos),

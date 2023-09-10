@@ -1,6 +1,7 @@
 from django.db import models
 from socios.models import Socios
 from proveedores.models import Proveedor
+from PagosProveedor.models import PagosProveedor
 import os
 
 # Create your models here.

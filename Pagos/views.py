@@ -1,6 +1,7 @@
 import datetime
 from decimal import Decimal
 from gettext import translation
+from ipaddress import summarize_address_range
 import os
 import re
 import PyPDF2
@@ -32,9 +33,70 @@ from io import BytesIO
 from django.template.loader import get_template
 from xhtml2pdf.default import DEFAULT_FONT
 from reportlab.lib.units import inch
-
+from .models import PagosProveedor
 
 # Create your views here. 
+
+@login_required
+def principal_resumen(request):
+
+    periodo = Periodo.objects.filter(activo=True).first()
+
+  
+    data = []
+    year = datetime.now().year
+    mes = datetime.now().month
+    for month in range(1, 13):
+        # Filtrar descuentos normales por año y mes
+        descuentos_normales = Pagos.objects.filter(
+            fecha_consumo__year=year, fecha_consumo__month=month
+        )
+
+        # Filtrar descuentos por cuotas por año y mes
+        descuentos_cuotas = Pagos_cuotas.objects.filter(
+            fecha_descuento__year=year, fecha_descuento__month=month
+        )
+
+        # Sumar los valores de consumo en descuentos normales
+        total_normales = sum(float(descuento.consumo_total) for descuento in descuentos_normales)
+
+        # Sumar los valores de consumo en descuentos por cuotas
+        total_cuotas = sum(float(descuento.consumo_total) for descuento in descuentos_cuotas)
+
+        # Calcular la suma total por mes
+        suma_total = total_normales + total_cuotas
+        if mes == month:
+            suma_comision = suma_total
+        # Agregar el resultado al array data
+        data.append(float(suma_total))
+
+    # MOSTRAR GANANCIAS
+    comision = PagosProveedor.objects.filter(
+            fecha_creacion__year=year, fecha_creacion__month=mes
+        )
+    total_comision = sum(float(suma.comision) for suma in comision)
+
+    # MOSTRAR SUMA TOTAL DE SOCIOS
+    socios = Socios.objects.all()
+    total_socios = len(socios)
+
+     # MOSTRAR SUMA TOTAL DE PROVEEDOR
+    prov = Proveedor.objects.all()
+    total_prov = len(prov)
+
+  # MOSTRAR SUMA TOTAL DE COMISION DEL MES ACTUAL
+    
+    data2 = {}
+    data2.update({
+        'total_comision':total_comision,
+        'total_socios':total_socios,
+        'total_prov':total_prov,
+        'suma_comision':suma_comision
+    })
+
+    
+    return render(request,'principal.html',{'periodo':periodo,'data':data,'data2':data2})
+
 @login_required
 def lista_pagos(request):
 
