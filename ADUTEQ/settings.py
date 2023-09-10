@@ -146,13 +146,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 TINYMCE_JS_URL = os.path.join(STATIC_URL, "path/to/tiny_mce/tiny_mce.js")
 
-# Agregar estas líneas
-SELECT2_PATH = 'select2/'
-STATICFILES_DIRS = [
-    # ... otras rutas ...
-    os.path.join(BASE_DIR, "venv/Lib/site-packages/django_select2/static/django_select2"),
-]
-
 LOGIN_URL = '/login'
 
 STATICFILES_DIRS = [

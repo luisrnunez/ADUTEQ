@@ -4,14 +4,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import AyudasMot,AyudasEconomicas, Socios, DetallesAyuda
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.contrib import messages
+from .models import datos_para_ayuda
 from django.db import transaction
-from .models import Periodo
+from .models import Periodo, AyudasExternas
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.db.models import Q
+from decimal import Decimal
 
 # Create your views here.
 def motivos(request):
+    
     motivos = AyudasMot.objects.all()
     items_por_pagina = 10
     paginator = Paginator(motivos, items_por_pagina)
@@ -25,7 +28,8 @@ def motivos(request):
   
     contexto = {
         'motivos': motivos_pag,
-        'periodo': {} 
+        'periodo': {} ,
+
     }
     
     return render(request, 'motivoayuda.html', contexto)
@@ -108,7 +112,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def viewayudas(request):
     periodos = Periodo.objects.all()  # Obtener todos los períodos
     anos = periodos.values_list('anio', flat=True).distinct()
-    
+    total_ayuda_permanente, total_cuota_ordinaria=datos_para_ayuda()
     periodoid = request.POST.get('periodoid')
     fechas_periodo = {}
     
@@ -142,6 +146,8 @@ def viewayudas(request):
                 'anos': anos,
                 'fechas_periodo': fechas_periodo,
                 'periodo_seleccionado': periodo_seleccionado,
+                'total_ayuda_permanente':total_ayuda_permanente,
+                'total_cuota_ordinaria':total_cuota_ordinaria
             }
             
             # Renderiza la tabla parcial con la paginación
@@ -167,6 +173,8 @@ def viewayudas(request):
         'anos': anos,
         'fechas_periodo': fechas_periodo,
         'periodo_seleccionado': periodo_seleccionado,
+        'total_ayuda_permanente':total_ayuda_permanente,
+        'total_cuota_ordinaria':total_cuota_ordinaria
     }
     return render(request, 'ayudasecon.html', context)
 
@@ -178,34 +186,59 @@ def viewayudas(request):
 def formRegistroAyuda(request):
     opciones = Socios.objects.select_related('user').all()
     motivos=AyudasMot.objects.all()
+    total_ayuda_permanente, total_cuota_ordinaria=datos_para_ayuda()
     return render(request,'aggAyuda.html',{
-        'opciones':opciones, 'motivos':motivos
+        'opciones':opciones, 'motivos':motivos, 'total_ayuda_permanente':total_ayuda_permanente,
+        'total_cuota_ordinaria':total_cuota_ordinaria
     })
 
 def aggAyuda(request):
     mmotivo=AyudasMot.objects.get(id=request.POST['motivo'])
     socios_disponibles=Socios.objects.all()
-
+    total_ayuda_permanente, total_cuota_ordinaria=datos_para_ayuda()
+    print(total_ayuda_permanente)
+    valorsocio = 0
+    
+    if 'valorsocio' in request.POST:
+        valorsocio_input = request.POST.get('valorsocio')
+        if valorsocio_input != '':
+            valorsocio = Decimal(valorsocio_input)
     if(request.POST.get('socio')=="null"):
-        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'], valorsocio=request.POST['valorsocio'] ,total=0, motivo=mmotivo, fecha=request.POST['fecha'])
+        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'], valorsocio=valorsocio ,total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
     else:
         socio=Socios.objects.get(id=request.POST['socio'])
-        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'], valorsocio=request.POST['valorsocio'], total=0, motivo=mmotivo, fecha=request.POST['fecha'])
+        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'], valorsocio=valorsocio, total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
 
-    if(request.method == 'POST'):
-        ayuda.save()
-        for Socio in socios_disponibles:
-            if(Socio.user.is_active):
-                DetallesAyuda.objects.create(fecha=None,ayuda=ayuda, socio=Socio, valor=ayuda.valorsocio, cancelado=False)
-        response = {
-            'status': 'success',
-            'message': 'Ayuda agregada correctamente.'
-            }
+    if ayuda.total <= total_ayuda_permanente[0][1]:
+        # Utiliza una transacción para evitar crear detalles de ayuda si ocurre un error
+        with transaction.atomic():
+            try:
+                ayuda.save()
+                for Socio in socios_disponibles:
+                    if Socio.user.is_active:
+                        DetallesAyuda.objects.create(
+                            fecha=None,
+                            ayuda=ayuda,
+                            socio=Socio,
+                            valor=ayuda.valorsocio,
+                            cancelado=False
+                        )
+                
+                response = {
+                    'status': 'success',
+                    'message': 'Ayuda agregada correctamente.'
+                }
+            except Exception as e:
+                response = {
+                    'status': 'error',
+                    'message': 'Ha existido algún error: {}'.format(str(e))
+                }
     else:
         response = {
             'status': 'error',
-            'message': 'Ha existido algún error, intentelo de nuevo'
-            }
+            'message': 'El total es mayor que el valor permitido.'
+        }
+    
     return JsonResponse(response)
 
 
@@ -228,7 +261,7 @@ def detallesAyuda(request, ayuda_id):
         detalles_paginados=paginator.get_page(numero_pagina)
     except PageNotAnInteger:
         detalles_paginados=paginator.get_page(1)
-    return render(request, 'detalles_ayuda.html',{'detalles': detalles_paginados})
+    return render(request, 'detalles_ayuda.html',{'detalles': detalles_paginados, 'detalle_id':ayuda_id})
 
 
 def registro_ayuda(request, detalle_id, valor):
@@ -294,10 +327,10 @@ def guardar_aportacion(request, detalle_id):
     
     return JsonResponse({'success': False})
 
-def verificar_socio(request, detalle_id):
-    detalle = DetallesAyuda.objects.get(id=detalle_id)
-    socio_id_null = detalle.ayuda.socio_id is None
-    return JsonResponse({'socio_id_null': socio_id_null})
+# def verificar_socio(request, detalle_id):
+#     detalle = DetallesAyuda.objects.get(id=detalle_id)
+#     socio_id_null = detalle.ayuda.socio_id is None
+#     return JsonResponse({'socio_id_null': socio_id_null})
 
 def buscar_detalle(request):
     if request.method == "POST":
@@ -328,6 +361,49 @@ def buscar_detalle(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
+def registrar_aportacion_externa(request, detalle_id):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre_aportador')
+        cedula = request.POST.get('cedula_aportador')
+        valor = request.POST.get('valor1')
+        print(valor)
+        fecha = request.POST.get('fecha')
+        detalle_id = request.POST.get('detalle_id')  # Asegúrate de agregar un campo oculto en tu formulario HTML para el detalle_id
+        detallea=AyudasEconomicas.objects.get(id=detalle_id)
+        
+            
+        # Guardar la aportación externa en la base de datos
+        aportacion_externa = AyudasExternas(
+            nombre=nombre,
+            cedula=cedula,
+            fecha=fecha,
+            detalle=detallea,
+            valor=valor
+        )
+        aportacion_externa.save()
+            
+        # Puedes retornar una respuesta JSON si lo deseas
+        response_data = {'message': 'Aportación externa registrada con éxito'}
+    return JsonResponse(response_data)
 
+def obtener_ayudas_externas(request, detalle_id):
+    detalle = AyudasEconomicas.objects.get(id=detalle_id)
+    ayudas_externas = AyudasExternas.objects.filter(detalle=detalle)
+        
+    return render(request, 'ayudas_externas.html', {'ayudas_externas': ayudas_externas, 'detalle_id':detalle.id})
+
+def editar_evidencia_ayuda(request, ayuda_id):
+    ayuda= AyudasEconomicas.objects.get(id=ayuda_id)
+    if request.method=='GET':
+        return render(request,'editar_evidencia_ayuda.html', {'ayuda': ayuda })
+    else:
+        if 'evidencia' in request.FILES:
+            ayuda.evidencia=request.FILES['evidencia']
+        else:
+            messages.warning(request, "Seleccione un archivo en formato pdf")
+        messages.success(request,'EL prestamo fue editado de forma exitosa')
+        ayuda.save()
+
+        return redirect('/verayudas/')
 
         

@@ -7,11 +7,13 @@
             <th>motivo</th>
             <th>Valor-Socio</th>
             <th>Total</th>
+            <th>Evidencia</th>
             <!-- <th>Editar</th> -->
             {% if periodo_seleccionado.activo == True %}
             <th>Eliminar</th>
             {% endif %}
             <th>Detalles</th>
+            <th>Editar Evidencia</th>
         </tr>
     </thead>
     <tbody>
@@ -25,8 +27,23 @@
             <td style="white-space: normal; word-wrap: break-word;">{{ayuda.descripcion}}</td>
             <td>{{ayuda.fecha}}</td>
             <td>{{ayuda.motivo}}</td>
-            <td>{{ayuda.valorsocio}}</td>
+            {% if ayuda.valorsocio|floatformat:2 == "0,00" %}
+                <td>Voluntario</td>
+            {% else %}
+                <td>{{ ayuda.valorsocio }}</td>
+            {% endif %}
             <td>{{ayuda.total}}</td>
+            <td>
+
+                {% if ayuda.evidencia %}
+                <a href="{{ ayuda.evidencia.url }}" target="_blank">
+                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                </a>
+                {% else %}
+                Sin evidencia
+                {% endif %}
+
+            </td>
 
             <!--{% if proveedor.estado == False %}
             <td>Desabilitado</td>

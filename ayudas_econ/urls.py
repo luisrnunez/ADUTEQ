@@ -24,11 +24,15 @@ urlpatterns = [
     path('eliminarayuda/<int:codigo>', views.eliminar_ayuda),
 
     path('guardar_aportacion/<int:detalle_id>/', views.guardar_aportacion, name='guardar_aportacion'),
-    path('verificar_socio/<int:detalle_id>/', views.verificar_socio, name='verificar_socio'),
     #detallesayuda
     path('buscar_detalle/', views.buscar_detalle, name='buscar_detalle'),
     path('detalleayuda/<int:ayuda_id>', views.detallesAyuda),
     path('registrarayuda/<int:detalle_id>/<int:valor>/', views.registro_ayuda),
     path('prestamo2/presagregar_pdf/<int:det_id>/',views.presagregar_pdf2, name = 'presagregar_pdf'),
+
+    path('registrar_aportacion_externa/<int:detalle_id>/', views.registrar_aportacion_externa ,name='registrar_aportacion_externa'),
+    path('obtener_ayudas_externas/<int:detalle_id>/', views.obtener_ayudas_externas, name='obtener_ayudas_externas'),
+    path('editar_evidencia_ayuda/<int:ayuda_id>/', views.editar_evidencia_ayuda, name='editar_evidencia_ayuda'),
+
 
 ]

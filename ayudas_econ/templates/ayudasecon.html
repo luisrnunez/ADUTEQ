@@ -25,6 +25,7 @@
                     </div> -->
                 </div>
                 <div style="display: flex; justify-content: center; width: min-content;">
+                    <input style="color: black; border-radius: 1%; margin-right: 30px;" disabled type="text" value="Fondo Actual: {{ total_ayuda_permanente.0.1 }}">
                     <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
                     <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
                         aria-placeholder="Asño" required>
@@ -64,9 +65,11 @@
                             <th>motivo</th>
                             <th>Valor-Socio</th>
                             <th>Total</th>
+                            <th>Evidencia</th>
                             <!-- <th>Editar</th> -->
                             <th>Eliminar</th>
                             <th>Detalles</th>
+                            <th>Editar Evidencia</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,6 +90,17 @@
                                 <td>{{ ayuda.valorsocio }}</td>
                             {% endif %}
                             <td>{{ ayuda.total }}</td>
+                            <td>
+
+                                {% if ayuda.evidencia %}
+                                <a href="{{ ayuda.evidencia.url }}" target="_blank">
+                                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                </a>
+                                {% else %}
+                                Sin evidencia
+                                {% endif %}
+                
+                            </td>
     
                             <!--{% if proveedor.estado == False %}
                             <td>Desabilitado</td>
@@ -109,7 +123,10 @@
                                     onclick="eliminarMotivo('{{ayuda.id}}', '/eliminarayuda/', 'Ayuda economica')">Eliminar</a>
                             </td>
                             <td>
-                                <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Detalles Ayuda</a>
+                                <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Aportaciones</a>
+                            </td>
+                            <td>
+                                <button class="edit-btn" onclick="confirmarEdicion('{{ayuda.id}}','{{ayuda.socio.user.first_name}}')">Evidencia</button>
                             </td>
                             <!--<td>{{proveedor.id}}</td>-->
                         </tr>
@@ -140,6 +157,26 @@
                 });
             });
         });
+    </script>
+
+    <script>
+        function confirmarEdicion(ayuda_id, socioNombre) {
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: 'Deseas editar evidencia de la ayuda económica del soci@ ' + socioNombre,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí',
+                        cancelButtonText: 'Cancelar',
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // El usuario ha confirmado la edición, redirigir a la página de edición
+                            window.location.href = '/editar_evidencia_ayuda/' + ayuda_id;
+                            print(valor)
+                        }
+                    });
+            }
     </script>
 
 </body>
