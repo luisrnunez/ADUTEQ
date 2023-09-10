@@ -71,9 +71,9 @@ def principal_resumen(request):
         # Calcular la suma total por mes
         suma_total = total_normales + total_cuotas
         if mes == month:
-            suma_comision = suma_total
+            suma_comision = round(suma_total, 2)
         # Agregar el resultado al array data
-        data.append(float(suma_total))
+        data.append(suma_total)
 
     # MOSTRAR GANANCIAS
     comision = PagosProveedor.objects.filter(
@@ -464,7 +464,8 @@ def extraer_datos_pdf(request):
         # file_path = fs.save('archivo.pdf', pdf_file)
         # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
 
-        tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
+        tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', pandas_options={'header': None, 'dtype': str})
+        #  tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
         datos_tabla = []
 
         for table in tables:
