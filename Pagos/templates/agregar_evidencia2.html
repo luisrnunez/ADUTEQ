@@ -10,7 +10,7 @@
         </div>
         <div class="content">
             <div class="form-container">
-                <form action="{% url 'agregar_pdf' detalle_cuotas.id %}" method="post" enctype="multipart/form-data"> 
+                <form action="{% url 'agregar_pdf2' detalle_cuotas.id %}" method="post" enctype="multipart/form-data"> 
                     {% csrf_token %}
      
                     <label for="evidencia">Evidencia:</label>
@@ -18,7 +18,7 @@
                   
                     <input type="submit" value="Guardar">
 
-                    <a href="/lista_pagos_cuotas"> <input type="button" value="Cancelar"
+                    <a href="/lista_pagos_cuotas_pendientes"> <input type="button" value="Cancelar"
                         style="background-color: red;"></a>
                   </form>                     
                 </form>

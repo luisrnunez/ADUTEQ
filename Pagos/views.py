@@ -8,7 +8,7 @@ import PyPDF2
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import Socios, Proveedor, Pagos, Pagos_cuotas, Detalle_cuotas
+from .models import Socios, Proveedor, Pagos, Pagos_cuotas, Detalle_cuotas, pagos_pendientes,detalle_cuotas_pendientes,pagos_cuotas_pendientes
 from proveedores.models import detallesCupos
 from .forms import PagosForm
 from django.contrib.auth.models import User
@@ -158,6 +158,60 @@ def lista_pagos(request):
     }
     return render(request, 'listar_pagos.html', context)
 
+def listar_pagos_pendientes(request):
+
+    periodos = Periodo.objects.all() 
+    anos = periodos.values_list('anio', flat=True).distinct()
+    #listar periodo por el select
+    periodoid = request.POST.get('periodoid')
+    fechas_periodo = {}
+    if periodoid:
+        periodo_seleccionado = Periodo.objects.filter(id=periodoid).first()
+        print(periodo_seleccionado)
+        if periodo_seleccionado:
+            fechas_periodo = {
+                'fecha_inicio': periodo_seleccionado.fecha_inicio,
+                'fecha_fin': periodo_seleccionado.fecha_fin
+            }
+           
+            print(periodo_seleccionado)
+            pagos = pagos_pendientes.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin']))
+            context = {
+                'pagos': pagos,
+                'periodos': periodos,
+                'anos': anos,
+                'fechas_periodo': fechas_periodo,
+                'periodo_seleccionado': periodo_seleccionado,
+            }
+            rendered_table = render_to_string("list_pag_pen_par.html",context)
+            return JsonResponse({"rendered_table": rendered_table})
+    
+    #listar periodo actual
+    periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+    if periodo_seleccionado:
+        fechas_periodo = {
+            'fecha_inicio': periodo_seleccionado.fecha_inicio,
+            'fecha_fin': periodo_seleccionado.fecha_fin
+        }
+        pagos = pagos_pendientes.objects.filter(fecha_consumo__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin']))
+        items_por_pagina = 20
+        paginator = Paginator(pagos, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            pagos = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            pagos = paginator.get_page(1)
+    else:
+        pagos = {}
+    context = {
+        'pagos': pagos,
+        'periodos': periodos,
+        'anos': anos,
+        'fechas_periodo': fechas_periodo,
+        'periodo_seleccionado': periodo_seleccionado,
+    }
+    return render(request, 'listar_pagos_pendientes.html', context)
+
 def obtener_periodos_por_anio(request, anio):
     periodos = Periodo.objects.filter(anio=anio).values('id', 'nombre')
     return JsonResponse({'periodos': list(periodos)})
@@ -265,6 +319,36 @@ def agrefar_pagos(request):
             socios = Socios.objects.filter(user__in=users)
             proveedores = Proveedor.objects.filter(estado=True)
             return render(request, 'agregar_pago.html', {'socios': socios, 'proveedores': proveedores})
+        
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def agregar_pagos_pendiente(request):
+    if request.method == 'GET':
+        users = User.objects.filter(is_active=True)
+        socios = Socios.objects.filter(user__in=users)
+        return render(request, 'agregar_pago_pendiente.html', {'socios': socios})
+    else:
+        socio_id = request.POST.get('socio')
+        socios = Socios.objects.get(id=socio_id)
+        fecha = request.POST.get('fecha_consumo')
+        cantidad = request.POST.get('consumo_total')
+
+        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+        if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+            if(float(cantidad)<=10000):
+                pagos = pagos_pendientes.objects.create(socio=socios, consumo_total=cantidad, fecha_consumo=fecha)
+                messages.success(request, 'Exito')
+                return redirect('/listar_pagos_pendientes/')
+            else:
+                messages.warning(request, 'La cantidad que desea ingresar es superior a la brindada por el proveedor')
+            return redirect('/listar_pagos_pendientes/')
+        else:
+            messages.warning(request, f'La fecha que ingresaste no esta dentro del periodo actual de {periodo_seleccionado.nombre}')
+            users = User.objects.filter(is_active=True)
+            socios = Socios.objects.filter(user__in=users)
+            proveedores = Proveedor.objects.filter(estado=True)
+            return render(request, 'agregar_pago_pendiente.html', {'socios': socios, 'proveedores': proveedores})
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -348,6 +432,22 @@ def editar_pago(request, pago_id):
         pagos.estado=request.POST.get('estado')
         pagos.save()
         return redirect('/listar_pagos/')
+    
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def editar_pago_pendiente(request, pago_id):
+    if request.method == 'GET':
+        pagos = pagos_pendientes.objects.get(id=pago_id)
+        form = PagosForm(instance=pagos)
+        return render(request, 'editar_pago_pendiente.html', {'pagos': pagos, 'form': form})
+    else:
+        pagos = pagos_pendientes.objects.get(id=pago_id)
+        pagos.consumo_total = request.POST.get('consumo_total')
+        pagos.fecha_consumo = request.POST.get('fecha_consumo')
+        pagos.estado=request.POST.get('estado')
+        pagos.save()
+        messages.success(request, 'Se ha editado el descuento exitosamente.')
+        return redirect('/listar_pagos_pendientes/')
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -362,6 +462,21 @@ def detalles_cuota(request, pago_cuota_id):
     except PageNotAnInteger:
         detalles_paginados=paginator.get_page(1)
     return render(request, 'listar_detalle_cuotas.html',
+                  {'detalle_cuotas': detalles_paginados, 'pago_cu': pago_cu})
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def detalles_cuota_pendiente(request, pago_cuota_id): 
+    detalle_cuotas = detalle_cuotas_pendientes.objects.filter(pago_cuota_pendientes=pago_cuota_id).order_by("estado", "numero_cuota")
+    pago_cu = pagos_cuotas_pendientes.objects.get(id=pago_cuota_id)
+    items_por_pagina = 8
+    paginator = Paginator(detalle_cuotas, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    try:
+        detalles_paginados=paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        detalles_paginados=paginator.get_page(1)
+    return render(request, 'list_det_cuo_pen.html',
                   {'detalle_cuotas': detalles_paginados, 'pago_cu': pago_cu})
 
 
@@ -407,7 +522,7 @@ def registra_pago_cuota(request, det_cuo_id):
                     messages.warning(request, 'No se puede pagar la cuota actual. La cuota del mes anterior no ha sido pagada.')
                     return redirect('/detalles_cuota/' + str(detalle_cuotas.pago_cuota.id))
     except Exception as e:
-        messages.success(request, 'Ups, ha ocurrido un problema')
+        messages.warning(request, 'Ups, ha ocurrido un problema')
     return redirect('/lista_pagos_cuotas/')
 
 from django.db import transaction
@@ -430,8 +545,30 @@ def eliminar_pago_cuota(request, det_cuo_id):
                 request, 'Se ha eliminado el pago de la cuota exitosamente.')
             return redirect('/lista_pagos_cuotas/')
     except Exception as e:
-        messages.success(request, 'Ups, ha ocurrido un problema')
+        messages.warning(request, 'Ups, ha ocurrido un problema')
     return redirect('/lista_pagos_cuotas/')
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def eliminar_pago_cuota_pendiente(request, det_cuo_id):  
+    try:
+        with transaction.atomic():
+            pago = get_object_or_404(pagos_cuotas_pendientes, id=det_cuo_id)
+            cuotas_canceladas = detalle_cuotas_pendientes.objects.filter(pago_cuota_pendientes=pago, estado=True)
+
+            if cuotas_canceladas.exists():
+                messages.warning(request, 'No se puede eliminar el descuento. Hay cuotas canceladas asociadas a este pago.')
+                return redirect('/lista_pagos_cuotas_pendientes')
+            
+            pagos_cuo = pagos_cuotas_pendientes.objects.get(id=det_cuo_id)
+            detalle_cuotas_pendientes.objects.filter(pago_cuota_pendientes=pagos_cuo).delete()
+            pagos_cuo.delete()
+            messages.success(
+                request, 'Se ha eliminado el pago de la cuota exitosamente.')
+            return redirect('/lista_pagos_cuotas_pendientes/')
+    except Exception as e:
+        messages.warning(request, 'Ups, ha ocurrido un problema')
+    return redirect('/lista_pagos_cuotas_pendientes/')
 
 
 @login_required
@@ -452,6 +589,14 @@ def eliminar_pago(request, pago_id):
     pagos = Pagos.objects.get(id=pago_id)
     pagos.delete()
     return redirect('/listar_pagos/')
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def eliminar_pago_pendiente(request, pago_id):
+    pagos = pagos_pendientes.objects.get(id=pago_id)
+    pagos.delete()
+    messages.success(request, 'Se ha eliminado el descuento exitosamente.')
+    return redirect('/listar_pagos_pendientes/')
 
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -797,3 +942,294 @@ def buscar_pagos(request):
         return JsonResponse({"rendered_table": rendered_table})
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
+
+def buscar_pagos_pendientes(request):
+    if request.method == "POST":
+        criterio = request.POST.get('criterio')
+        valor = request.POST.get('query')
+        pagos = []
+
+        if criterio:
+            # Realiza las consultas según el criterio y el valor ingresados
+            if criterio == 'nombres':
+                pagos = pagos_pendientes.objects.filter(socio__user__first_name__icontains=valor) | pagos_pendientes.objects.filter(socio__user__last_name__icontains=valor)
+            elif criterio == 'proveedor':
+                pagos = pagos_pendientes.objects.filter(proveedor__nombre__icontains=valor)
+            elif criterio == 'fecha':
+                pagos = pagos_pendientes.objects.filter(fecha_consumo__icontains=valor)
+            elif criterio == '1':
+                pagos = pagos_pendientes.objects.filter(estado=True)
+            elif criterio == '0':
+                pagos = pagos_pendientes.objects.filter(estado=False)
+
+        items_por_pagina = 10  # Cambia esto según tus necesidades
+        paginator = Paginator(pagos, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            pagos_paginados = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            pagos_paginados = paginator.get_page(1)
+
+        # Renderiza una tabla parcial con los resultados
+        rendered_table = render_to_string("list_pag_pen_par.html", {"pagos": pagos_paginados})
+
+        return JsonResponse({"rendered_table": rendered_table})
+
+    return JsonResponse({"error": "Método no permitido"}, status=400)
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def agregar_pagos_cuotas_pen(request):
+    try:
+        with transaction.atomic():
+            if request.method == 'GET':
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(user__in=users)
+                proveedores = Proveedor.objects.filter(estado=True)
+                return render(request, 'agregar_pago_cuo_pen.html', {'socios': socios, 'proveedores': proveedores})
+            else:
+                socio_id = request.POST.get('socio')
+                socios = Socios.objects.get(id=socio_id)
+
+                # proveedor_id = request.POST.get('proveedor')
+                # proveedores = Proveedor.objects.get(id=proveedor_id)
+
+                cantidad = request.POST.get('consumo_total')
+                numero_cuota = request.POST.get('numero_cuotas')
+
+                fecha_descuento = str(request.POST.get('fecha_descuento'))
+                fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
+                
+                if fecha_actual.day < 15:
+                    fecha_inicio_pagos = fecha_actual.replace(day=15)
+                else:
+                    next_month = fecha_actual.replace(day=1) + timedelta(days=32)
+                    fecha_inicio_pagos = next_month.replace(day=15)
+                
+                cantidadval = float(cantidad)
+                n_cuota = float(numero_cuota)
+                valor_cuo = cantidadval / n_cuota 
+
+                periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+                if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+                    pagoscuotas = pagos_cuotas_pendientes.objects.create(
+                        socio=socios, consumo_total=cantidad, fecha_descuento=fecha_descuento,
+                        numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo
+                    )
+                    pagoscuotas.save()
+
+                    fechas_pago = [fecha_inicio_pagos + timedelta(days=(30 * i)) for i in range(int(numero_cuota))]
+                    
+                    for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                        detalle_cuotas = detalle_cuotas_pendientes(
+                            pago_cuota_pendientes=pagoscuotas,
+                            numero_cuota=numero_cuota,
+                            fecha_descuento=fecha_pago,
+                            valor_cuota=valor_cuo,
+                            socio=socios
+                        )
+                        detalle_cuotas.save()
+
+                    messages.success(request, 'Se ha agregado con éxito el descuento por cuotas')
+                    return redirect('/lista_pagos_cuotas_pendientes/')
+                else:
+                    messages.warning(request, f'La fecha que ingresaste no está dentro del período actual de {periodo_seleccionado.nombre}')
+                    users = User.objects.filter(is_active=True)
+                    socios = Socios.objects.filter(user__in=users)
+                    proveedores = Proveedor.objects.filter(estado=True)
+                    return render(request, 'agregar_pago_cuo_pen.html', {'socios': socios, 'proveedores': proveedores})
+            
+    except Exception as e:
+        messages.warning(request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
+    return redirect('/lista_pagos_cuotas_pendientes/')
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def lista_pagos_cuotas_pendientes(request):
+    periodos = Periodo.objects.all()  # Obtener todos los períodos
+    anos = periodos.values_list('anio', flat=True).distinct()
+    #listar periodo por el select
+    periodoid = request.POST.get('periodoid')
+    fechas_periodo = {}
+    if periodoid:
+        periodo_seleccionado = Periodo.objects.filter(id=periodoid).first()
+        print(periodo_seleccionado)
+        if periodo_seleccionado:
+            fechas_periodo = {
+                'fecha_inicio': periodo_seleccionado.fecha_inicio,
+                'fecha_fin': periodo_seleccionado.fecha_fin
+            }
+           
+            print(periodo_seleccionado)
+            pagos = pagos_cuotas_pendientes.objects.filter(
+                Q(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
+                Q(fecha_descuento__lt=fechas_periodo['fecha_inicio'], estado="False")
+            ).order_by("-id","estado")
+    
+            context = {
+                'pago_cuotas': pagos,
+                'periodos': periodos,
+                'anos': anos,
+                'fechas_periodo': fechas_periodo,
+                'periodo_seleccionado': periodo_seleccionado,
+            }
+            rendered_table = render_to_string("pagos_cuotas_partial.html",context)
+            return JsonResponse({"rendered_table": rendered_table})
+    
+    #listar periodo actual
+    periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+    if periodo_seleccionado:
+        fechas_periodo = {
+            'fecha_inicio': periodo_seleccionado.fecha_inicio,
+            'fecha_fin': periodo_seleccionado.fecha_fin
+        }
+        pagos = pagos_cuotas_pendientes.objects.filter(
+                Q(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
+                Q(fecha_descuento__lt=fechas_periodo['fecha_inicio'], estado="False")
+            ).order_by("-id","estado")
+        items_por_pagina = 10
+        paginator = Paginator(pagos, items_por_pagina)
+        numero_pagina = request.GET.get('page')
+        try:
+            pagos = paginator.get_page(numero_pagina)
+        except PageNotAnInteger:
+            pagos = paginator.get_page(1)
+    else:
+        pagos = {}
+    context = {
+        'pago_cuotas': pagos,
+        'periodos': periodos,
+        'anos': anos,
+        'fechas_periodo': fechas_periodo,
+        'periodo_seleccionado': periodo_seleccionado,
+    }
+    return render(request, 'pagos_cuotas_pendientes.html', context)
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def registra_pago_cuota_pen(request, det_cuo_id): 
+    try:
+        with transaction.atomic():
+            detalle_cuotas = detalle_cuotas_pendientes.objects.get(id=det_cuo_id)
+            cuota_actual = detalle_cuotas.numero_cuota
+
+            if cuota_actual == 1:
+                detalle_cuotas.estado = True
+                pago_cuotas = pagos_cuotas_pendientes.objects.get(id=detalle_cuotas.pago_cuota_pendientes.id)
+                pago_cuotas.cuota_actual += 1
+
+                if pago_cuotas.cuota_actual == pago_cuotas.numero_cuotas:
+                    pago_cuotas.estado = True
+
+                detalle_cuotas.save()
+                pago_cuotas.save()
+
+                messages.success(request, 'Se ha registrado el pago de la cuota exitosamente.')
+                return redirect('/detalles_cuota_pendiente/' + str(detalle_cuotas.pago_cuota_pendientes.id))
+            else:
+                cuota_anterior = detalle_cuotas_pendientes.objects.filter(
+                    fecha_descuento__lt=detalle_cuotas.fecha_descuento,
+                    pago_cuota_pendientes=detalle_cuotas.pago_cuota_pendientes,
+                    numero_cuota=cuota_actual - 1
+                ).first()
+
+                if cuota_anterior is not None and cuota_anterior.estado:
+                    detalle_cuotas.estado = True
+                    pago_cuotas = pagos_cuotas_pendientes.objects.get(id=detalle_cuotas.pago_cuota_pendientes.id)
+                    pago_cuotas.cuota_actual += 1
+
+                    if pago_cuotas.cuota_actual == pago_cuotas.numero_cuotas:
+                        pago_cuotas.estado = True
+
+                    detalle_cuotas.save()
+                    pago_cuotas.save()
+
+                    messages.success(request, 'Se ha registrado el pago de la cuota exitosamente.')
+                    return redirect('/detalles_cuota_pendiente/' + str(detalle_cuotas.pago_cuota_pendientes.id))
+                else:
+                    messages.warning(request, 'No se puede pagar la cuota actual. La cuota del mes anterior no ha sido pagada.')
+                    return redirect('/detalles_cuota_pendiente/' + str(detalle_cuotas.pago_cuota_pendientes.id))
+    except Exception as e:
+        messages.warning(request, 'Ups, ha ocurrido un problema')
+        return redirect('/lista_pagos_cuotas_pendientes/')
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def agregar_pdf2(request, det_id): 
+    detalle_cuotas = detalle_cuotas_pendientes.objects.get(id=det_id)
+    if request.method == 'GET':
+        return render(request,'agregar_evidencia2.html', {'detalle_cuotas': detalle_cuotas}) 
+    else:
+        archivo_pdf = request.FILES['evidencia']
+        detalle_cuotas.evidencia=archivo_pdf
+        detalle_cuotas.save()
+        return redirect('/detalles_cuota_pendiente/' + str(detalle_cuotas.pago_cuota_pendientes.id))
+    
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def convertir_cuotas2(request, pago_id):
+    if request.method == 'GET':
+        try:
+            pagos = pagos_pendientes.objects.get(id=pago_id)
+            # form = PagosForm(instance=pagos)
+            print(pagos.consumo_total)
+            return render(request, 'convertir_pendientes.html', {'pagos': pagos})
+        except Exception as e:
+            messages.warning(request, 'Ups, ha ocurrido un problema')
+            return redirect('/lista_pagos_cuotas_pendientes/')
+
+    else:
+            socio_id = request.POST.get('socio')
+            socios = Socios.objects.get(id=socio_id)
+
+            # proveedor_id = request.POST.get('proveedor')
+            # proveedores = Proveedor.objects.get(id=proveedor_id)
+
+            cantidad = request.POST.get('consumo_total')
+            numero_cuota = request.POST.get('numero_cuotas')
+
+            fecha_descuento = str(request.POST.get('fecha_descuento'))
+            fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
+                
+            if fecha_actual.day < 15:
+                fecha_inicio_pagos = fecha_actual.replace(day=15)
+            else:
+                next_month = fecha_actual.replace(day=1) + timedelta(days=32)
+                fecha_inicio_pagos = next_month.replace(day=15)
+                
+            cantidadval = float(cantidad)
+            n_cuota = float(numero_cuota)
+            valor_cuo = cantidadval / n_cuota
+
+            periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+            if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+                pagoscuotas = pagos_cuotas_pendientes.objects.create(
+                    socio=socios, consumo_total=cantidad, fecha_descuento=fecha_descuento,
+                    numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo
+                )
+                pagoscuotas.save()
+
+                fechas_pago = [fecha_inicio_pagos + timedelta(days=(30 * i)) for i in range(int(numero_cuota))]
+                    
+                for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                        detalle_cuotas = detalle_cuotas_pendientes(
+                            pago_cuota_pendientes=pagoscuotas,
+                            numero_cuota=numero_cuota,
+                            fecha_descuento=fecha_pago,
+                            valor_cuota=valor_cuo,
+                            socio=socios
+                        )
+                        detalle_cuotas.save()
+
+                pagox = request.POST.get('id_pago')
+                print(pagox)
+                eliminar_pago_pendiente(request,pagox)
+
+                messages.success(request, 'Se ha agregado con exito el descuento por cuotas')
+                return redirect('/lista_pagos_cuotas_pendientes/')
+            else:
+                    messages.warning(request, f'La fecha que ingresaste no está dentro del período actual de {periodo_seleccionado.nombre}')
+                    users = User.objects.filter(is_active=True)
+                    socios = Socios.objects.filter(user__in=users)
+                    proveedores = Proveedor.objects.filter(estado=True)
+                    return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
