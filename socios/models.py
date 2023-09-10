@@ -26,6 +26,8 @@ class Socios(models.Model):
 
     def __str__(self):
         return self.user.first_name
+    class Meta:
+        ordering = ['user__last_name']
     
 class Aportaciones(models.Model):
     TIPOS_APORTACION = (

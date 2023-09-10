@@ -525,6 +525,18 @@ def actualizar_estados(request):
                 "SELECT * FROM actualizar_estados(%s, %s, %s);", [mes, anio, id_socio])
     return redirect(cerrar_periodo)
 
+def actualizar_estados_ayudas(request):
+    checks = request.POST.getlist('ayuda_id[]')
+    print(checks)
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    with connection.cursor() as cursor:
+        for id_ayuda in checks:
+            cursor.execute(
+                "SELECT * FROM actualizar_estados_ayudas(%s, %s, %s);", [mes, anio, id_ayuda])
+    return redirect(cerrar_periodo)
+
 
 def actualizar_descuentos(request):
     checks = request.POST.getlist('pago_id[]')

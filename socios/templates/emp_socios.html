@@ -67,6 +67,7 @@
         box-shadow: 0px 4px 8px rgb(134, 134, 134);
         margin: 5px;
         border-radius: 1%;
+        background-color: #34b234;
     }
 
     .image-header {
@@ -85,15 +86,17 @@
         font-weight: bold;
         color: white;
     }
+    table{
+        margin-top: 20px;
+    }
 </style>
 
 
 <div class="content-menu">
-
     <div class="socios-content ">
         <div class="botones-sup">
             <div class="botones_arriba">
-                <div class="image-header">
+                <div class="header">
                     <h3>Socios</h3>
                 </div>
                 <a href="{% url 'agg_socios' %}">
@@ -109,11 +112,11 @@
                 <a href="/registraraportaciones/">
                     <button style="margin: 5px;" class="add-socio-btn">Registrar Aportaciones (AE, CO)</button>
                 </a>
-                <a href="/reportes_datos_socios/" target="_blank" style=" text-decoration: none;
+                <!-- <a href="/reportes_datos_socios/" target="_blank" style=" text-decoration: none;
                  display: flex; flex-direction: column; align-items: center; text-align: center;">
-                    <i style="font-size: 50px; margin: 5px;" class="far fa-file-pdf"></i>
+                    <i style="font-size: 50px; margin: 5px; " class="far fa-file-pdf"></i>
                     <p>Datos Socios</p>
-                </a>
+                </a> -->
                 <div style="display: inline-flex; justify-content: end; width: max-content;">
                     <div class="search-form">
 
