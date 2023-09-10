@@ -191,7 +191,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label" for="cedula_aportador">Cédula del Aportador:</label>
-                                <input class="form-control" type="text" id="cedula_aportador" name="cedula_aportador" required>
+                                <input maxlength="10" class="form-control" type="text" id="cedula_aportador" name="cedula_aportador" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label" for="valor1">Valor de Aportación:</label>
@@ -219,10 +219,11 @@ $(document).ready(function() {
     $("#buscador_input").on("input", function() {
         var query = $(this).val();
         var criterio = document.getElementById('criterio').value;
+        var detalle_id = '{{detalle_id}}';
         console.log(criterio);
         console.log(query);
         $.ajax({
-            url: '{% url "buscar_detalle" %}',
+            url: '/buscar_detalle/'+detalle_id,
             type: "POST",
             data: {
                 csrfmiddlewaretoken: '{{ csrf_token }}',
@@ -237,9 +238,10 @@ $(document).ready(function() {
     
     $("#criterio").on("change", function() {
         var criterio = $(this).val();
+        var detalle_id = '{{detalle_id}}';
 
         $.ajax({
-            url: '{% url "buscar_detalle" %}',
+            url: '/buscar_detalle/'+detalle_id,
             type: "POST",
             data: {
                 csrfmiddlewaretoken: '{{ csrf_token }}',
