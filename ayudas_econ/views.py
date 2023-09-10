@@ -1,7 +1,7 @@
 from datetime import date
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import AyudasMot,AyudasEconomicas, Socios, DetallesAyuda
+from .models import AyudasMot,AyudasEconomicas, Socios, DetallesAyuda,ConsumosCuotaOrdinaria
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.contrib import messages
 from .models import datos_para_ayuda
@@ -193,7 +193,7 @@ def formRegistroAyuda(request):
     })
 
 def aggAyuda(request):
-    mmotivo=AyudasMot.objects.get(id=request.POST['motivo'])
+    mmotivo=AyudasMot.objects.get(id=request.POST.get('motivo'))
     socios_disponibles=Socios.objects.all()
     total_ayuda_permanente, total_cuota_ordinaria=datos_para_ayuda()
     print(total_ayuda_permanente)
@@ -204,10 +204,10 @@ def aggAyuda(request):
         if valorsocio_input != '':
             valorsocio = Decimal(valorsocio_input)
     if(request.POST.get('socio')=="null"):
-        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'], valorsocio=valorsocio ,total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
+        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio ,total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
     else:
         socio=Socios.objects.get(id=request.POST['socio'])
-        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=request.POST['evidencia'], valorsocio=valorsocio, total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
+        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
 
     if ayuda.total <= total_ayuda_permanente[0][1]:
         # Utiliza una transacción para evitar crear detalles de ayuda si ocurre un error
@@ -332,11 +332,11 @@ def guardar_aportacion(request, detalle_id):
 #     socio_id_null = detalle.ayuda.socio_id is None
 #     return JsonResponse({'socio_id_null': socio_id_null})
 
-def buscar_detalle(request):
+def buscar_detalle(request, ayuda_id):
     if request.method == "POST":
         criterio = request.POST.get('criterio')
         valor = request.POST.get('query')
-        detalles_ayuda = DetallesAyuda.objects.all().order_by("cancelado")
+        detalles_ayuda = DetallesAyuda.objects.filter(ayuda=ayuda_id).order_by("cancelado")
 
         if criterio:
             if criterio == 'nombres':
@@ -401,9 +401,80 @@ def editar_evidencia_ayuda(request, ayuda_id):
             ayuda.evidencia=request.FILES['evidencia']
         else:
             messages.warning(request, "Seleccione un archivo en formato pdf")
-        messages.success(request,'EL prestamo fue editado de forma exitosa')
+        messages.success(request,'La evidencia fue editada de manera exitosa')
         ayuda.save()
 
         return redirect('/verayudas/')
 
+
+#------------------------------------Cuotas Ordinarias--------------------------------------#
+def listar_gastos_cuotas_ordinaria(request):
+    total_ayuda_permanente, total_cuota_ordinaria=datos_para_ayuda()
+    gastos=ConsumosCuotaOrdinaria.objects.all().order_by('-fecha')
+    items_por_pagina = 10
+    paginator = Paginator(gastos, items_por_pagina)
+    numero_pagina = request.GET.get('page')
+    
+    try:
+        gastos_pag = paginator.get_page(numero_pagina)
+    except PageNotAnInteger:
+        gastos_pag = paginator.get_page(1)
+    
+  
+    contexto = {
+        'gastos': gastos_pag,
+        'periodo': {} ,
+        'total_ayuda_permanente':total_ayuda_permanente,
+        'total_cuota_ordinaria':total_cuota_ordinaria
+
+    }
+    
+    return render(request, 'consumos_cuota_ordinaria.html', contexto)
+
+def registrar_consumo_ordinaria(request):
+    total_ayuda_permanente, total_cuota_ordinaria = datos_para_ayuda()
+    
+    if request.method == 'POST':
+        descripcion = request.POST.get('descripcion')
+        valor = Decimal(request.POST.get('consumo'))  # Convertir el valor a Decimal
+        fecha = request.POST.get('fecha')
         
+        if 'evidencia' in request.FILES:
+            evidencia = request.FILES['evidencia']
+        else:
+            evidencia = None
+        
+        # Verificar si el valor es menor o igual a total_cuota_ordinaria
+        if valor <= total_cuota_ordinaria[0][1]:
+            # Guardar el consumo en la base de datos
+            consumo_cuota = ConsumosCuotaOrdinaria(
+                descripcion=descripcion,
+                valor=valor,
+                fecha=fecha,
+                evidencia=evidencia,
+            )
+            consumo_cuota.save()
+            response_data = {'message': 'Consumo registrado con éxito'}
+        else:
+            response_data = {'status': 'error', 'message': 'El valor del consumo es mayor que la cuota ordinaria disponible.'}
+    
+    return JsonResponse(response_data)
+
+def editar_evidencia_consumo(request, consumo_id):
+    consumo= ConsumosCuotaOrdinaria.objects.get(id=consumo_id)
+    if request.method=='GET':
+        return render(request,'editar_evidencia_ordinaria.html', {'consumo': consumo })
+    else:
+        if 'evidencia' in request.FILES:
+            consumo.evidencia=request.FILES['evidencia']
+        else:
+            messages.warning(request, "Seleccione un archivo en formato pdf")
+        messages.success(request,'La evidencia fue editada de manera exitosa')
+        consumo.save()
+
+        return redirect('/lista_cuotas_ordinarias/')
+    
+def deleteConsumo(request, consumo_id):
+    consumo=ConsumosCuotaOrdinaria.objects.get(id=consumo_id)
+    consumo.delete()
+    return redirect('/lista_cuotas_ordinarias')

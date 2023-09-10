@@ -1144,6 +1144,53 @@ END;
 $$ LANGUAGE plpgsql;
 """
 
+create_function7="""
+CREATE OR REPLACE FUNCTION actualizar_cuota_ordinaria()
+RETURNS TRIGGER AS $$
+DECLARE
+  valor_consumo numeric(8,2);
+BEGIN
+  -- Obtener el valor ingresado en la tabla de consumos
+  SELECT valor INTO valor_consumo FROM ayudas_econ_consumoscuotaordinaria WHERE id = NEW.id;
+
+  -- Restar el valor de la cuota ordinaria actual
+  UPDATE socios_total_cuota_ordinaria
+  SET total_actual = total_actual - valor_consumo
+  WHERE tipo_aportacion = 'CO';
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function8="""
+CREATE OR REPLACE FUNCTION actualizar_total_ayuda_permanente_eliminar()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Sumar el valor del registro que se va a eliminar al campo total_actual de la tabla socios_total_ayuda_permanente
+  UPDATE socios_total_ayuda_permanente
+  SET total_actual = total_actual + OLD.total
+  WHERE tipo_aportacion = 'EA';
+
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function9="""
+CREATE OR REPLACE FUNCTION sumar_cuota_ordinaria()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Suma el valor eliminado a la tabla socios_total_cuota_ordinaria
+  UPDATE socios_total_cuota_ordinaria
+  SET total_actual = total_actual + OLD.valor
+  WHERE tipo_aportacion = 'CO';
+
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
 create_trigger1="""
 CREATE TRIGGER trigger_nuevo_socio
 AFTER INSERT ON public.socios_socios
@@ -1187,6 +1234,27 @@ FOR EACH ROW
 EXECUTE FUNCTION actualizar_total_despues_de_insertar();
 """
 
+create_trigger7="""
+CREATE TRIGGER trigger_restar_cuota_ordinaria
+AFTER INSERT ON ayudas_econ_consumoscuotaordinaria
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_cuota_ordinaria();
+"""
+
+create_trigger8="""
+CREATE TRIGGER before_delete_ayuda_economica
+BEFORE DELETE ON ayudas_econ_ayudaseconomicas
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_total_ayuda_permanente_eliminar();
+"""
+
+create_trigger9="""
+CREATE TRIGGER sumar_valor_cuota_ordinaria
+BEFORE DELETE ON ayudas_econ_consumoscuotaordinaria
+FOR EACH ROW
+EXECUTE FUNCTION sumar_cuota_ordinaria();
+"""
+
 
 class Migration(migrations.Migration):
 
@@ -1222,10 +1290,16 @@ class Migration(migrations.Migration):
         migrations.RunSQL(create_function4),
         migrations.RunSQL(create_function5),
         migrations.RunSQL(create_function6),
+        migrations.RunSQL(create_function7),
+        migrations.RunSQL(create_function8),
+        migrations.RunSQL(create_function9),
         migrations.RunSQL(create_trigger1),
         migrations.RunSQL(create_trigger2),
         migrations.RunSQL(create_trigger3),
         migrations.RunSQL(create_trigger4),
         migrations.RunSQL(create_trigger5),
         migrations.RunSQL(create_trigger6),
+        migrations.RunSQL(create_trigger7),
+        migrations.RunSQL(create_trigger8),
+        migrations.RunSQL(create_trigger9),
     ]

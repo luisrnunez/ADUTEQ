@@ -40,6 +40,12 @@ class AyudasExternas(models.Model):
     fecha=models.DateField()
     detalle=models.ForeignKey(AyudasEconomicas, on_delete=models.CASCADE)
 
+class ConsumosCuotaOrdinaria(models.Model):
+    descripcion=models.TextField(max_length=300)
+    valor=models.DecimalField(max_digits = 8, decimal_places = 2)
+    fecha=models.DateField()
+    evidencia=models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
+
 
 @receiver(post_save, sender=AyudasEconomicas)
 def actualizar_total_ayuda_permanente(sender, instance, created, **kwargs):
