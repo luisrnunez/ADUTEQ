@@ -11,82 +11,119 @@
             justify-content: center;
             margin-top: 20px;
         }
+
+        .botones_arriba {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-right: 10px;
+            flex-flow: row wrap;
+            border: 1px solid rgb(187, 189, 186);
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgb(134, 134, 134);
+            margin: 5px;
+            border-radius: 1%;
+            background-color: #34b234;
+        }
+
+        .image-header {
+            margin-bottom: 20px;
+            background-color: #34b234;
+            width: 100%;
+            margin: auto;
+            text-align: center;
+            margin-bottom: 5px;
+            /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+        }
+
+        h3 {
+            font-weight: bold;
+            color: white;
+        }
+
+        table {
+            margin-top: 20px;
+        }
     </style>
-    <div class="content-menu" style="padding-top: 0%;">
-
-        <div class="header">
-            <h1>Detalles de pago de <b>{{ socio.user.first_name }}</b> <b>{{ socio.user.last_name }}</b></h1>
-        </div>
-        <div class="socios-content ">
+    <div class="content-menu">
+        <div class="socios-content">
             <div class="botones-sup">
-                <a href="/prestamos/"> <button class="add-socio-btn"> Atras</button></a>
+                <div class="botones_arriba">
+                    <div class="header">
+                        <h3>Detalles de pago de <b>{{ socio.user.first_name }}</b> <b>{{ socio.user.last_name }}</b>
+                        </h3>
+                    </div>
+                    <a href="/prestamos/"> <button class="add-socio-btn"> Atras</button></a>
+                    <table class="socios-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Socio</th>
+                                <th scope="col">Cuota</th>
+                                <th scope="col">Monto a pagar</th>
+                                <th scope="col">Evidencia</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Registrar</th>
+                                <th scope="col">Evidencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cuota in cuotas %}
+                            <tr>
+                                <td>{{ cuota.socio.user.first_name }}</td>
+                                <td>{{ cuota.numero_cuota}}</td>
+                                <td>{{ cuota.monto_pago }}$</td>
+                                <td>
+        
+                                    {% if cuota.evidencia %}
+                                    <a href="{{ cuota.evidencia.url }}" target="_blank">
+                                        <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                    </a>
+                                    {% else %}
+                                    Sin evidencia
+                                    {% endif %}
+        
+                                </td>
+        
+                                <td>
+                                    {% if cuota.cancelado %}
+                                    <button class="green-button">
+                                        Cancelado
+                                    </button>
+                                    {% else %}
+                                    <button class="red-button">
+                                        Pendiente
+                                    </button>
+                                    {% endif %}
+                                </td>
+        
+                                <td>{{ cuota.fecha_pago }}</td>
+                                <td>
+                                    {% if cuota.cancelado == False %}
+                                    <button class="edit-btn"
+                                        onclick="confirmarPagoCuota('{{ cuota.id }}','{{ cuota.socio.user.first_name }}','{{ cuota.cancelado }}','{{ cuota.socio.id }}','{{ cuota.prestamo.id }}')">
+                                        Registrar pago
+                                    </button>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if cuota.cancelado %}
+                                    <form action="{% url 'presagregar_pdf' cuota.id %}">
+                                        <button class="edit-btn">Editar</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+        
+                        </tbody>
+                    </table>
 
+                </div>
             </div>
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Socio</th>
-                        <th scope="col">Cuota</th>
-                        <th scope="col">Monto a pagar</th>
-                        <th scope="col">Evidencia</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Registrar</th>
-                        <th scope="col">Evidencia</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cuota in cuotas %}
-                    <tr>
-                        <td>{{ cuota.socio.user.first_name }}</td>
-                        <td>{{ cuota.numero_cuota}}</td>
-                        <td>{{ cuota.monto_pago }}$</td>
-                        <td>
-
-                            {% if cuota.evidencia %}
-                            <a href="{{ cuota.evidencia.url }}" target="_blank">
-                                <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
-                            </a>
-                            {% else %}
-                            Sin evidencia
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-                            {% if cuota.cancelado %}
-                            <button class="green-button">
-                                Cancelado
-                            </button>
-                            {% else %}
-                            <button class="red-button">
-                                Pendiente
-                            </button>
-                            {% endif %}
-                        </td>
-
-                        <td>{{ cuota.fecha_pago }}</td>
-                        <td>
-                            {% if cuota.cancelado == False %}
-                            <button class="edit-btn"
-                                onclick="confirmarPagoCuota('{{ cuota.id }}','{{ cuota.socio.user.first_name }}','{{ cuota.cancelado }}','{{ cuota.socio.id }}','{{ cuota.prestamo.id }}')">
-                                Registrar pago
-                            </button>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if cuota.cancelado %}
-                            <form action="{% url 'presagregar_pdf' cuota.id %}">
-                                <button class="edit-btn">Editar</button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-
-                </tbody>
-            </table>
-
             <div class="pagination-container">
                 <nav aria-label="...">
                     <ul class="pagination">
@@ -106,34 +143,34 @@
                     </ul>
                 </nav>
             </div>
-
         </div>
-        <script>
+    </div>
+    <script>
 
-            function confirmarPagoCuota(cuotaId, socioNombre, cancelado, socio_id, prestamo_id) {
-                var valor;
+        function confirmarPagoCuota(cuotaId, socioNombre, cancelado, socio_id, prestamo_id) {
+            var valor;
 
-                if (cancelado == 'False') {
-                    valor = 0;
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: 'Registrar el pago de este prestamo al soci@ ' + socioNombre,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí',
-                        cancelButtonText: 'Cancelar',
-                        dangerMode: true,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // El usuario ha confirmado la edición, redirigir a la página de edición
-                            window.location.href = '/prestamo/aplicar_pago_cuota/' + cuotaId + '/' + valor + '/' + socio_id + '/' + prestamo_id + '/';
-                            print(valor)
-                        }
-                    });
+            if (cancelado == 'False') {
+                valor = 0;
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Registrar el pago de este prestamo al soci@ ' + socioNombre,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    cancelButtonText: 'Cancelar',
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // El usuario ha confirmado la edición, redirigir a la página de edición
+                        window.location.href = '/prestamo/aplicar_pago_cuota/' + cuotaId + '/' + valor + '/' + socio_id + '/' + prestamo_id + '/';
+                        print(valor)
+                    }
+                });
 
-                }
             }
+        }
 
-        </script>
+    </script>
 
-        {% endblock %}
+    {% endblock %}

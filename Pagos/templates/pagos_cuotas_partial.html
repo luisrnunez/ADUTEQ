@@ -1,15 +1,15 @@
 <table class="socios-table">
     <thead>
         <tr>
-            <th scope="col">ID</th>
+            <!-- <th scope="col">ID</th> -->
             <th scope="col">Socio</th>
             <th scope="col">Proveedor</th>
             <th scope="col">Numero Cuotas</th>
             <!-- <th scope="col">Cuota Actual</th> -->
             <th scope="col">Consumo Total</th>
             <!-- <th scope="col">Valor Cuota</th> -->
-            <th scope="col">Estado</th>
             <th scope="col">Fecha Descuento</th>
+            <th scope="col">Estado</th>
             <th scope="col">Detalle</th>
             {% if periodo_seleccionado.activo %}
             <th scope="col">Eliminar</th>
@@ -19,7 +19,7 @@
     <tbody>
         {% for pago_cuota in pago_cuotas %}
         <tr>
-            <td>{{pago_cuota.id}}</td>
+            <!-- <td>{{pago_cuota.id}}</td> -->
             <td>{{pago_cuota.socio.user.last_name }} {{pago_cuota.socio.user.first_name }}</td>
             <td>{{pago_cuota.proveedor.nombre}}</td>
             <td>{{pago_cuota.numero_cuotas}}</td>

@@ -44,3 +44,34 @@ class Detalle_cuotas(models.Model):
     fecha_descuento=models.DateField()
     evidencia = models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
     valor_cuota=models.DecimalField(max_digits=8,decimal_places=2, default=120)
+
+
+class pagos_pendientes(models.Model):
+    socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
+    consumo_total=models.DecimalField(max_digits=8,decimal_places=2)
+    fecha_consumo=models.DateField()
+    estado = models.BooleanField(default=False)
+    class Meta:
+        ordering = ['fecha_consumo']
+
+class pagos_cuotas_pendientes(models.Model):
+    socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
+    numero_cuotas=models.IntegerField()
+    cuota_actual=models.IntegerField()
+    consumo_total=models.DecimalField(max_digits=8,decimal_places=2)
+    valor_cuota=models.DecimalField(max_digits=8,decimal_places=2)
+    estado = models.BooleanField(default=False)
+    fecha_descuento=models.DateField()
+    class Meta:
+        ordering = ['fecha_descuento']
+
+class detalle_cuotas_pendientes(models.Model):
+    socio=models.ForeignKey(Socios, on_delete=models.CASCADE, default=1)
+    pago_cuota_pendientes=models.ForeignKey(pagos_cuotas_pendientes, on_delete=models.CASCADE)
+    numero_cuota=models.IntegerField( default=0)
+    estado = models.BooleanField(default=False)
+    fecha_descuento=models.DateField()
+    evidencia = models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
+    valor_cuota=models.DecimalField(max_digits=8,decimal_places=2)
+    class Meta:
+        ordering = ['fecha_descuento']

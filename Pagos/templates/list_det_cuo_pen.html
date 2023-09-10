@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .botones_arriba {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-right: 10px;
+        flex-flow: row wrap;
+        border: 1px solid rgb(187, 189, 186);
+        width: 100%;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgb(134, 134, 134);
+        margin: 5px;
+        border-radius: 1%;
+        background-color: #34b234;
+    }
+
+    .image-header {
+        margin-bottom: 20px;
+        background-color: #34b234;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 5px;
+        /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+    }
+
+    h3 {
+        font-weight: bold;
+        color: white;
+    }
+    table{
+        margin-top: 20px;
+    }
+</style>
+
+
+<div class="content-menu">
+    <div class="socios-content">
+        <div class="botones-sup">
+            <div class="botones_arriba">
+                <div class="header">
+                    <h3> Detalle Cuotas Pendientes {{pago_cu.socio}} {{pago_cu.socio.user.last_name}}</h3>
+                </div>
+
+
+                <a href="/lista_pagos_cuotas_pendientes/"> <button class="add-socio-btn">Lista Pagos Cuotas Pendientes</button></a>
+
+                <table class="socios-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">No Cuota</th>
+                            <th scope="col">Valor Cuota</th>
+                            <th scope="col">Fecha de Pago</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Evidencia</th>
+                            <th scope="col">Registar Pago</th>
+                            <th scope="col">Registar Evidencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle_cuota in detalle_cuotas %}
+                        <tr>
+                            <td>{{detalle_cuota.numero_cuota}}</td> 
+                            <td>{{detalle_cuota.pago_cuota_pendientes.valor_cuota}}</td>
+                            <td>{{detalle_cuota.fecha_descuento}}</td>
+                            <td>
+                                {% if detalle_cuota.estado %}
+                                <button class="green-button">
+                                    Cancelado
+                                </button>
+                                {% else %}
+                                <button class="red-button">
+                                    Pendiente
+                                </button>
+                                {% endif %}
+                            </td>
+
+                            <td>
+
+                                {% if detalle_cuota.evidencia %}
+                                <a href="{{ detalle_cuota.evidencia.url }}" target="_blank">
+                                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                </a>
+                                {% else %}
+                                Sin evidencia
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {% if detalle_cuota.estado == False %}
+                                <button class="edit-btn"
+                                    onclick="confirmarPagoCuota('{{ detalle_cuota.id }}','{{ detalle_cuota.pago_cuota_pendientes.socio }}')">
+                                    Registrar pago
+                                </button>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if detalle_cuota.estado == True %}
+                                <form action="{% url 'agregar_pdf2' detalle_cuota.id %}">
+                                    {% csrf_token %}
+                                    <button class="edit-btn">Agregar Evidencia</button>
+                                </form>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="pagination-container">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    {% if detalle_cuotas.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="Primero">
+                            Primero
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ detalle_cuotas.previous_page_number }}"
+                            aria-label="Anterior">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="pagination-item active">
+                        <span class="page-link">{{ detalle_cuotas.number }}</span>
+                    </li>
+                    {% if detalle_cuotas.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ detalle_cuotas.next_page_number }}" aria-label="Siguiente">
+                            Siguiente
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ detalle_cuotas.paginator.num_pages }}" aria-label="Último">
+                            Último
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+
+    </div>
+</div>
+<script>
+
+    function confirmarPagoCuota(cuotaId, socioNombre) {
+        var valor;
+
+        valor = 0;
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Registrar el pago de esta cuota al soci@ ' + socioNombre,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/registra_pago_cuota_pen/' + cuotaId;
+            }
+        });
+
+    }
+
+</script>
+
+{% endblock %}

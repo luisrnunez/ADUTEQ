@@ -406,7 +406,7 @@ def ListaSocios(request):
     usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
     socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
     periodo={}
-    items_por_pagina = 10
+    items_por_pagina = 20
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     try:

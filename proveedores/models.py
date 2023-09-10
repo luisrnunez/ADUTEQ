@@ -12,7 +12,7 @@ class Proveedor(models.Model):
     ruc=models.CharField(unique=True,max_length=13)
     direccion=models.CharField(max_length=500)
     comision=models.IntegerField()
-    cupo=models.DecimalField(max_digits = 8, decimal_places = 2)
+    cupo=models.DecimalField(max_digits = 8, decimal_places = 2) 
     estado=models.BooleanField(default=False)
 
 
