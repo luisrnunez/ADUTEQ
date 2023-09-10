@@ -14,6 +14,14 @@
 <body>
 
 {% block content %}
+<style>
+    .styled-label {
+        font-weight: bold; 
+        font-size: 16px;
+        color: #333; 
+        float: right;
+}
+</style>
     <!-- Aquí va el contenido de la página -->
     <div class="content-menu" style="padding-top: 0%;">
 
@@ -25,6 +33,7 @@
                 <form id="registro-formayuda" action="/aggAyuda/" method="POST">{% csrf_token %}
                     
                     <!-- <input maxlength="50" type="text" id="motivo" placeholder="Fulanito" name="motivo" required> -->
+                    <label class="styled-label" for="">Fondo Actual: {{ total_ayuda_permanente.0.1 }}</label>
                     
                     <label for="motivo">Motivo:</label>
                     <select name="motivo" id="selectmotivos">
@@ -48,14 +57,14 @@
                     <label for="descripcion">Descripción:</label>
                     <input maxlength="200" type="text" id="descripcion" name="descripcion" required>
 
-                    <label id="labelValorsocio" for="valorsocio">Valor por socio:</label>
-                    <input type="number" step="any" id="valorsocio" name="valorsocio" placeholder="3.00-10.00" required>
+                    <label id="labelValorsocio" for="valorsocio">Total:</label>
+                    <input type="number" step="any" id="total" name="total" required>
 
                     <label for="fecha">Fecha:</label>
                     <input type="date" id="fecha" name="fecha">
 
-                    <label for="evidencia">Evidencia:</label>
-                    <input style="margin: 0px 0px 20px 0px;" type="file" id="evidencia" name="evidencia">
+                    <!-- <label for="evidencia">Evidencia:</label>
+                    <input style="margin: 0px 0px 20px 0px;" type="file" id="evidencia" name="evidencia"> -->
 
 
                     <input type="submit" value="Agregar Ayuda">
@@ -93,7 +102,7 @@
         });
       </script> -->
 
-      <script>
+      <!-- <script>
         function mostrarOcultarValor(select) {
             var valorsocioInput = document.getElementById("valorsocio");
             var labelValorsocio = document.getElementById("labelValorsocio");
@@ -108,7 +117,7 @@
                 labelValorsocio.style.display = "inline";
             }
         }
-        </script>
+        </script> -->
         
     {% endblock %}
 </body>

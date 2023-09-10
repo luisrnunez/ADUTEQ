@@ -2,6 +2,11 @@
 {% load static %}
 
 {% block content %}
+<style>
+    #tasaInteresDiv {
+    display: none;
+}
+</style>
     <!-- Aquí va el contenido de la página -->
     <div class="content-menu" style="padding-top: 0%;">
 
@@ -24,15 +29,40 @@
                   
                     <label for="plazo_meses">Plazo en meses:</label>
                     <input type="number" pattern="[1][12]" maxlength="2" id="plazo_meses" name="plazo_meses" value="{{ prestamo.plazo_meses }}" required>
+                    
+                    <div style="display: flex; align-items: center;">
+                        <label style="font-size: 11px; margin-top: 10px;" for="emergente">Es Emergente?:</label>
+                        <input type="checkbox" id="emergente" name="emergente" {% if cupo.permanente %}checked{% endif %} style="transform: scale(1); margin-left: 10px;">
+                    </div>
                   
-                    <label for="tasa_interes">Tasa de interés:</label>
-                    <input type="number" id="tasa_interes" name="tasa_interes" value="{{ prestamo.tasa_interes }}" required>
+                    <div id="tasaInteresDiv">
+                        <label for="tasa_interes">Tasa de Interés:</label>
+                        <input step="0.01" type="number" id="tasa_interes" name="tasa_interes" value="{{ prestamo.tasa_interes }}">
+                    </div>
+                    <script>
+                        document.getElementById('tasa_interes').addEventListener('input', function() {
+                            if (this.value.length > 2) {
+                                this.value = this.value.slice(0, 2);
+                            }
+                        });
+                        </script>
                   
-                    <label for="fecha_prestamo">Fecha:</label>
+                    <label for="fecha_prestamo">Fecha Prestamo:</label>
                     <input type="date" id="fecha_prestamo" name="fecha_prestamo" value="{{ prestamo.fecha_prestamo }}" required>
+
+                    <div style="display: flex; align-items: center;">
+                        <label style="font-size: 11px; margin-top: 10px;" for="restaurar_cupo"><strong>Seleccionar inicio de pago:</strong></label>
+                        <input type="checkbox" id="primer_pago" name="primer_pago" {% if cupo.permanente %}checked{% endif %} style="transform: scale(1); margin-left: 10px;">
+                    </div>
+
+                    <div style="display: none;" id="fecha_inicio_container">
+                        <label for="fecha_prestamo">Fecha inicio:</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                    </div>
+
                   
                 
-                    <label for="descripcion">Descripción:</label>
+                    <label style="margin: 20px 0px 0px 0px;" for="descripcion">Descripción:</label>
                     <textarea id="descripcion" name="descripcion">{{ prestamo.descripcion }}</textarea>
                   
                     <input type="submit" value="Agregar prestamo">
@@ -45,6 +75,44 @@
         </div>
         <!-- Resto del contenido de la página -->
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var emergenteCheckbox = document.getElementById('emergente');
+            var tasaInteresDiv = document.getElementById('tasaInteresDiv');
+    
+            emergenteCheckbox.addEventListener('change', function () {
+                if (emergenteCheckbox.checked) {
+                    tasaInteresDiv.style.display = 'block';
+                } else {
+                    tasaInteresDiv.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const primerPagoCheckbox = document.getElementById('primer_pago');
+            const fechaInicioContainer = document.getElementById('fecha_inicio_container');
+            const fechaInicioInput = document.getElementById('fecha_inicio');
+        
+            // Función para mostrar u ocultar los campos de fecha
+            function toggleFechaInicio() {
+                if (primerPagoCheckbox.checked) {
+                    fechaInicioContainer.style.display = 'block';
+                    fechaInicioInput.required = true;
+                } else {
+                    fechaInicioContainer.style.display = 'none';
+                    fechaInicioInput.required = false;
+                }
+            }
+        
+            // Agregar un controlador de eventos para el cambio de la casilla de verificación
+            primerPagoCheckbox.addEventListener('change', toggleFechaInicio);
+        
+            // Llamar a la función inicialmente para que coincida con el estado inicial de la casilla de verificación
+            toggleFechaInicio();
+        });
+        </script>
     
     <script>
            var campoNumerico = document.getElementById("ruc");

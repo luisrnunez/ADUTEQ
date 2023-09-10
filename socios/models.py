@@ -38,6 +38,17 @@ class Aportaciones(models.Model):
     monto = models.DecimalField(max_digits=8, decimal_places=2)
     fecha = models.DateField(null=True)
 
+class Total_Ayuda_Permanente(models.Model):
+    tipo_aportacion = models.CharField(max_length=2, primary_key=True)
+    total_actual = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha_transaccion = models.DateField()
+
+class Total_Cuota_Ordinaria(models.Model):
+    tipo_aportacion = models.CharField(max_length=2, primary_key=True)
+    total_actual = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha_transaccion = models.DateField()
+
+
 # @receiver(post_save, sender=Socios)
 # def agregar_aportaciones_nuevo_socio(sender, instance, created, **kwargs):
 #     if created:

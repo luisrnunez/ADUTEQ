@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import guardar_pago_cuota, guardar_prestamo, mostrar_prestamo,editar_prestamo,aplicar_pago, mostrar_detalles,mostrar_detalles_todo, aplicar_pago_cuota, eliminar_prestamo_y_cuotas, editar_detalles, presagregar_pdf
+from .views import guardar_pago_cuota, guardar_prestamo, mostrar_prestamo,editar_prestamo,aplicar_pago, mostrar_detalles,mostrar_detalles_todo, aplicar_pago_cuota, eliminar_prestamo_y_cuotas, editar_detalles, presagregar_pdf, editar_evidencia
 
 urlpatterns = [
     path('prestamo/guardar/', guardar_prestamo, name='guardar_prestamo'),
@@ -8,6 +8,7 @@ urlpatterns = [
     path('prestamo/aplicar_pago/<int:prestamo_id>/<int:valor>/',aplicar_pago, name = 'aplicar_pago'),
 
     path('prestamo/presagregar_pdf/<int:det_id>/',presagregar_pdf, name = 'presagregar_pdf'),
+    path('prestamo/editar_evidencia/<int:prestamo_id>/',editar_evidencia, name = 'editar_evidencia'),
 
     path('detalles_pago/<int:socio_id>/<int:prestamo_id>', mostrar_detalles , name='mostrar_detalles_pago'),
     path('detalles_pago/all/', mostrar_detalles_todo , name='mostrar_detalles_todo'),

@@ -1,5 +1,5 @@
 import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from gettext import translation
 from ipaddress import summarize_address_range
 import os
@@ -271,7 +271,7 @@ def agregar_pagos_cuotas(request):
             proveedor_id = request.POST.get('proveedor')
             proveedores = Proveedor.objects.get(id=proveedor_id)
 
-            cantidad = request.POST.get('consumo_total')
+            cantidad = Decimal(request.POST.get('consumo_total'))
             
 
             # fecha = request.POST.get('fecha_descuento')
@@ -282,9 +282,12 @@ def agregar_pagos_cuotas(request):
             fechas_pago = [
                 fecha_actual + timedelta(days=(30 * (i+1))) for i in range(int(numero_cuoa))]
 
-            cantidadval = float(cantidad)
-            n_cuota = float(numero_cuoa)
+            cantidadval = Decimal(cantidad)
+            n_cuota = Decimal(numero_cuoa)
             valor_cuo = cantidadval / n_cuota
+            valor_cuo = valor_cuo.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            print(valor_cuo)
+            
 
             # if(str(cantidad)>cupo):
             #     messages.warning(request, 'El valor que desea ingrear es superior al cupo brindado por el proveedor')
@@ -296,7 +299,13 @@ def agregar_pagos_cuotas(request):
                 )
                 pagoscuotas.save()
 
+                diferencia=cantidadval-(valor_cuo* (Decimal(numero_cuoa)))
+                print(diferencia)
+
                 for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                    if numero_cuota == int(numero_cuoa):
+                        valor_cuo += diferencia
+
                     detalle_cuatas = Detalle_cuotas(
                         pago_cuota=pagoscuotas,
                         numero_cuota=numero_cuota,

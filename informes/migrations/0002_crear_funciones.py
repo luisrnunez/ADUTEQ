@@ -1076,6 +1076,74 @@ END;
 $$ LANGUAGE plpgsql;
 """
 
+create_function4="""
+CREATE OR REPLACE FUNCTION distribuir_aportacion()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.tipo_aportacion = 'AE' THEN
+        -- Actualiza la tabla de total de ayuda permanente
+        INSERT INTO socios_total_ayuda_permanente (tipo_aportacion, total_actual, fecha_transaccion)
+        VALUES (
+            'EA',
+            COALESCE((SELECT total_actual FROM socios_total_ayuda_permanente WHERE tipo_aportacion = 'EA'), 0) + NEW.monto,
+            NEW.fecha
+        )
+        ON CONFLICT (tipo_aportacion) DO UPDATE
+        SET
+            total_actual = EXCLUDED.total_actual,
+            fecha_transaccion = EXCLUDED.fecha_transaccion;
+    ELSIF NEW.tipo_aportacion = 'CO' THEN
+        -- Actualiza la tabla de total de cuota ordinaria
+        INSERT INTO socios_total_cuota_ordinaria (tipo_aportacion, total_actual, fecha_transaccion)
+        VALUES (
+            'CO',
+            COALESCE((SELECT total_actual FROM socios_total_cuota_ordinaria WHERE tipo_aportacion = 'CO'), 0) + NEW.monto,
+            NEW.fecha
+        )
+        ON CONFLICT (tipo_aportacion) DO UPDATE
+        SET
+            total_actual = EXCLUDED.total_actual,
+            fecha_transaccion = EXCLUDED.fecha_transaccion;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function5="""
+CREATE OR REPLACE FUNCTION actualizar_total_y_cancelado()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Actualizar el campo total en ayudas_econ_ayudaseconomicas
+    UPDATE ayudas_econ_ayudaseconomicas AS ae
+    SET total = total + NEW.valor
+    WHERE ae.id = NEW.ayuda_id;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function6="""
+CREATE OR REPLACE FUNCTION actualizar_total_despues_de_insertar()
+RETURNS TRIGGER AS $$
+BEGIN
+    DECLARE
+        nuevo_valor numeric(8,2);
+    BEGIN
+        nuevo_valor := NEW.valor;
+        
+        UPDATE ayudas_econ_ayudaseconomicas
+        SET total = total + nuevo_valor
+        WHERE id = NEW.detalle_id;
+        
+        RETURN NEW;
+    END;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
 create_trigger1="""
 CREATE TRIGGER trigger_nuevo_socio
 AFTER INSERT ON public.socios_socios
@@ -1096,6 +1164,29 @@ AFTER UPDATE OF cupo ON public.proveedores_proveedor
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_detalles_cupo_cambio_cupo();
 """
+
+create_trigger4="""
+CREATE TRIGGER distribuir_aportacion_trigger
+AFTER INSERT ON socios_aportaciones
+FOR EACH ROW
+EXECUTE FUNCTION distribuir_aportacion();
+"""
+
+create_trigger5="""
+CREATE TRIGGER actualizar_total_y_cancelado_trigger
+AFTER UPDATE ON ayudas_econ_detallesayuda
+FOR EACH ROW
+WHEN (OLD.valor IS DISTINCT FROM NEW.valor)
+EXECUTE FUNCTION actualizar_total_y_cancelado();
+"""
+
+create_trigger6="""
+CREATE TRIGGER actualizar_total_despues_de_insertar_trigger
+AFTER INSERT ON ayudas_econ_ayudasexternas
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_total_despues_de_insertar();
+"""
+
 
 class Migration(migrations.Migration):
 
@@ -1128,7 +1219,13 @@ class Migration(migrations.Migration):
         migrations.RunSQL(create_function1),
         migrations.RunSQL(create_function2),
         migrations.RunSQL(create_function3),
+        migrations.RunSQL(create_function4),
+        migrations.RunSQL(create_function5),
+        migrations.RunSQL(create_function6),
         migrations.RunSQL(create_trigger1),
         migrations.RunSQL(create_trigger2),
         migrations.RunSQL(create_trigger3),
+        migrations.RunSQL(create_trigger4),
+        migrations.RunSQL(create_trigger5),
+        migrations.RunSQL(create_trigger6),
     ]
