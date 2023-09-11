@@ -64,7 +64,7 @@
                     </div>
                 </div>
             </div>
-            <br><br>
+            <br>
             <div class="row">
                 <div class="col-xl-5 col-lg-6">
 
@@ -79,9 +79,14 @@
                                     </h5>
                                     <h3 style="color: #62c562;" class="mt-3 mb-3">{{ data2.total_socios }}</h3>
                                     <p class="mb-0 text-muted">
-                                        <span class="text-success me-2"><i class="mdi mdi-arrow-up-bold"></i>
-                                            1.8%</span>
-                                        <span class="text-nowrap">Desde el mes pasado</span>
+                                        <span class="text-danger me-2"><i class="mdi mdi-arrow-down-bold"></i>
+                                            {% if data2.total_socios_inactivos %}  
+                                            {{ data2.total_socios_inactivos }}
+                                        {% else %}
+                                            0
+                                        {% endif %}</span>
+                                        <br>
+                                        <span class="text-nowrap">Socios no afiliados</span>
                                     </p>
                                 </div> <!-- end card-body-->
                             </div> <!-- end card-->
@@ -98,8 +103,12 @@
                                     <h3 style="color: #62c562;" class="mt-3 mb-3">{{ data2.total_prov }}</h3>
                                     <p class="mb-0 text-muted">
                                         <span class="text-danger me-2"><i class="mdi mdi-arrow-down-bold"></i>
-                                            1.08%</span>
-                                        <span class="text-nowrap">Desde el mes pasado</span>
+                                            {% if data2.total_prov_inactivo %}  
+                                            {{ data2.total_prov_inactivo }}
+                                        {% else %}
+                                            0
+                                        {% endif %}</span>
+                                        <span class="text-nowrap">Proveedores no afiliados</span>
                                     </p>
                                 </div> <!-- end card-body-->
                             </div> <!-- end card-->
@@ -117,7 +126,11 @@
                                     <h3 style="color: #62c562;" class="mt-3 mb-3">${{ data2.total_comision }}</h3>
                                     <p class="mb-0 text-muted">
                                         <span class="text-danger me-2"><i class="mdi mdi-arrow-down-bold"></i>
-                                            7.00%</span>
+                                            {% if data2.total_comision_mesantes %}  
+                                            ${{ data2.total_comision_mesantes }}
+                                        {% else %}
+                                        $0
+                                        {% endif %}</span>
                                         <span class="text-nowrap">Desde el mes pasado</span>
                                     </p>
                                 </div> <!-- end card-body-->
@@ -131,10 +144,14 @@
                                         <i class="mdi mdi-pulse widget-icon"></i>
                                     </div>
                                     <h5 class="text-muted fw-normal mt-0" title="Growth">Consumos</h5>
-                                    <h3 style="color: #62c562;" class="mt-3 mb-3">+ $ {{ data2.suma_comision }}</h3>
+                                    <h3 style="color: #62c562;" class="mt-3 mb-3">${{ data2.suma_consumos }}</h3>
                                     <p class="mb-0 text-muted">
                                         <span class="text-success me-2"><i class="mdi mdi-arrow-up-bold"></i>
-                                            4.87%</span>
+                                            {% if data2.suma_consumos_mesante %}  
+                                            ${{ data2.suma_consumos_mesante }}
+                                        {% else %}
+                                        $0
+                                        {% endif %}</span>
                                         <span class="text-nowrap">Desde el mes pasado</span>
                                     </p>
                                 </div> <!-- end card-body-->

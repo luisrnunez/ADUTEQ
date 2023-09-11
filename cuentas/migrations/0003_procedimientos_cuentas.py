@@ -261,6 +261,67 @@ END;
 $BODY$;
 """
 
+CREATE_FUNCTION10 = """
+CREATE EXTENSION tablefunc;
+
+CREATE OR REPLACE PROCEDURE public.obtener_consumo_proveedores(
+	IN mes integer,
+	IN anio integer)
+LANGUAGE 'plpgsql'
+AS $BODY$
+DECLARE
+    columnas_proveedores text;
+    sqlt text;
+    proveedor_nombre text;
+BEGIN
+    -- Obtener los nombres de proveedores únicos como filas
+    CREATE TEMP TABLE proveedores_temp AS
+        SELECT DISTINCT nombre
+        FROM public.proveedores_proveedor
+        ORDER BY nombre;
+
+    -- Construir la lista de nombres de proveedores como columnas en la consulta dinámica
+    columnas_proveedores := '';
+    FOR proveedor_nombre IN (SELECT nombre FROM proveedores_temp)
+    LOOP
+        columnas_proveedores := columnas_proveedores || ',' || quote_ident(REPLACE(proveedor_nombre, ' ', '_')) || ' numeric';
+    END LOOP;
+    columnas_proveedores := substring(columnas_proveedores FROM 2);
+
+    -- Eliminar la tabla temporal de consumo_proveedores si ya existe
+    DROP TABLE IF EXISTS consumo_proveedores;
+
+    -- Construir la consulta dinámicamente con los parámetros mes y anio
+    sqlt := '
+        CREATE TEMP TABLE consumo_proveedores AS
+        SELECT *
+        FROM crosstab(
+            ''SELECT s.cedula AS cedula, u.first_name as nombres, u.last_name as apellidos, pr.nombre AS nombre_proveedor, SUM(p.consumo_total) AS total_consumido
+            FROM public."Pagos_pagos" p
+            INNER JOIN public.socios_socios s ON p.socio_id = s.id
+			INNER JOIN public.auth_user u ON s.user_id = u.id
+            INNER JOIN public.proveedores_proveedor pr ON p.proveedor_id = pr.id
+            WHERE EXTRACT(MONTH FROM p.fecha_consumo) = ' || mes || ' AND EXTRACT(YEAR FROM p.fecha_consumo) = ' || anio || '
+            GROUP BY s.cedula, u.first_name, u.last_name, pr.nombre
+            ORDER BY apellidos, nombres, pr.nombre'',
+            ''SELECT DISTINCT nombre FROM proveedores_temp ORDER BY 1''
+        ) AS ct (
+            cedula text,
+			nombres text,
+			apellidos text,
+            ' || columnas_proveedores || '
+        )
+    ';
+
+    -- Ejecutar la consulta dinámicamente
+    EXECUTE sqlt;
+
+    -- Eliminar la tabla temporal de proveedores_temp
+    DROP TABLE IF EXISTS proveedores_temp;
+END;
+$BODY$;
+"""
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -278,4 +339,5 @@ class Migration(migrations.Migration):
         migrations.RunSQL(CREATE_FUNCTION7),
         migrations.RunSQL(CREATE_FUNCTION8),
         migrations.RunSQL(CREATE_FUNCTION9),
+        migrations.RunSQL(CREATE_FUNCTION10),
     ]

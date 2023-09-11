@@ -63,15 +63,22 @@ def principal_resumen(request):
         )
 
         # Sumar los valores de consumo en descuentos normales
-        total_normales = sum(float(descuento.consumo_total) for descuento in descuentos_normales)
+        total_normales = sum(float(descuento.consumo_total) if descuento.consumo_total is not None else 0 for descuento in descuentos_normales)
 
         # Sumar los valores de consumo en descuentos por cuotas
-        total_cuotas = sum(float(descuento.consumo_total) for descuento in descuentos_cuotas)
+        total_cuotas = sum(float(descuento.consumo_total) if descuento.consumo_total is not None else 0 for descuento in descuentos_cuotas)
 
         # Calcular la suma total por mes
         suma_total = total_normales + total_cuotas
         if mes == month:
-            suma_comision = round(suma_total, 2)
+            suma_consumos = round(suma_total, 2)
+        if mes > 1:
+            if (mes-1) == month:
+                suma_consumos_mesante = round(suma_total, 2)
+        if mes == 1:
+            if (12) == month:
+                suma_consumos_mesante = round(suma_total, 2)
+
         # Agregar el resultado al array data
         data.append(suma_total)
 
@@ -79,24 +86,43 @@ def principal_resumen(request):
     comision = PagosProveedor.objects.filter(
             fecha_creacion__year=year, fecha_creacion__month=mes
         )
-    total_comision = sum(float(suma.comision) for suma in comision)
+    total_comision = sum(float(suma.comision) if suma.comision is not None else 0 for suma in comision)
+
+    #MOSTRAR GANANCIAS PASADAS
+    if mes == 1:
+        mes == 12
+    else: mes = mes - 1
+    comision = PagosProveedor.objects.filter(
+            fecha_creacion__year=year, fecha_creacion__month = mes
+        )
+    total_comision_mesantes = sum(float(suma.comision) if suma.comision is not None else 0 for suma in comision)
+
 
     # MOSTRAR SUMA TOTAL DE SOCIOS
     socios = Socios.objects.all()
     total_socios = len(socios)
+    socios = User.objects.filter(is_active=False,is_staff=False,is_superuser=False)
+    total_socios_inactivos = len(socios) if socios is not None else 0 
 
      # MOSTRAR SUMA TOTAL DE PROVEEDOR
     prov = Proveedor.objects.all()
     total_prov = len(prov)
-
+    prov = Proveedor.objects.filter(estado=False)
+    total_prov_inactivo = len(prov) if prov is not None else 0 
   # MOSTRAR SUMA TOTAL DE COMISION DEL MES ACTUAL
+
+    
     
     data2 = {}
     data2.update({
         'total_comision':total_comision,
         'total_socios':total_socios,
         'total_prov':total_prov,
-        'suma_comision':suma_comision
+        'suma_consumos':suma_consumos,
+        'total_socios_inactivos':total_socios_inactivos,
+        'total_prov_inactivo':total_prov_inactivo,
+        'suma_consumos_mesante':suma_consumos_mesante,
+        'total_comision_mesantes':total_comision_mesantes,
     })
 
     

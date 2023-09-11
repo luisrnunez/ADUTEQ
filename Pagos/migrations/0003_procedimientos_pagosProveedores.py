@@ -21,12 +21,12 @@ BEGIN
 				WHERE proveedor_id = NEW.proveedor_id;
 			ELSE
 				INSERT INTO "PagosProveedor_pagosproveedor"  (proveedor_id, valor_total,comision, fecha_creacion, valor_cancelado)
-            	VALUES (NEW.proveedor_id,NEW.consumo_total, (NEW.consumo_total *  (comi/100)), current_date, 'false');	
+            	VALUES (NEW.proveedor_id,NEW.consumo_total, (NEW.consumo_total) *  (comi/100), NEW.fecha_consumo, 'false');	
 			END IF;
         ELSE
             -- Insertar un nuevo registro en proveedor_pago	
-			 INSERT INTO "PagosProveedor_pagosproveedor"  (proveedor_id, valor_total, fecha_creacion, valor_cancelado)
-            VALUES (NEW.proveedor_id, NEW.consumo_total, current_date, 'false');
+			 INSERT INTO "PagosProveedor_pagosproveedor"  (proveedor_id, valor_total,comision, fecha_creacion, valor_cancelado)
+            	VALUES (NEW.proveedor_id,NEW.consumo_total, (NEW.consumo_total) *  (comi/100), NEW.fecha_consumo, 'false');
         END IF;
     ELSIF TG_OP = 'DELETE' THEN
 		comi := (SELECT comision FROM "proveedores_proveedor" WHERE id = OLD.proveedor_id);
