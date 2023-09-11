@@ -50,6 +50,14 @@
     .highcharts-data-table tr:hover {
         background: #f1f7ff;
     }
+    .cortar{
+        display: flex;
+        align-items: center; /* Alinea verticalmente */
+        justify-content: space-between;
+    }
+    .final{
+        display: inline-flex;
+    }
 </style>
 <div class="content-menu">
 
@@ -59,8 +67,9 @@
             <br>
             <div class="row">
                 <div class="col-12">
-                    <div class="page-title-box">
+                    <div class="page-title-box cortar">
                         <h1 style="font-size: 30px; color: #62c562;" class="page-title">HOLA, BIENVENIDOS A ADUTEQ</h1>
+                        <h1 style="font-size: 30px; color: #62c562;" class="page-title final">{{ user }}</h1>
                     </div>
                 </div>
             </div>

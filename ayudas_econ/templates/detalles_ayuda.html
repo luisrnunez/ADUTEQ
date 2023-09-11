@@ -56,25 +56,29 @@
     <div class="content-menu">
         <div class="socios-content">
             <div class="botones-sup">
-                <a href="/verayudas/"> <button class="add-socio-btn"> Atras</button></a>
-                <a href="#" id="abrirModal">
-                    <button class="add-socio-btn">Registrar aportación externa</button>
-                </a>
-                <a href="/obtener_ayudas_externas/{{detalle_id}}/"> <button class="add-socio-btn"> Aportaciones
-                        externas</button></a>
-                <div style="display: inline-flex; justify-content: end; width: max-content;">
-                    <div class="search-form">
-
-                        <select id="criterio" name="criterio">
-                            <option value="nombres">Nombre</option>
-                            <option value="apellidos">Apellido</option>
-                        </select>
-                        <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
-                        <!-- <button type="submit">Buscar</button> -->
-
+                <div class="botones_arriba">
+                    <div class="header">
+                        <h3>Detalles de aportaciones de ayudas económicas</b></h3>
+                        <a href="/verayudas/"> <button class="add-socio-btn"> Atras</button></a>
+                        <a href="#" id="abrirModal">
+                            <button class="add-socio-btn">Registrar aportación externa</button>
+                        </a>
+                        <a href="/obtener_ayudas_externas/{{detalle_id}}/"> <button class="add-socio-btn"> Aportaciones
+                                externas</button></a>
                     </div>
-                </div>
-            </div>
+                    <div style="display: inline-flex; justify-content: end; width: max-content;">
+                        <div class="search-form">
+
+                            <select id="criterio" name="criterio">
+                                <option value="nombres">Nombre</option>
+                                <option value="apellidos">Apellido</option>
+                            </select>
+                            <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
+                            <!-- <button type="submit">Buscar</button> -->
+
+                        </div>
+                    </div>
+
                     <table class="socios-table">
                         <thead>
                             <tr>
@@ -126,8 +130,10 @@
                                 <td>{{ detalle.fecha }}</td>
                                 <td>
                                     {% if detalle.cancelado == False %}
-                                    <button class="edit-btn"
-                                        onclick="confirmarregistro('{{ detalle.id }}','{{ detalle.ayuda.socio.user.first_name }}','{{ detalle.cancelado }}')">
+                                    <button class="edit-btn" data-detalle-id="{{ detalle.id }}"
+                                        data-socio-nombre="{{ detalle.ayuda.socio.user.first_name }}"
+                                        data-cancelado="{{ detalle.cancelado }}" data-toggle="modal"
+                                        data-target="#exampleModal">
                                         Registrar pago
                                     </button>
                                     {% endif %}
@@ -145,111 +151,112 @@
 
                 </div>
             </div>
+            <div class="pagination-container">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if detalles.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="Primero">
+                                Primero
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.previous_page_number }}" aria-label="Anterior">
+                                Anterior
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="pagination-item active">
+                            <span style="border-radius: 5px;" class="page-link">{{ detalles.number }}</span>
+                        </li>
+                        {% if detalles.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.next_page_number }}" aria-label="Siguiente">
+                                Siguiente
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.paginator.num_pages }}" aria-label="Último">
+                                Último
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+
+
         </div>
 
-        <div class="pagination-container">
-            <nav aria-label="...">
-                <ul class="pagination">
-                    {% if detalles.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1" aria-label="Primero">
-                            Primero
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ detalles.previous_page_number }}" aria-label="Anterior">
-                            Anterior
-                        </a>
-                    </li>
-                    {% endif %}
-                    <li class="pagination-item active">
-                        <span style="border-radius: 5px;" class="page-link">{{ detalles.number }}</span>
-                    </li>
-                    {% if detalles.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ detalles.next_page_number }}" aria-label="Siguiente">
-                            Siguiente
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ detalles.paginator.num_pages }}" aria-label="Último">
-                            Último
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-    </div>
-
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese aportación</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="aportacionForm" method="post">
-                        {% csrf_token %}
-                        <label class="form-label" for="valor">Valor de Aportación:</label>
-                        <input class="form-control" type="number" step="any" id="valor" name="valor" required>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button id="guardarAportacion" type="button" class="btn btn-primary">Guardar</button>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese aportación</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="aportacionForm" method="post">
+                            {% csrf_token %}
+                            <label class="form-label" for="valor">Valor de Aportación:</label>
+                            <input class="form-control" type="number" step="any" id="valor" name="valor" required>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarAportacion" type="button" class="btn btn-primary">Guardar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
-    <div class="modal fade" id="exampleModalexternal" tabindex="-1" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese aportación</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="aportacionForm" method="post">
-                        {% csrf_token %}
-                        <input hidden class="form-control" type="text" id="detalle_id" name="detalle_id"
-                            value="{{detalle_id}}">
+        <div class="modal fade" id="exampleModalexternal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese aportación</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="aportacionForm" method="post">
+                            {% csrf_token %}
+                            <input hidden class="form-control" type="text" id="detalle_id" name="detalle_id"
+                                value="{{detalle_id}}">
 
-                        <div class="mb-3">
-                            <label class="form-label" for="nombre_aportador">Nombre del Aportador:</label>
-                            <input class="form-control" type="text" id="nombre_aportador" name="nombre_aportador"
-                                required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="cedula_aportador">Cédula del Aportador:</label>
-                            <input maxlength="10" class="form-control" type="text" id="cedula_aportador"
-                                name="cedula_aportador" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="valor1">Valor de Aportación:</label>
-                            <input class="form-control" type="number" step="any" id="valor1" name="valor1" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="fecha">Fecha de Aportación:</label>
-                            <input class="form-control" type="date" id="fecha" name="fecha" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button id="guardarAportacionn" type="button" class="btn btn-primary">Guardar</button>
+                            <div class="mb-3">
+                                <label class="form-label" for="nombre_aportador">Nombre del Aportador:</label>
+                                <input class="form-control" type="text" id="nombre_aportador" name="nombre_aportador"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="cedula_aportador">Cédula del Aportador:</label>
+                                <input maxlength="10" class="form-control" type="text" id="cedula_aportador"
+                                    name="cedula_aportador" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="valor1">Valor de Aportación:</label>
+                                <input class="form-control" type="number" step="any" id="valor1" name="valor1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="fecha">Fecha de Aportación:</label>
+                                <input class="form-control" type="date" id="fecha" name="fecha" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarAportacionn" type="button" class="btn btn-primary">Guardar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
     </div>
 
     <script>
+
         $(document).ready(function () {
             $("#buscador_input").on("input", function () {
                 var query = $(this).val();
@@ -286,279 +293,155 @@
                     success: function (data) {
                         $("#socios-body").html(data.rendered_table);
                     }
-                })
-            });
-
-            $(document).ready(function () {
-                $('#filtro-nombre-socio').on('keyup', function () {
-                    var filtro = $(this).val().toLowerCase();
-                    $('.socios-table tbody tr').each(function () {
-                        var nombreSocio = $(this).find('td:eq(4)').text().toLowerCase();
-                        if (nombreSocio.includes(filtro)) {
-                            $(this).show();
-                        } else {
-                            $(this).hide();
-                        }
-                    });
                 });
             });
         });
- </script>
-    <script>
-                // Agrega un evento de clic al botón "Registrar pago"
-                $(document).ready(function () {
-                    $('.edit-btn').click(function () {
-                        confirmarregistro(this); // Llama a la función confirmarregistro pasando el botón como argumento
-                    });
+
+        $(document).ready(function () {
+            $('#filtro-nombre-socio').on('keyup', function () {
+                var filtro = $(this).val().toLowerCase();
+                $('.socios-table tbody tr').each(function () {
+                    var nombreSocio = $(this).find('td:eq(4)').text().toLowerCase();
+                    if (nombreSocio.includes(filtro)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
                 });
+            });
+        });
     </script>
     <script>
 
-                function confirmarregistro(button) {
-                    var detalle_id = $(button).data('detalle-id');
-                    var socioNombre = $(button).data('socio-nombre');
-                    var cancelado = $(button).data('cancelado');
+        $(document).ready(function () {
+            $('.edit-btn').click(function () {
+                confirmarregistro(this); // Llama a la función confirmarregistro pasando el botón como argumento
+            });
+        });
 
-                    // Abre el modal
-                    $('#exampleModal').modal('show');
+        function confirmarregistro(button) {
+            var detalle_id = $(button).data('detalle-id');
+            var socioNombre = $(button).data('socio-nombre');
+            var cancelado = $(button).data('cancelado');
 
-                    $('#guardarAportacion').click(function () {
-                        var valor = $('#valor').val();
+            // Abre el modal
+            $('#exampleModal').modal('show');
 
-                        // Cierra el modal
-                        $('#exampleModal').modal('hide');
+            $('#guardarAportacion').click(function (e) {
+                e.preventDefault(); // Evita que el formulario se envíe y el modal se cierre automáticamente
 
-                        Swal.fire({
-                            title: '¿Deseas guardar la aportación?',
-                            text: 'Estás a punto de registrar la portación del soci@ ' + socioNombre,
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Guardar',
-                            cancelButtonText: 'Cancelar'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Realiza la llamada AJAX para guardar la aportación
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/guardar_aportacion/' + detalle_id + '/',
-                                    data: {
-                                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-                                        valor: valor
-                                    },
-                                    success: function (data) {
-                                        if (data.success) {
-                                            // Recarga la página o realiza acciones adicionales si es necesario
-                                            location.reload();
-                                        } else {
-                                            Swal.fire({
-                                                title: 'Error',
-                                                text: 'Ups, ocurrió un error en la transacción',
-                                                icon: 'error'
-                                            });
-                                        }
-                                    },
-                                    error: function () {
-                                        Swal.fire({
-                                            title: '¿Estás seguro?',
-                                            text: 'Registrar el pago de este prestamo al soci@ ' + socioNombre,
-                                            icon: 'warning',
-                                            showCancelButton: true,
-                                            confirmButtonText: 'Sí',
-                                            cancelButtonText: 'Cancelar',
-                                            dangerMode: true,
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                // El usuario ha confirmado la edición, redirigir a la página de edición
-                                                window.location.href = '/registrarayuda/' + detalle_id + '/' + valor + '/';
-                                                print(valor)
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    });
+                var valor = $('#valor').val();
 
-
-                } $(document).ready(function () {
-                    $('.edit-btn').click(function () {
-                        confirmarregistro(this); // Llama a la función confirmarregistro pasando el botón como argumento
-                    });
-                });
-
-                function confirmarregistro(button) {
-                    var detalle_id = $(button).data('detalle-id');
-                    var socioNombre = $(button).data('socio-nombre');
-                    var cancelado = $(button).data('cancelado');
-
-                    // Abre el modal
-                    $('#exampleModal').modal('show');
-
-                    $('#guardarAportacion').click(function (e) {
-                        e.preventDefault(); // Evita que el formulario se envíe y el modal se cierre automáticamente
-
-                        var valor = $('#valor').val();
-
-                        Swal.fire({
-                            title: '¿Deseas guardar la aportación?',
-                            text: 'Estás a punto de registrar el pago de este préstamo al soci@ ' + socioNombre,
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Guardar',
-                            cancelButtonText: 'Cancelar'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Realiza la llamada AJAX para guardar la aportación
-                                $.ajax({
-                                    type: 'POST',
-                                    url: '/guardar_aportacion/' + detalle_id + '/',
-                                    data: {
-                                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-                                        valor: valor
-                                    },
-                                    success: function (data) {
-                                        if (data.success) {
-                                            // Cierra el modal después de guardar la aportación
-                                            $('#exampleModal').modal('hide');
-
-                                            // Recarga la página o realiza acciones adicionales si es necesario
-                                            location.reload();
-                                        } else {
-                                            Swal.fire({
-                                                title: 'Error',
-                                                text: 'Ups, ocurrió un error en la transacción',
-                                                icon: 'error'
-                                            });
-                                        }
-                                    },
-                                    error: function () {
-                                        Swal.fire({
-                                            title: 'Error',
-                                            text: 'Ups, ocurrió un error en la transacción',
-                                            icon: 'error'
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    });
-                }
-    </script>
-    <script>
-                document.getElementById('abrirModal').addEventListener('click', function () {
-                    $('#exampleModalexternal').modal('show');
-                });
-    </script>
-    <script>
-                document.getElementById('guardarAportacionn').addEventListener('click', function () {
-                    var nombre = $('#nombre_aportador').val();
-                    var cedula = $('#cedula_aportador').val();
-                    var valor1 = $('#valor1').val();
-                    var fecha = $('#fecha').val();
-                    var detalle_id = $('#detalle_id').val();
-
-                    Swal.fire({
-                        title: 'Confirmación',
-                        text: '¿Estás seguro de que deseas guardar la aportación?',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Guardar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $.ajax({
-                                type: 'POST',
-                                url: '/registrar_aportacion_externa/' + detalle_id + '/',
-                                data: {
-                                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-                                    nombre_aportador: nombre,
-                                    cedula_aportador: cedula,
-                                    valor1: valor1,
-                                    fecha: fecha,
-                                    detalle_id: detalle_id
-                                },
-                                success: function (data) {
-                                    if (data.message) {
-                                        Swal.fire({
-                                            title: 'Éxito',
-                                            text: data.message,
-                                            icon: 'success'
-                                        }).then(() => {
-                                            $('#exampleModalexternal').modal('hide');
-                                            location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Error',
-                                            text: 'Ups, ocurrió un error en la transacción',
-                                            icon: 'error'
-                                        });
-                                    }
-                                },
-                                error: function () {
+                Swal.fire({
+                    title: '¿Deseas guardar la aportación?',
+                    text: 'Estás a punto de registrar el pago de este préstamo al soci@ ' + socioNombre,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Guardar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Realiza la llamada AJAX para guardar la aportación
+                        $.ajax({
+                            type: 'POST',
+                            url: '/guardar_aportacion/' + detalle_id + '/',
+                            data: {
+                                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                                valor: valor
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    // Cierra el modal después de guardar la aportación
+                                    Swal.fire({
+                                        title: 'Exitó',
+                                        text: 'Aportación realizada con exito',
+                                        icon: 'success'
+                                    });
+                                    $('#exampleModal').modal('hide');
+                                } else {
                                     Swal.fire({
                                         title: 'Error',
                                         text: 'Ups, ocurrió un error en la transacción',
                                         icon: 'error'
                                     });
                                 }
+                            },
+                            error: function () {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ups, ocurrió un error en la transacción',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+    <script>
+        document.getElementById('abrirModal').addEventListener('click', function () {
+            $('#exampleModalexternal').modal('show');
+        });
+    </script>
+    <script>
+        document.getElementById('guardarAportacionn').addEventListener('click', function () {
+            var nombre = $('#nombre_aportador').val();
+            var cedula = $('#cedula_aportador').val();
+            var valor1 = $('#valor1').val();
+            var fecha = $('#fecha').val();
+            var detalle_id = $('#detalle_id').val();
+
+            Swal.fire({
+                title: 'Confirmación',
+                text: '¿Estás seguro de que deseas guardar la aportación?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/registrar_aportacion_externa/' + detalle_id + '/',
+                        data: {
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                            nombre_aportador: nombre,
+                            cedula_aportador: cedula,
+                            valor1: valor1,
+                            fecha: fecha,
+                            detalle_id: detalle_id
+                        },
+                        success: function (data) {
+                            if (data.message) {
+                                Swal.fire({
+                                    title: 'Éxito',
+                                    text: data.message,
+                                    icon: 'success'
+                                }).then(() => {
+                                    $('#exampleModalexternal').modal('hide');
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ups, ocurrió un error en la transacción',
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ups, ocurrió un error en la transacción',
+                                icon: 'error'
                             });
                         }
                     });
-                });
+                }
+            });
+        });
     </script>
 
-
-
-
-    </script>
-    function mostrarModal(detalle_id) {
-    $('#exampleModal').modal('show');
-
-    $('#guardarAportacion').click(function () {
-    var valor = $('#valor').val();
-
-    Swal.fire({
-    title: 'Confirmación',
-    text: '¿Estás seguro de que deseas guardar la aportación?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Guardar',
-    cancelButtonText: 'Cancelar'
-    }).then((result) => {
-    if (result.isConfirmed) {
-    $.ajax({
-    type: 'POST',
-    url: '/guardar_aportacion/' + detalle_id + '/',
-    data: {
-    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-    valor: valor
-    },
-    success: function (data) {
-    if (data.success) {
-    $('#exampleModal').modal('hide');
-    location.reload();
-    } else {
-    Swal.fire({
-    title: 'Error',
-    text: 'Ups, ocurrió un error en la transacción',
-    icon: 'error'
-    });
-    }
-    },
-    error: function () {
-    Swal.fire({
-    title: 'Error',
-    text: 'Ups, ocurrió un error en la transacción',
-    icon: 'error'
-    });
-    }
-    });
-    }
-    });
-    });
-    }
-    </script>
+    {% endblock %}
 </body>
-
-{% endblock %}
