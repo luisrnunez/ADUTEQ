@@ -18,6 +18,8 @@ class Proveedor(models.Model):
 
     def __str__(self):
         return self.nombre
+    class Meta:
+        ordering = ['nombre']
 
 class detallesCupos(models.Model):
     socio=models.ForeignKey(Socios, on_delete=models.CASCADE)

@@ -1,8 +1,10 @@
 from django.urls import path
 from .views import enviar_correo_todos, nuevo_enviar_correo,reportes, generar_reporte_pdf_total_usuarios,cerrar_periodo,actualizar_cancelados,actualizar_estados, actualizar_descuentos,generar_reporte_consumo_todos, reportes_socios_general
-from .views import reportes_datos_socios, actualizar_estados_ayudas
+from .views import reportes_datos_socios, actualizar_estados_ayudas,generar_pdf_socio
+from django.conf.urls.static import static
+from django.conf import settings
 
-urlpatterns = [
+urlpatterns = [ 
 
     path('enviar_gastos/<int:socio_id>/', nuevo_enviar_correo, name='enviar_gastos'),
     # correo para todos
@@ -17,4 +19,7 @@ urlpatterns = [
     path('actualizar_descuentos/', actualizar_descuentos, name='actualizar_descuentos'),
     path('reportes_socios_todos/', generar_reporte_consumo_todos, name='reportes_socios_todos'),
     path('reportes_socios_general/', reportes_socios_general, name='reportes_socios_general'),
+    path('generar_pdf_socio/', generar_pdf_socio, name='generar_pdf_socio'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

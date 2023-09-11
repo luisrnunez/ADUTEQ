@@ -20,7 +20,7 @@ class AyudasEconomicas(models.Model):
     socio=models.ForeignKey(Socios, on_delete=models.CASCADE, null=True)
     motivo=models.ForeignKey(AyudasMot, on_delete=models.CASCADE)
     descripcion=models.TextField(max_length=200)
-    valorsocio=models.DecimalField(max_digits = 8, decimal_places = 2, default='0')
+    valorsocio=models.DecimalField(max_digits = 8, decimal_places = 2, blank=True, null=True)
     fecha=models.DateField()
     total=models.DecimalField(max_digits = 8, decimal_places = 2)
     evidencia=models.FileField(null=True)

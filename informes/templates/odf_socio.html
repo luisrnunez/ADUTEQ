@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Informacion de Socio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #000000;
+            text-align: center;
+            font-size: xx-large;
+        }
+
+        p {
+            margin: 8px 0;
+            font-size: x-large;
+            background-color: #f5f4f4;
+            /* border: 1px solid #000000; */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .container11 {
+            margin: 0;
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); */
+        }
+
+        th,
+        td {
+            /* border: 1px solid #ddd; */
+            padding: 8px;
+            /* text-align: center; */
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h4 {
+            text-align: right;
+        }
+        img{
+            width: 280px;
+            height: 280px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Información del Socio {{ socio.user.first_name }} {{ socio.user.last_name }}</h1>
+    <div class="container11">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 70%;">
+                    <p><strong>Nombre:</strong> {{ socio.user.first_name }} {{ socio.user.last_name }}</p>
+                    <p><strong>Cédula:</strong> {{ socio.cedula }}</p>
+                    <p><strong>Correo:</strong> {{ socio.user.email }}</p>
+                    <p><strong>Fecha de Nacimiento:</strong> {{ socio.fecha_nacimiento }}</p>
+                </td>
+                <td style="text-align: center;">
+                    {% if socio.foto %}
+                    <img src="ADUTEQ/{{ socio.foto.url }}" alt="Foto del socio" />
+                    {% else %}
+                    No hay foto disponible.
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="container11">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td>
+                    <p><strong>Facultad:</strong> {{socio.facultad}}</p>
+                    <p><strong>Dirección:</strong> {{socio.categoria}}</p>
+                    <p><strong>Dedicación Academica:</strong> {{ socio.dedicacion_academica }}</p>
+                    <p><strong>Fecha de Afiliación:</strong> {{ socio.user.date_joined }}</p>
+                    <p><strong>Dirección:</strong> {{socio.direccion_domiciliaria}}</p>
+                    <p><strong>Lugar de Nacimiento:</strong> {{ socio.lugar_nacimiento }}</p>
+                    <p><strong>Titulo:</strong> {{socio.titulo}}</p>
+                    <p><strong>Numero Telefonico:</strong> {{ socio.numero_telefonico }}</p>
+                    <p><strong>Numero Convencional:</strong> {{ socio.user.numero_convencional }}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

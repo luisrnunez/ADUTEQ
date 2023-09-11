@@ -1,3 +1,4 @@
+from django.contrib.humanize.templatetags.humanize import intcomma
 from multiprocessing import context
 from django.shortcuts import redirect, render
 from Pagos.models import Pagos
@@ -37,6 +38,7 @@ import calendar
 from Periodo.models import Periodo
 
 # Create your views here.
+
 
 def obtener_gastos_socio(socio_id):
     # Obtener el socio específico
@@ -130,9 +132,9 @@ def generar_pdf(context):
 def datospdf(socio_id, mes, anio):
 
     nombres_meses = [
-    "-ENERO", "-FEBRERO", "-MARZO", "-ABRIL", "-MAYO", "-JUNIO",
-    "-JULIO", "-AGOSTO", "-SEPTIEMBRE", "-OCTUBRE", "-NOVIEMBRE", "-DICIEMBRE"
-]
+        "-ENERO", "-FEBRERO", "-MARZO", "-ABRIL", "-MAYO", "-JUNIO",
+        "-JULIO", "-AGOSTO", "-SEPTIEMBRE", "-OCTUBRE", "-NOVIEMBRE", "-DICIEMBRE"
+    ]
 
     nombre_mes = nombres_meses[mes - 1]
 
@@ -143,24 +145,28 @@ def datospdf(socio_id, mes, anio):
     aportaciones_ayuda = data[3]
     consumos_totales = data[4]
 
-    hide_consumos_proveedor = any(consumo_total == 0 or consumo_total is None for _, consumo_total in consumos_proveedor)
-    hide_consumos_cuotas = any(valor_cuota == 0 or valor_cuota is None for _, _, _, valor_cuota in consumos_cuotas)
-    hide_aportaciones_socio = any(montoa == 0 or montoa is None for _, montoa in aportaciones_socio)
-    hide_aportaciones_ayuda = any(valor_aportado == 0 or valor_aportado is None for _, valor_aportado  in aportaciones_ayuda)
-    #hide_consumos_totales = any(columna2 == 0 or columna2 is None for _, columna2 in consumos_totales)
+    hide_consumos_proveedor = any(
+        consumo_total == 0 or consumo_total is None for _, consumo_total in consumos_proveedor)
+    hide_consumos_cuotas = any(
+        valor_cuota == 0 or valor_cuota is None for _, _, _, valor_cuota in consumos_cuotas)
+    hide_aportaciones_socio = any(
+        montoa == 0 or montoa is None for _, montoa in aportaciones_socio)
+    hide_aportaciones_ayuda = any(
+        valor_aportado == 0 or valor_aportado is None for _, valor_aportado in aportaciones_ayuda)
+    # hide_consumos_totales = any(columna2 == 0 or columna2 is None for _, columna2 in consumos_totales)
 
     context = {
         'hide_consumos_proveedor': hide_consumos_proveedor,
         'hide_consumos_cuotas': hide_consumos_cuotas,
         'hide_aportaciones_socio': hide_aportaciones_socio,
         'hide_aportaciones_ayuda': hide_aportaciones_ayuda,
-        #'hide_consumos_totales': hide_consumos_totales,
+        # 'hide_consumos_totales': hide_consumos_totales,
         'consumos_proveedor': consumos_proveedor,
         'consumos_cuotas': consumos_cuotas,
         'aportaciones_socio': aportaciones_socio,
         'aportaciones_ayuda': aportaciones_ayuda,
         'consumos_totales': consumos_totales,
-        'mes':nombre_mes
+        'mes': nombre_mes
     }
 
     return context
@@ -174,25 +180,26 @@ def nuevo_enviar_correo(request, socio_id):
 
     numero_mes = hoy.month
     anio = hoy.year
-    
+
     selected_mes = request.POST.get('mes', 'mes_actual')
 
     if selected_mes == 'mes_actual':
         numero_mes = hoy.month
         anio = hoy.year
     else:
-        if hoy.month == 1: 
-            numero_mes = 12  
+        if hoy.month == 1:
+            numero_mes = 12
         else:
-            numero_mes = hoy.month - 1 
+            numero_mes = hoy.month - 1
 
         anio = hoy.year if numero_mes != 12 else hoy.year - 1
-        
+
     resultados = obtener_datos_socioss(socio_id, numero_mes, anio)
     informe_data = generar_pdf(datospdf(socio_id, numero_mes, anio))
 
     if enviarGastoEmail(socio_id, resultados, informe_data):
-        response = {'status': 'success', 'message': 'Informe enviado correctamente'}
+        response = {'status': 'success',
+                    'message': 'Informe enviado correctamente'}
     else:
         response = {'status': 'error', 'message': 'Ups. algo salió mal'}
 
@@ -244,10 +251,10 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
 #                     anio = hoy.year
 #                     nombre_mes = nombres_meses[numero_mes - 1]
 #                 else:
-#                     if hoy.month == 1: 
-#                         numero_mes = 12  
+#                     if hoy.month == 1:
+#                         numero_mes = 12
 #                     else:
-#                         numero_mes = hoy.month - 1 
+#                         numero_mes = hoy.month - 1
 
 #                     anio = hoy.year if numero_mes != 12 else hoy.year - 1
 #                     nombre_mes = nombres_meses[numero_mes - 1]
@@ -273,7 +280,8 @@ def enviarGastoEmail(socio_id, context, pdf_buffer):
 #     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
 def enviar_correo_todos(request):
-    selected_mes = request.POST.get('mes', 'mes_actual')  # Obtener el mes seleccionado del POST
+    # Obtener el mes seleccionado del POST
+    selected_mes = request.POST.get('mes', 'mes_actual')
 
     hoy = datetime.today()
     nombres_meses = [
@@ -284,7 +292,8 @@ def enviar_correo_todos(request):
     # Divide la lista de socios en bloques de tamaño 'tamano_bloque'
     tamano_bloque = 25  # Puedes ajustar este valor según tus necesidades
     socios = Socios.objects.filter(user__is_active=True)
-    bloques = [socios[i:i + tamano_bloque] for i in range(0, len(socios), tamano_bloque)]
+    bloques = [socios[i:i + tamano_bloque]
+               for i in range(0, len(socios), tamano_bloque)]
 
     for bloque in bloques:
         for socio in bloque:
@@ -326,7 +335,8 @@ def enviar_correo_todos(request):
 
 def reportes(request):
     periodo_seleccionado = Periodo.objects.filter(activo=True).first()
-    return render(request, "reportes.html",{'periodo':periodo_seleccionado})
+    socios = Socios.objects.all()
+    return render(request, "reportes.html", {'periodo': periodo_seleccionado, 'socios': socios})
 
 
 def obtener_consumo_total_func(mes, anio):
@@ -373,7 +383,7 @@ def generar_reporte_pdf_total_usuarios(request):
                'mes': mes,
                'image_path': image_path,
                'anio': anio,
-               'total': total,
+               'total': intcomma(total),
                'fecha_gen': fecha_gen
                }
 
@@ -410,7 +420,7 @@ def generar_reporte_consumo_todos(request):
                    'mes': mes,
                    'image_path': image_path,
                    'anio': anio,
-                   'total': total,
+                   'total': intcomma(total),
                    'fecha_gen': fecha_gen
                    }
 
@@ -525,6 +535,7 @@ def actualizar_estados(request):
                 "SELECT * FROM actualizar_estados(%s, %s, %s);", [mes, anio, id_socio])
     return redirect(cerrar_periodo)
 
+
 def actualizar_estados_ayudas(request):
     checks = request.POST.getlist('ayuda_id[]')
     print(checks)
@@ -612,7 +623,7 @@ def reportes_socios_general(request):
                'mes': mes,
                'image_path': image_path,
                'anio': anio,
-               'total': total,
+               'total': intcomma(total),
                'fecha_gen': fecha_gen
                }
 
@@ -635,7 +646,8 @@ def reportes_datos_socios(request):
     fecha_actual = datetime.now()
     mes = fecha_actual.month
     anio = fecha_actual.year
-    socios = Socios.objects.filter(user__is_active=True).annotate(last_name=F('user__last_name')).order_by('last_name')
+    socios = Socios.objects.filter(user__is_active=True).annotate(
+        last_name=F('user__last_name')).order_by('last_name')
     image_path = os.path.join(os.path.dirname(
         __file__), 'static', 'img', 'aduteq.png')
     fecha_gen = datetime.now()
@@ -658,3 +670,22 @@ def reportes_datos_socios(request):
         return response
 
     return HttpResponse("Error al generar el PDF", status=500)
+
+
+def generar_pdf_socio(request):
+    socio_id = request.POST.get('socio')
+    socio = Socios.objects.get(id=socio_id)
+    template = get_template('odf_socio.html')
+    context = {'socio': socio}
+
+    html = template.render(context)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="socio_{socio.cedula}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF', status=500)
+
+    return response
