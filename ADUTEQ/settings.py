@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
-import dj_database_url
 import django
 from django.utils.encoding import smart_str
 django.utils.encoding.smart_text = smart_str
@@ -28,17 +27,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
+SECRET_KEY = 'django-insecure-dy*&if3fs0zfdk7qi#12z$xxs$@dfphf&u3%5v#pdjqhfc##(='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = True
 
-ALLOWED_HOSTS = ['233a-190-15-134-2.ngrok-free.app','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['233a-190-15-134-2.ngrok-free.app','127.0.0.1']
 
 
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:    
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,7 +67,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  
     
 ]
 ROOT_URLCONF = 'ADUTEQ.urls'
@@ -101,23 +96,14 @@ WSGI_APPLICATION = 'ADUTEQ.wsgi.application'
 DATABASES = {
     'default': {
         "ENGINE": "django.db.backends.postgresql",
-        "URL": "postgres://default:4uzSZsMT6cRD@ep-solitary-term-82085068-pooler.us-east-1.postgres.vercel-storage.com:5432/verceldb",
-        "NAME": "verceldb",
-        "USER": "default",
-        "PASSWORD": "4uzSZsMT6cRD",
-        "HOST": "ep-solitary-term-82085068-pooler.us-east-1.postgres.vercel-storage.com",
+        "NAME": "dbaduteq",
+        "USER": "postgres",
+        "PASSWORD": "123",
+        "HOST": "127.0.0.1",
         "PORT":"5432",
     }
 }
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='postgresql://postgres:postgres@localhost:5432/mysite', 
-#                       conn_max_age=600    )}
-
+ 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -158,30 +144,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
-# Following settings only make sense on production and may break development environments.
-if not DEBUG:    # Tell Django to copy statics to the `staticfiles` directory
-    # in your application directory on Render.
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    # Turn on WhiteNoise storage backend that takes care of compressing static files
-    # and creating unique names for each version so they can safely be cached forever.
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 TINYMCE_JS_URL = os.path.join(STATIC_URL, "path/to/tiny_mce/tiny_mce.js")
-# Agregar estas líneas
-SELECT2_PATH = 'select2/'
-STATICFILES_DIRS = [
-    # ... otras rutas ...
-    os.path.join(BASE_DIR, "venv/Lib/site-packages/django_select2/static/django_select2"),
-]
 
 LOGIN_URL = '/login'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ADUTEQ/static')
 ]
-
-
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'ADUTEQ/media')
@@ -215,7 +184,7 @@ EMAIL_HOST_PASSWORD = 'pnrriqutcefjsqnd'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
-# BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
+BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
 
 LOGOUT_REDIRECT_URL = 'login'
 
