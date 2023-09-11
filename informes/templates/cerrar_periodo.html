@@ -25,7 +25,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
-
+ 
         .tabla-container {
             background-color: #fff;
             border: 1px solid #ddd;
@@ -58,13 +58,13 @@
             /* word-wrap: break-word; */
         }
 
-        @media (max-width: 768px) {
+        /* @media (max-width: 768px) {
             .styled-table th,
             .styled-table td {
                 padding: 5px;
                 font-size: 12px;
             }
-        }
+        } */
 
         .styled-table th {
             background-color: #f2f2f2;
@@ -84,6 +84,8 @@
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
+            margin-left: 5px;
+            margin-right: 5px;
         }
 
         .hidden {
@@ -198,7 +200,7 @@
                     <div class="tabla-header">
                         <h2>Descuento de Prestamos</h2>
                         {% if suma_prestamos > 0 %}
-                        <button style="margin: 0% 0% 0% 50%;" type="button" class="red-button"
+                        <button type="button" class="red-button"
                             id="toggleTableButton1">Ocultar</button>
                         <button class="tabla-button" type="submit">Registrar Descuento</button>
                         <!-- <a style="text-decoration: none;" href="/actualizar_cancelados" class="tabla-button" type="submit">Registrar Descuento</a> -->
