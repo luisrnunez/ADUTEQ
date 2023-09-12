@@ -17160,9 +17160,9 @@ html[data-layout-mode=detached]:not([data-layout=topnav]) .logo-topbar {
     display: block
 }
 
-html[data-layout-mode=detached]:not([data-layout=topnav]) .leftbar-user {
+/* html[data-layout-mode=detached]:not([data-layout=topnav]) .leftbar-user {
     background: url(../images/waves.png) no-repeat
-}
+} */
 
 html[data-layout-mode=detached]:not([data-layout=topnav])[data-sidenav-size=full] .wrapper .leftside-menu {
     padding-bottom: calc(var(--ct-footer-height) + .75rem);
