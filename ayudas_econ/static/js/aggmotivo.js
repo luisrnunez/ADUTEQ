@@ -47,7 +47,7 @@ $(document).ready(function () {
 
         Swal.fire({
             title: 'Confirmación',
-            text: '¿Estás seguro de que deseas guardar la aportación?',
+            text: '¿Estás seguro de que deseas guardar esta ayuda económica?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Guardar',

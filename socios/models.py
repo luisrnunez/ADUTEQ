@@ -67,8 +67,8 @@ def obtener_datos_socioss(socio_id, mes, anio):
     
     if resultados:
         column_names = [
-            'nombre', 'cedula', 'cuota_prestamos', 'aportacion',
-            'descuento_proveedores', 'aportacion_ayudaseco', 'total'
+            'nombre', 'cedula', 'cuota_cuotas',
+            'cuota_prestamo', 'aportacion', 'descuento_proveedores', 'aportacion_ayudaseco', 'total'
         ]
         resultado_dict = dict(zip(column_names, resultados[0]))
         return resultado_dict

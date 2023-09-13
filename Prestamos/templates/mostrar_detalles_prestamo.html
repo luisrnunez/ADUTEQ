@@ -56,6 +56,7 @@
                         <h3>Detalles de pago de <b>{{ socio.user.first_name }}</b> <b>{{ socio.user.last_name }}</b>
                         </h3>
                     </div>
+                    <button id="mostrar-checkboxes-btn" class="add-socio-btn">Aplazar pagos</button>
                     <a href="/prestamos/"> <button class="add-socio-btn"> Atras</button></a>
                     <table class="socios-table">
                         <thead>
@@ -68,6 +69,7 @@
                                 <th scope="col">Fecha</th>
                                 <th scope="col">Registrar</th>
                                 <th scope="col">Evidencia</th>
+                                <th scope="col">Aplazar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -116,10 +118,14 @@
                                     </form>
                                     {% endif %}
                                 </td>
+                                <td class="checkbox-td">
+                                    <input type="checkbox" name="aplazar_cuota" value="{{ cuota.id }}" style="display: none;">
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                    <button id="agregar-mes-btn" class="add-socio-btn" style="display: none; float: right;">Agregar un mes</button>
 
                 </div>
             </div>
@@ -144,6 +150,35 @@
             </div>
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            // Manejar el clic en el botón "Aplazar pagos"
+            $("#mostrar-checkboxes-btn").click(function() {
+                // Mostrar los checkboxes
+                $(".checkbox-td input[type='checkbox']").show();
+                
+                // Mostrar el botón "Agregar un mes"
+                $("#agregar-mes-btn").show();
+            });
+        
+            // Manejar el clic en el botón "Agregar un mes"
+            $("#agregar-mes-btn").click(function() {
+                var cuotasSeleccionadas = [];
+        
+                // Recopilar los ID de cuotas seleccionadas
+                $("input[name='aplazar_cuota']:checked").each(function() {
+                    cuotasSeleccionadas.push($(this).val());
+                });
+        
+                // Redirigir a la función que agrega un mes a las fechas
+                if (cuotasSeleccionadas.length > 0) {
+                    window.location.href = "/ruta_para_agregar_mes/" + cuotasSeleccionadas.join(",");
+                } else {
+                    alert("Debes seleccionar al menos una cuota para agregar un mes.");
+                }
+            });
+        });
+        </script>
     <script>
 
         function confirmarPagoCuota(cuotaId, socioNombre, cancelado, socio_id, prestamo_id) {

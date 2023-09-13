@@ -47,7 +47,7 @@
                     <select name="socio" id="beneficiarios" onchange="mostrarOcultarValor(this)">
                         {% for opcion in opciones %}
                             {% if opcion.user.is_active %}
-                                <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
+                                <option value="{{ opcion.id }}">{{ opcion.user.last_name }} {{ opcion.user.first_name }}</option>
                             {% endif %}
                         {% endfor %}
                         <option value="null">Otro</option>
@@ -57,8 +57,13 @@
                     <label for="descripcion">Descripción:</label>
                     <input maxlength="200" type="text" id="descripcion" name="descripcion" required>
 
-                    <label id="labelValorsocio" for="valorsocio">Total:</label>
-                    <input type="number" step="any" id="total" name="total" required>
+                    <div style="display: flex; align-items: center;">
+                        <label title="ESTA CASILLA ACTIVARÁ EL CAMPO TOTAL, TENGA EN CUENTA QUE EL TOTAL INGRESADO SE RESTARA DEL TOTAL DE AYUDA PERMANENTE" style="font-size: 11px; margin-top: 10px;" for="tipo">Ayuda brindada por ADUTEQ?:</label>
+                        <input title="ESTA CASILLA ACTIVARÁ EL CAMPO TOTAL, TENGA EN CUENTA QUE EL TOTAL INGRESADO SE RESTARA DEL TOTAL DE AYUDA PERMANENTE" type="checkbox" id="aono" name="aono" style="transform: scale(1); margin-left: 10px;">
+                    </div>
+
+                    <label id="labelValorsocio" for="valorsocio" style="display: none;">Total:</label>
+                    <input type="number" step="any" id="total" name="total" style="display: none;">
 
                     <label for="fecha">Fecha:</label>
                     <input type="date" id="fecha" name="fecha" required>
@@ -118,6 +123,25 @@
             }
         }
         </script> -->
+        <script>
+            // Selecciona el checkbox y los campos de entrada
+const checkbox = document.getElementById("aono");
+const labelValorsocio = document.getElementById("labelValorsocio");
+const total = document.getElementById("total");
+
+// Agrega un evento change al checkbox
+checkbox.addEventListener("change", function () {
+    if (checkbox.checked) {
+        // Si el checkbox está marcado, muestra los campos
+        labelValorsocio.style.display = "inline";
+        total.style.display = "inline";
+    } else {
+        // Si el checkbox está desmarcado, oculta los campos
+        labelValorsocio.style.display = "none";
+        total.style.display = "none";
+    }
+});
+        </script>
         
     {% endblock %}
 </body>

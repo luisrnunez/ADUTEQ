@@ -1,50 +1,115 @@
 {% for detalle in detalles %}
-                    <tr>
-                        <td>{{ detalle.ayuda.motivo }}</td>
-                        <!-- <td>{{ detalle.valor}}</td> -->
-                        {% if detalle.valor|floatformat:2 == "0,00" %}
-                            <td>Voluntario</td>
-                        {% else %}
-                            <td>{{ detalle.valor }}</td>
-                        {% endif %}
-                        <td>
+<tr>
+    <td>{{ detalle.ayuda.motivo }}</td>
+    <!-- <td>{{ detalle.valor}}</td> -->
+    {% if detalle.valor|floatformat:2 == "0,00" %}
+    <td>Voluntario</td>
+    {% else %}
+    <td>{{ detalle.valor }}</td>
+    {% endif %}
+    <td>
 
-                            {% if detalle.evidencia %}
-                            <a href="{{ cuota.evidencia.url }}" target="_blank">
-                                <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
-                            </a>
-                            {% else %}
-                            Sin evidencia
-                            {% endif %}
+        {% if detalle.evidencia %}
+        <a href="{{ cuota.evidencia.url }}" target="_blank">
+            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+        </a>
+        {% else %}
+        Sin evidencia
+        {% endif %}
 
-                        </td>
+    </td>
 
-                        <td>
-                            {% if detalle.cancelado %}
-                            <button class="green-button">
-                                Cancelado
-                            </button>
-                            {% else %}
-                            <button class="red-button">
-                                Pendiente
-                            </button>
-                            {% endif %}
-                        </td>
+    <td>
+        {% if detalle.cancelado %}
+        <button class="green-button">
+            Cancelado
+        </button>
+        {% else %}
+        <button class="red-button">
+            Pendiente
+        </button>
+        {% endif %}
+    </td>
 
-                        <td>{{ detalle.socio.user.first_name }} {{ detalle.socio.user.last_name }}</td>
-                        <td>{{ detalle.fecha }}</td>
-                        <td>
-                            {% if detalle.cancelado == False %}
-                            <button class="edit-btn"
-                                onclick="confirmarregistro('{{ detalle.id }}','{{ detalle.ayuda.socio.user.first_name }}','{{ detalle.cancelado }}')">
-                                Registrar pago
-                            </button>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if detalle.cancelado %}
-                            
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+    <td>{{ detalle.socio.user.first_name }} {{ detalle.socio.user.last_name }}</td>
+    <td>{{ detalle.fecha }}</td>
+    <td>
+        {% if detalle.cancelado == False %}
+        <button class="edit-btn" data-detalle-id="{{ detalle.id }}"
+            data-socio-nombre="{{ detalle.ayuda.socio.user.first_name }}" data-cancelado="{{ detalle.cancelado }}"
+            data-toggle="modal" data-target="#exampleModal">
+            Registrar pago
+        </button>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+
+<script>
+
+    $(document).ready(function () {
+        $('.edit-btn').click(function () {
+            confirmarregistro(this); // Llama a la función confirmarregistro pasando el botón como argumento
+        });
+    });
+
+    function confirmarregistro(button) {
+        var detalle_id = $(button).data('detalle-id');
+        var socioNombre = $(button).data('socio-nombre');
+        var cancelado = $(button).data('cancelado');
+
+        // Abre el modal
+        $('#exampleModal').modal('show');
+
+        $('#guardarAportacion').click(function (e) {
+            e.preventDefault(); // Evita que el formulario se envíe y el modal se cierre automáticamente
+
+            var valor = $('#valor').val();
+
+            Swal.fire({
+                title: '¿Deseas guardar la aportación?',
+                text: 'Estás a punto de registrar este aporte a la ayuda del soci@ ' + socioNombre,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Realiza la llamada AJAX para guardar la aportación
+                    $.ajax({
+                        type: 'POST',
+                        url: '/guardar_aportacion/' + detalle_id + '/',
+                        data: {
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                            valor: valor
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                // Cierra el modal después de guardar la aportación
+                                Swal.fire({
+                                    title: 'Exitó',
+                                    text: 'Aportación realizada con exito',
+                                    icon: 'success'
+                                });
+                                $('#exampleModal').modal('hide');
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ups, ocurrió un error en la transacción',
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ups, ocurrió un error en la transacción',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    }
+</script>
