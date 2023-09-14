@@ -348,12 +348,13 @@ def actualizar_cancelados(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                                                BEGIN
-                                                    UPDATE public."Prestamos_pagomensual"
-                                                    SET cancelado = True
-                                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio
-                                                    and socio_id=socio;
-                                                END;
+                                                                BEGIN
+                                                                    UPDATE public."Prestamos_pagomensual"
+                                                                    SET cancelado = True
+                                                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio
+                                                                    and socio_id=socio;
+                                                                END;
+                                                                
                                                 
                                 
                 $BODY$;
@@ -378,15 +379,16 @@ def actualizar_descuentos(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                BEGIN
-                    UPDATE public."Pagos_pagos" p
-                    SET estado = True
-                    FROM public.socios_socios s
-                    WHERE p.socio_id = s.id
-                        AND EXTRACT(MONTH FROM p.fecha_consumo) = mes
-                        AND EXTRACT(YEAR FROM p.fecha_consumo) = anio
-                        AND s.cedula = cedu;
-                END;
+                                BEGIN
+                                    UPDATE public."Pagos_pagos" p
+                                    SET estado = True
+                                    FROM public.socios_socios s
+                                    WHERE p.socio_id = s.id
+                                        AND EXTRACT(MONTH FROM p.fecha_consumo) = mes
+                                        AND EXTRACT(YEAR FROM p.fecha_consumo) = anio
+                                        AND s.cedula = cedu;
+                                END;
+                                
                 $BODY$;
                 """
             )
@@ -420,6 +422,35 @@ def actualizar_estados(apps, schema_editor):
                 """
             )
 
+def actualizar_estados_ayudas(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'actualizar_estados_ayudas')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.actualizar_estados_ayudas(
+                    mes integer,
+                    anio integer,
+                    id_ayuda integer)
+                    RETURNS void
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                                                BEGIN
+                                                    UPDATE public.ayudas_econ_detallesayuda
+                                                    SET pagado = True
+                                                    where id=id_ayuda;
+                                                END;
+                                                
+                                
+                $BODY$;
+                """
+            )
+
 def obtener_ayudas_func(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -432,37 +463,41 @@ def obtener_ayudas_func(apps, schema_editor):
                 CREATE OR REPLACE FUNCTION public.obtener_ayudas_func(
                     mes integer,
                     anio integer)
-                    RETURNS TABLE(nombre text, cedula character varying, fecha_ayuda date, aportacion_ayudaseco numeric) 
+                    RETURNS TABLE(nombre text, cedula character varying, fecha_ayuda date, aportacion_ayudaseco numeric, id_ayuda bigint) 
                     LANGUAGE 'plpgsql'
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                     ROWS 1000
 
                 AS $BODY$
-                BEGIN
-                    RETURN QUERY
-                    SELECT
-                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
-                        s.cedula AS cedula,
-                        ae.fecha AS fecha,
-                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco
-                    FROM
-                        public.socios_socios s
-                    INNER JOIN
-                        public.auth_user u ON s.user_id = u.id
-                    LEFT JOIN (
-                        SELECT socio_id, fecha, SUM(valor) AS valor
-                        FROM public.ayudas_econ_detallesayuda
-                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
-                        GROUP BY socio_id, fecha
-                    ) ae ON s.id = ae.socio_id
-                    GROUP BY
-                        u.first_name, u.last_name, s.cedula, ae.fecha
-                    HAVING SUM(COALESCE(ae.valor, 0)) > 0;
-                END;
+                                BEGIN
+                                    RETURN QUERY
+                                    SELECT
+                                        CONCAT(u.first_name, ' ', u.last_name) AS Nombre,
+                                        s.cedula AS cedula,
+                                        ae.fecha AS fecha,
+                                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
+                                        ae.id
+                                    FROM
+                                        public.socios_socios s
+                                    INNER JOIN
+                                        public.auth_user u ON s.user_id = u.id
+                                    LEFT JOIN (
+                                        SELECT socio_id, fecha, SUM(valor) AS valor, id
+                                        FROM public.ayudas_econ_detallesayuda
+                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                                        and pagado=False
+                                        GROUP BY socio_id, fecha, id
+                                    ) ae ON s.id = ae.socio_id
+                                    GROUP BY
+                                        u.first_name, u.last_name, s.cedula, ae.fecha, ae.id
+                                    HAVING SUM(COALESCE(ae.valor, 0)) > 0;
+                                END;
+                                
                 $BODY$;
                 """
             )
+
 
 def obtener_consumo_total_func(apps, schema_editor):
     with connection.cursor() as cursor:
@@ -483,63 +518,65 @@ def obtener_consumo_total_func(apps, schema_editor):
                     ROWS 1000
 
                 AS $BODY$
-                                                BEGIN
-                                                    RETURN QUERY
-                                                    SELECT
-                                                        CONCAT(u.last_name, ' ', u.first_name) AS Nombre,
-                                                        s.cedula AS cedula,
-                                                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
-                                                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
-                                                        SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
-                                                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
-                                                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
-                                                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) 
-                                                            + COALESCE(ae.valor, 0)) AS consumo_total
-                                                    FROM
-                                                        public.socios_socios s
-                                                    INNER JOIN
-                                                        public.auth_user u ON s.user_id = u.id
-                                                    LEFT JOIN (
-                                                        SELECT socio_id, SUM(monto) AS aportacion_total
-                                                        FROM public.socios_aportaciones
-                                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
-                                                        GROUP BY socio_id
-                                                    ) sa ON s.id = sa.socio_id
-                                                    LEFT JOIN (
-                                                        SELECT socio_id, SUM(consumo_total) AS consumo_total
-                                                        FROM public."Pagos_pagos"
-                                                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
-                                                        and estado = False
-                                                        GROUP BY socio_id
-                                                    ) p ON s.id = p.socio_id
-                                                    LEFT JOIN (
-                                                        SELECT socio_id, SUM(monto_pago) AS monto_pago
-                                                        FROM public."Prestamos_pagomensual"
-                                                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
-                                                        and cancelado = False
-                                                        GROUP BY socio_id
-                                                    ) pm ON s.id = pm.socio_id
-                                                    
-                                                    LEFT JOIN (
-                                                        SELECT socio_id, SUM(valor_cuota) AS valor_cuota
-                                                        FROM public."Pagos_detalle_cuotas"
-                                                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
-                                                        and estado = False
-                                                        GROUP BY socio_id
-                                                    ) pd ON s.id = pd.socio_id
-                                                    
-                                                    LEFT JOIN (
-                                                        SELECT socio_id, SUM(valor) AS valor
-                                                        FROM public.ayudas_econ_detallesayuda
-                                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
-                                                        GROUP BY socio_id
-                                                    ) ae ON s.id = ae.socio_id
-                                                    GROUP BY
-                                                        u.first_name, u.last_name, s.cedula
-                                                        HAVING SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) 
-                                                            + COALESCE(ae.valor, 0))>0
-                                                        ORDER BY u.last_name;
-                                                END;
+                                                                BEGIN
+                                                                    RETURN QUERY
+                                                                    SELECT
+                                                                        CONCAT(u.last_name, ' ', u.first_name) AS Nombre,
+                                                                        s.cedula AS cedula,
+                                                                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
+                                                                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
+                                                                        SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
+                                                                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
+                                                                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
+                                                                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) 
+                                                                            + COALESCE(ae.valor, 0)) AS consumo_total
+                                                                    FROM
+                                                                        public.socios_socios s
+                                                                    INNER JOIN
+                                                                        public.auth_user u ON s.user_id = u.id
+                                                                    LEFT JOIN (
+                                                                        SELECT socio_id, SUM(monto) AS aportacion_total
+                                                                        FROM public.socios_aportaciones
+                                                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                                                                        GROUP BY socio_id
+                                                                    ) sa ON s.id = sa.socio_id
+                                                                    LEFT JOIN (
+                                                                        SELECT socio_id, SUM(consumo_total) AS consumo_total
+                                                                        FROM public."Pagos_pagos"
+                                                                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                                                                        and estado = False
+                                                                        GROUP BY socio_id
+                                                                    ) p ON s.id = p.socio_id
+                                                                    LEFT JOIN (
+                                                                        SELECT socio_id, SUM(monto_pago) AS monto_pago
+                                                                        FROM public."Prestamos_pagomensual"
+                                                                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
+                                                                        and cancelado = False
+                                                                        GROUP BY socio_id
+                                                                    ) pm ON s.id = pm.socio_id
+                                                                    
+                                                                    LEFT JOIN (
+                                                                        SELECT socio_id, SUM(valor_cuota) AS valor_cuota
+                                                                        FROM public."Pagos_detalle_cuotas"
+                                                                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
+                                                                        and estado = False
+                                                                        GROUP BY socio_id
+                                                                    ) pd ON s.id = pd.socio_id
+                                                                    
+                                                                    LEFT JOIN (
+                                                                        SELECT socio_id, SUM(valor) AS valor
+                                                                        FROM public.ayudas_econ_detallesayuda
+                                                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                                                                        and pagado = False
+                                                                        GROUP BY socio_id
+                                                                    ) ae ON s.id = ae.socio_id
+                                                                    GROUP BY
+                                                                        u.first_name, u.last_name, s.cedula
+                                                                        HAVING SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) 
+                                                                            + COALESCE(ae.valor, 0))>0
+                                                                        ORDER BY u.last_name;
+                                                                END;
+                                                                
                                                 
                                 
                 $BODY$;
@@ -565,59 +602,60 @@ def obtener_consumo_total_todos_func(apps, schema_editor):
                     ROWS 1000
 
                 AS $BODY$
-                BEGIN
-                    RETURN QUERY
-                    SELECT
-                        CONCAT(u.last_name, ' ', u.first_name) AS Nombre,
-                        s.cedula AS cedula,
-                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
-                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
-                        SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
-                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
-                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
-                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) + COALESCE(ae.valor, 0)) AS consumo_total,
-                        (SUM(CASE WHEN COALESCE(pd.estado, true) AND COALESCE(pm.cancelado, true) AND COALESCE(p.estado, true) THEN 1 ELSE 0 END) = COUNT(*)) AS todas_cumplidas
-                    FROM
-                        public.socios_socios s
-                    INNER JOIN
-                        public.auth_user u ON s.user_id = u.id
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(monto) AS aportacion_total
-                        FROM public.socios_aportaciones
-                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
-                        GROUP BY socio_id
-                    ) sa ON s.id = sa.socio_id
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(consumo_total) AS consumo_total, estado
-                        FROM public."Pagos_pagos"
-                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
-                        GROUP BY socio_id, estado
-                    ) p ON s.id = p.socio_id
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(monto_pago) AS monto_pago, cancelado
-                        FROM public."Prestamos_pagomensual"
-                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
-                        GROUP BY socio_id, cancelado
-                    ) pm ON s.id = pm.socio_id
-                                                    
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(valor_cuota) AS valor_cuota, estado
-                        FROM public."Pagos_detalle_cuotas"
-                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
-                        GROUP BY socio_id, estado
-                    ) pd ON s.id = pd.socio_id
-                                                    
-                    LEFT JOIN (
-                        SELECT socio_id, SUM(valor) AS valor
-                        FROM public.ayudas_econ_detallesayuda
-                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
-                        GROUP BY socio_id
-                    ) ae ON s.id = ae.socio_id
-                    GROUP BY
-                        u.first_name, u.last_name, s.cedula
-                    HAVING SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) + COALESCE(ae.valor, 0)) > 0
-                    ORDER BY u.last_name;
-                END;
+                                BEGIN
+                                    RETURN QUERY
+                                    SELECT
+                                        CONCAT(u.last_name, ' ', u.first_name) AS Nombre,
+                                        s.cedula AS cedula,
+                                        SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamos,
+                                        SUM(COALESCE(pd.valor_cuota, 0)) AS cuota_descuento,
+                                        SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
+                                        SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
+                                        SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
+                                        SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) + COALESCE(ae.valor, 0)) AS consumo_total,
+                                        (SUM(CASE WHEN COALESCE(pd.estado, true) AND COALESCE(pm.cancelado, true) AND COALESCE(ae.pagado, true) AND COALESCE(p.estado, true) THEN 1 ELSE 0 END) = COUNT(*)) AS todas_cumplidas
+                                    FROM
+                                        public.socios_socios s
+                                    INNER JOIN
+                                        public.auth_user u ON s.user_id = u.id
+                                    LEFT JOIN (
+                                        SELECT socio_id, SUM(monto) AS aportacion_total
+                                        FROM public.socios_aportaciones
+                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                                        GROUP BY socio_id
+                                    ) sa ON s.id = sa.socio_id
+                                    LEFT JOIN (
+                                        SELECT socio_id, SUM(consumo_total) AS consumo_total, estado
+                                        FROM public."Pagos_pagos"
+                                        WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                                        GROUP BY socio_id, estado
+                                    ) p ON s.id = p.socio_id
+                                    LEFT JOIN (
+                                        SELECT socio_id, SUM(monto_pago) AS monto_pago, cancelado
+                                        FROM public."Prestamos_pagomensual"
+                                        WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio 
+                                        GROUP BY socio_id, cancelado
+                                    ) pm ON s.id = pm.socio_id
+                                                                    
+                                    LEFT JOIN (
+                                        SELECT socio_id, SUM(valor_cuota) AS valor_cuota, estado
+                                        FROM public."Pagos_detalle_cuotas"
+                                        WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio 
+                                        GROUP BY socio_id, estado
+                                    ) pd ON s.id = pd.socio_id
+                                                                    
+                                    LEFT JOIN (
+                                        SELECT socio_id, SUM(valor) AS valor, pagado
+                                        FROM public.ayudas_econ_detallesayuda
+                                        WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                                        GROUP BY socio_id, pagado
+                                    ) ae ON s.id = ae.socio_id
+                                    GROUP BY
+                                        u.first_name, u.last_name, s.cedula
+                                    HAVING SUM(COALESCE(pm.monto_pago, 0) + COALESCE(pd.valor_cuota, 0) + COALESCE(sa.aportacion_total, 0) + COALESCE(p.consumo_total, 0) + COALESCE(ae.valor, 0)) > 0
+                                    ORDER BY u.last_name;
+                                END;
+                                
                 $BODY$;
                 """
             )
@@ -785,14 +823,16 @@ def obtener_suma_ayudas_func(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                DECLARE
-                    total_pago numeric;
-                BEGIN
-                    SELECT SUM(valor) INTO total_pago
-                    FROM public.ayudas_econ_detallesayuda
-                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
-                    RETURN total_pago;
-                END;
+                                DECLARE
+                                    total_pago numeric;
+                                BEGIN
+                                    SELECT SUM(valor) INTO total_pago
+                                    FROM public.ayudas_econ_detallesayuda
+                                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio
+                                    and pagado=False;
+                                    RETURN total_pago;
+                                END;
+                                
                 $BODY$;
                 """
             )
@@ -814,16 +854,17 @@ def obtener_suma_consumo_total_descuentos_func(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                                DECLARE
-                                    suma_consumo numeric;
-                                BEGIN
-                                    SELECT SUM(consumo_total) INTO suma_consumo
-                                    FROM public."Pagos_pagos"
-                                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
-                                    and estado = False;
+                                                DECLARE
+                                                    suma_consumo numeric;
+                                                BEGIN
+                                                    SELECT SUM(consumo_total) INTO suma_consumo
+                                                    FROM public."Pagos_pagos"
+                                                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                                                    and estado = False;
 
-                                    RETURN suma_consumo;
-                                END;
+                                                    RETURN suma_consumo;
+                                                END;
+                                                
                                 
                 $BODY$;
                 """
@@ -846,16 +887,17 @@ def obtener_suma_descuento_cuotas_func(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                                DECLARE
-                                    total_pago numeric;
-                                BEGIN
-                                    SELECT SUM(valor_cuota) INTO total_pago
-                                    FROM public."Pagos_detalle_cuotas"
-                                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio
-                                    and estado=False;
+                                                DECLARE
+                                                    total_pago numeric;
+                                                BEGIN
+                                                    SELECT SUM(valor_cuota) INTO total_pago
+                                                    FROM public."Pagos_detalle_cuotas"
+                                                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio
+                                                    and estado=False;
 
-                                    RETURN total_pago;
-                                END;
+                                                    RETURN total_pago;
+                                                END;
+                                                
                                 
                 $BODY$;
                 """
@@ -878,16 +920,50 @@ def obtener_suma_prestamo_total_func(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                                DECLARE
-                                    total_pago numeric;
-                                BEGIN
-                                    SELECT SUM(monto_pago) INTO total_pago
-                                    FROM public."Prestamos_pagomensual"
-                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio
-                                    and cancelado=False;
+                                                DECLARE
+                                                    total_pago numeric;
+                                                BEGIN
+                                                    SELECT SUM(monto_pago) INTO total_pago
+                                                    FROM public."Prestamos_pagomensual"
+                                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio
+                                                    and cancelado=False;
 
-                                    RETURN total_pago;
-                                END;
+                                                    RETURN total_pago;
+                                                END;
+                                                
+                                
+                $BODY$;
+                """
+            )
+
+def obtener_suma_prestamo_total_pagados_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_suma_prestamo_total_pagados_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_suma_prestamo_total_pagados_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                                                DECLARE
+                                                    total_pago numeric;
+                                                BEGIN
+                                                    SELECT SUM(monto_pago) INTO total_pago
+                                                    FROM public."Prestamos_pagomensual"
+                                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio
+                                                    and cancelado=True;
+
+                                                    RETURN total_pago;
+                                                END;
+                                                
                                 
                 $BODY$;
                 """
@@ -910,43 +986,44 @@ def obtener_suma_total(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                DECLARE
-                    total NUMERIC;
-                    total_ayudas NUMERIC;
-                    total_descuentos NUMERIC;
-                    descuento_cuotas NUMERIC;
-                    total_pres NUMERIC;
-                BEGIN
-                    total := 0;
-                    total_ayudas := 0;
-                    total_descuentos := 0;
-                    descuento_cuotas := 0;
-                    total_pres := 0;
+                                DECLARE
+                                    total NUMERIC;
+                                    total_ayudas NUMERIC;
+                                    total_descuentos NUMERIC;
+                                    descuento_cuotas NUMERIC;
+                                    total_pres NUMERIC;
+                                BEGIN
+                                    total := 0;
+                                    total_ayudas := 0;
+                                    total_descuentos := 0;
+                                    descuento_cuotas := 0;
+                                    total_pres := 0;
 
-                    SELECT COALESCE(SUM(valor), 0)
-                    INTO total_ayudas
-                    FROM public.ayudas_econ_detallesayuda
-                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
+                                    SELECT COALESCE(SUM(valor), 0)
+                                    INTO total_ayudas
+                                    FROM public.ayudas_econ_detallesayuda
+                                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
 
-                    SELECT COALESCE(SUM(consumo_total), 0)
-                    INTO total_descuentos
-                    FROM public."Pagos_pagos"
-                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio;
+                                    SELECT COALESCE(SUM(consumo_total), 0)
+                                    INTO total_descuentos
+                                    FROM public."Pagos_pagos"
+                                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio;
 
-                    SELECT COALESCE(SUM(valor_cuota), 0)
-                    INTO descuento_cuotas
-                    FROM public."Pagos_detalle_cuotas"
-                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio;
+                                    SELECT COALESCE(SUM(valor_cuota), 0)
+                                    INTO descuento_cuotas
+                                    FROM public."Pagos_detalle_cuotas"
+                                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio;
 
-                    SELECT COALESCE(SUM(monto_pago), 0)
-                    INTO total_pres
-                    FROM public."Prestamos_pagomensual"
-                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio;
+                                    SELECT COALESCE(SUM(monto_pago), 0)
+                                    INTO total_pres
+                                    FROM public."Prestamos_pagomensual"
+                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio;
 
-                    total := total_ayudas + total_descuentos + descuento_cuotas + total_pres;
+                                    total := total_ayudas + total_descuentos + descuento_cuotas + total_pres;
 
-                    RETURN total;
-                END;
+                                    RETURN total;
+                                END;
+                                
                 $BODY$;
                 """
             )
@@ -1313,6 +1390,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(actualizar_cancelados),
         migrations.RunPython(actualizar_descuentos),
         migrations.RunPython(actualizar_estados),
+        migrations.RunPython(actualizar_estados_ayudas),
         migrations.RunPython(obtener_ayudas_func),
         migrations.RunPython(obtener_consumo_total_func),
         migrations.RunPython(obtener_consumo_total_todos_func),

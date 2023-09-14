@@ -12,13 +12,16 @@ AS $BODY$
 DECLARE
     total_comision NUMERIC(8, 2);
 BEGIN
-    SELECT SUM(p.consumo_total * pp.comision / 100)
+    SELECT SUM(p.consumo_total * coalesce(ch.comision_anterior, pp.comision) / 100)
     INTO total_comision
     FROM "Pagos_pagos" p
     JOIN proveedores_proveedor pp ON p.proveedor_id = pp.id
+    LEFT JOIN proveedores_comisionhistorica ch ON pp.id = ch.proveedor_id
+        AND EXTRACT(YEAR FROM p.fecha_consumo) = EXTRACT(YEAR FROM ch.fecha_registro)
+        AND EXTRACT(MONTH FROM p.fecha_consumo) = EXTRACT(MONTH FROM ch.fecha_registro)
     WHERE EXTRACT(MONTH FROM p.fecha_consumo) = mes
-    AND EXTRACT(YEAR FROM p.fecha_consumo) = anio
-	and p.estado= True;
+        AND EXTRACT(YEAR FROM p.fecha_consumo) = anio
+        AND p.estado = True;
 
     IF total_comision IS NULL THEN
         total_comision := 0;
@@ -113,13 +116,16 @@ AS $BODY$
 DECLARE
     total_comision NUMERIC(8, 2);
 BEGIN
-    SELECT SUM(pd.valor_cuota * pp.comision / 100)
+    SELECT SUM(pd.valor_cuota * coalesce(ch.comision_anterior, pp.comision) / 100)
     INTO total_comision
     FROM "Pagos_detalle_cuotas" pd
     JOIN proveedores_proveedor pp ON pd.proveedor_id = pp.id
+    LEFT JOIN proveedores_comisionhistorica ch ON pp.id = ch.proveedor_id
+        AND EXTRACT(YEAR FROM pd.fecha_descuento) = EXTRACT(YEAR FROM ch.fecha_registro)
+        AND EXTRACT(MONTH FROM pd.fecha_descuento) = EXTRACT(MONTH FROM ch.fecha_registro)
     WHERE EXTRACT(MONTH FROM pd.fecha_descuento) = mes
-    AND EXTRACT(YEAR FROM pd.fecha_descuento) = anio
-	and pd.estado = True;
+        AND EXTRACT(YEAR FROM pd.fecha_descuento) = anio
+        AND pd.estado = True;
 
     IF total_comision IS NULL THEN
         total_comision := 0;
