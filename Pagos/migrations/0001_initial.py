@@ -10,8 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('proveedores', '0006_detallescupos_permanente'),
-        ('socios', '0004_alter_aportaciones_socio'),
+        
     ]
 
     operations = [
