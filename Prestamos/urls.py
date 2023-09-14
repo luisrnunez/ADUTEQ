@@ -1,11 +1,13 @@
 from django.urls import path
-from .views import guardar_pago_cuota, guardar_prestamo, mostrar_prestamo,editar_prestamo,aplicar_pago, mostrar_detalles,mostrar_detalles_todo, aplicar_pago_cuota, eliminar_prestamo_y_cuotas, editar_detalles, presagregar_pdf, editar_evidencia
+from .views import guardar_pago_cuota, guardar_prestamo, mostrar_prestamo,editar_prestamo,aplicar_pago, mostrar_detalles,mostrar_detalles_todo, aplicar_pago_cuota, eliminar_prestamo_y_cuotas, editar_detalles, presagregar_pdf, editar_evidencia,aplazar_pagos_meses, verificar_cuotas_pagadas
 
 urlpatterns = [
     path('prestamo/guardar/', guardar_prestamo, name='guardar_prestamo'),
     path('prestamos/', mostrar_prestamo, name='mostrar_prestamo'),
     path('prestamo/editar/<int:prestamo_id>/', editar_prestamo, name='editar_prestamo'),
     path('prestamo/aplicar_pago/<int:prestamo_id>/<int:valor>/',aplicar_pago, name = 'aplicar_pago'),
+    path('aplazar_meses/<str:cuotas_seleccionadas>/', aplazar_pagos_meses, name='aplazar_pago'),
+    path('verificar_cuotas_pagadas/<str:cuotas_seleccionadas>/', verificar_cuotas_pagadas, name='verificar_cuotas_pagadas'),
 
     path('prestamo/presagregar_pdf/<int:det_id>/',presagregar_pdf, name = 'presagregar_pdf'),
     path('prestamo/editar_evidencia/<int:prestamo_id>/',editar_evidencia, name = 'editar_evidencia'),

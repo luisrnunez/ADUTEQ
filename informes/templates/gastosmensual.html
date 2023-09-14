@@ -88,6 +88,9 @@ td {
                 </tr> -->
               </tbody>
             </table>
+            {% if pagos_pen %}
+            <p>Tu consumo total de este mes fue de {{ gastos.total }}, pero no se le descontó todo, quedando pendiente un valor de {{ pagos_pen.0.0 }}</p>
+            {% endif %}
         </td>
       </tr>
     </table>

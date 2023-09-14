@@ -10,6 +10,7 @@ from django.core.paginator import Paginator, PageNotAnInteger
 from .models import Periodo
 from django.template.loader import render_to_string
 from decimal import Decimal, ROUND_HALF_UP
+from dateutil.relativedelta import relativedelta
 
 def guardar_prestamo(request):
     if request.method == 'POST':
@@ -400,3 +401,44 @@ def eliminar_prestamo_y_cuotas(request, prestamo_id):
         # Si ocurre algún error durante la transacción, la transacción se revierte automáticamente
         messages.warning(request,'Ups, ha ocurrido un problema')
     return redirect('mostrar_prestamo')
+
+
+def aplazar_pagos_meses(request, cuotas_seleccionadas):
+    try:
+        meses = request.GET.get('meses')
+        cuotas_seleccionadas = cuotas_seleccionadas.split(',')  # Convertir la cadena de IDs en una lista
+
+        detalles = PagoMensual.objects.filter(id__in=cuotas_seleccionadas)
+
+        for detalle in detalles:
+            detalle.fecha_pago = detalle.fecha_pago + relativedelta(months=int(meses))
+            detalle.save()
+
+        response_data = {'status': 'success', 'message': 'Cuotas aplazadas exitosamente'}
+    except ValueError:
+        response_data = {'status': 'error', 'message': 'Ocurrió un error al aplazar las cuotas'}
+
+    return JsonResponse(response_data)
+
+def verificar_cuotas_pagadas(request, cuotas_seleccionadas):
+    try:
+        cuotas_seleccionadas = cuotas_seleccionadas.split(',')
+        cuotas_pagadas = []
+
+        # Verificar si alguna de las cuotas seleccionadas ya está pagada
+        for cuota_id in cuotas_seleccionadas:
+            cuota = PagoMensual.objects.get(id=cuota_id)
+            if cuota.cancelado:
+                cuotas_pagadas.append(cuota.numero_cuota)
+
+        if cuotas_pagadas:
+            message = f"Las cuotas {', '.join(map(str, cuotas_pagadas))} ya están pagadas."
+            response_data = {'status': 'error', 'message': message}
+        else:
+            response_data = {'status': 'success', 'message': 'Todas las cuotas seleccionadas están disponibles para aplazar.'}
+    except PagoMensual.DoesNotExist:
+        response_data = {'status': 'error', 'message': 'Alguna de las cuotas seleccionadas no existe.'}
+    except Exception as e:
+        response_data = {'status': 'error', 'message': str(e)}
+
+    return JsonResponse(response_data)
