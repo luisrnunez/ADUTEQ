@@ -12,22 +12,23 @@ def verifica_y_crea_funcion_informe(apps, schema_editor):
             cursor.execute(
                 """
                 CREATE OR REPLACE FUNCTION public.nuevo_obtener_datos(
-                    socio integer,
-                    mes integer,
-                    anio integer)
-                RETURNS TABLE(nombre text, cedula character varying, cuota_prestamos numeric, aportacion numeric, descuento_proveedores numeric, aportacion_ayudaseco numeric, total numeric) 
-                LANGUAGE 'plpgsql'
-                COST 100
-                VOLATILE PARALLEL UNSAFE
-                ROWS 1000
+	socio integer,
+	mes integer,
+	anio integer)
+    RETURNS TABLE(nombre text, cedula character varying, cuota_cuotas numeric, cuota_prestamo numeric, aportacion numeric, descuento_proveedores numeric, aportacion_ayudaseco numeric, total numeric) 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
 
-                AS $BODY$
+AS $BODY$
                 BEGIN
                     RETURN QUERY
                     SELECT
                         CONCAT(u.first_name, ' ', u.last_name) AS nombre,
                         s.cedula AS cedula,
-                        SUM(COALESCE(dc.valor_cuota, 0)) AS cuota_prestamos,
+                        SUM(COALESCE(dc.valor_cuota, 0)) AS cuota_cuotas,
+						SUM(COALESCE(pm.monto_pago, 0)) AS cuota_prestamo,
                         SUM(COALESCE(sa.aportacion_total, 0)) AS aportacion,
                         SUM(COALESCE(p.consumo_total, 0)) AS descuento_proveedores,
                         SUM(COALESCE(ae.valor, 0)) AS aportacion_ayudaseco,
@@ -75,7 +76,8 @@ def verifica_y_crea_funcion_informe(apps, schema_editor):
                         1,
                         2;
                 END;
-                $BODY$;
+                
+$BODY$;
                 """
             )
 
@@ -959,15 +961,14 @@ def obtener_informe_mensual2(apps, schema_editor):
             cursor.execute(
                 """
                 CREATE OR REPLACE FUNCTION public.obtener_informe_mensual2(
-                    id_socio bigint,
-                    numero_mes integer,
-                    anio integer)
+                id_socio bigint,
+                numero_mes integer,
+                anio integer)
                 RETURNS TABLE(columna1 character varying, columna2 numeric, columna3 date, columna4 character varying) 
                 LANGUAGE 'plpgsql'
                 COST 100
                 VOLATILE PARALLEL UNSAFE
                 ROWS 1000
-
                 AS $BODY$
                 DECLARE
                     total numeric := 0;
@@ -996,14 +997,22 @@ def obtener_informe_mensual2(apps, schema_editor):
                         ) cu
                         UNION ALL
                         SELECT tipo_aportacion, montoa_aportacion, sa.fecha as fecha_transaccion, 'Aportación'::character varying as tipo_transaccion, 3 as orden FROM (
-                            SELECT tipo_aportacion, monto AS montoa_aportacion, fecha
-                            FROM public.socios_aportaciones
-                            WHERE socio_id = id_socio
-                                AND EXTRACT(MONTH FROM fecha) = numero_mes
-                                AND EXTRACT(YEAR FROM fecha) = anio
+                            SELECT tipo_aportacion, sa.monto AS montoa_aportacion, sa.fecha, 'Aportación'::character varying as tipo_transaccion
+                            FROM public.socios_aportaciones sa
+                            WHERE sa.socio_id = id_socio
+                                AND EXTRACT(MONTH FROM sa.fecha) = numero_mes
+                                AND EXTRACT(YEAR FROM sa.fecha) = anio
                         ) sa
                         UNION ALL
-                        SELECT descripcion, valor_aportado, ae.fecha as fecha_transaccion, 'Ayuda Económica'::character varying as tipo_transaccion, 4 as orden FROM (
+                        SELECT 'Cuota de Préstamo'::character varying as proveedor_nombre, pp.monto_pago as valor, pp.fecha_pago as fecha_transaccion, 'Cuota de Préstamo'::character varying as tipo_transaccion, 4 as orden
+                        FROM public."Prestamos_pagomensual" pp
+                        INNER JOIN public."Prestamos_prestamo" pr ON pp.prestamo_id = pr.id
+                        WHERE pp.socio_id = id_socio
+                            AND EXTRACT(MONTH FROM pp.fecha_pago) = numero_mes
+                            AND EXTRACT(YEAR FROM pp.fecha_pago) = anio
+                            AND pp.cancelado = false
+                        UNION ALL
+                        SELECT descripcion, valor_aportado, ae.fecha as fecha_transaccion, 'Ayuda Económica'::character varying as tipo_transaccion, 5 as orden FROM (
                             SELECT ae.descripcion, da.valor AS valor_aportado, ae.fecha
                             FROM public.ayudas_econ_ayudaseconomicas ae
                             INNER JOIN public.ayudas_econ_detallesayuda da ON ae.id = da.ayuda_id
@@ -1027,7 +1036,7 @@ def obtener_informe_mensual2(apps, schema_editor):
                     -- Agregar fila "Total"
                     RETURN QUERY
                     SELECT 'Total'::character varying as columna1, total as columna2, null::date as columna3, null::character varying as columna4;
-                    
+
                     -- Eliminar la tabla temporal al finalizar
                     DROP TABLE IF EXISTS temp_result;
                 END;
@@ -1164,17 +1173,22 @@ $$ LANGUAGE plpgsql;
 """
 
 create_function8="""
-CREATE OR REPLACE FUNCTION actualizar_total_ayuda_permanente_eliminar()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.sumar_valor_despues_delete()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
 BEGIN
-  -- Sumar el valor del registro que se va a eliminar al campo total_actual de la tabla socios_total_ayuda_permanente
-  UPDATE socios_total_ayuda_permanente
-  SET total_actual = total_actual + OLD.total
-  WHERE tipo_aportacion = 'EA';
-
-  RETURN OLD;
+    IF OLD.socio_id IS NOT NULL AND OLD.brinda_ayuda THEN
+        -- Sumar el valor a la tabla socios_total_ayuda_permanente
+        UPDATE public.socios_total_ayuda_permanente
+        SET total_actual = total_actual + OLD.total
+        WHERE tipo_aportacion = 'EA'; -- Elige el tipo de aportación adecuado
+    END IF;
+    RETURN OLD;
 END;
-$$ LANGUAGE plpgsql;
+$BODY$;
 """
 
 create_function9="""
@@ -1187,6 +1201,26 @@ BEGIN
   WHERE tipo_aportacion = 'CO';
 
   RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+create_function10="""
+CREATE OR REPLACE FUNCTION restar_valor_despues_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.socio_id IS NULL AND NEW.brinda_ayuda THEN
+        -- Restar el valor de la tabla socios_total_cuota_ordinaria
+        UPDATE public.socios_total_cuota_ordinaria
+        SET total_actual = total_actual - NEW.total
+        WHERE tipo_aportacion = 'CO'; -- Elige el tipo de aportación adecuado
+    ELSIF NEW.socio_id IS NOT NULL AND NEW.brinda_ayuda THEN
+        -- Restar el valor de la tabla socios_total_ayuda_permanente
+        UPDATE public.socios_total_ayuda_permanente
+        SET total_actual = total_actual - NEW.total
+        WHERE tipo_aportacion = 'EA'; -- Elige el tipo de aportación adecuado
+    END IF;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 """
@@ -1242,10 +1276,10 @@ EXECUTE FUNCTION actualizar_cuota_ordinaria();
 """
 
 create_trigger8="""
-CREATE TRIGGER before_delete_ayuda_economica
-BEFORE DELETE ON ayudas_econ_ayudaseconomicas
+CREATE TRIGGER sumar_valor_trigger_delete
+AFTER DELETE ON public.ayudas_econ_ayudaseconomicas
 FOR EACH ROW
-EXECUTE FUNCTION actualizar_total_ayuda_permanente_eliminar();
+EXECUTE FUNCTION sumar_valor_despues_delete();
 """
 
 create_trigger9="""
@@ -1253,6 +1287,13 @@ CREATE TRIGGER sumar_valor_cuota_ordinaria
 BEFORE DELETE ON ayudas_econ_consumoscuotaordinaria
 FOR EACH ROW
 EXECUTE FUNCTION sumar_cuota_ordinaria();
+"""
+
+create_trigger10="""
+CREATE TRIGGER restar_valor_trigger
+AFTER INSERT ON public.ayudas_econ_ayudaseconomicas
+FOR EACH ROW
+EXECUTE FUNCTION restar_valor_despues_insert();
 """
 
 
@@ -1293,6 +1334,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(create_function7),
         migrations.RunSQL(create_function8),
         migrations.RunSQL(create_function9),
+        migrations.RunSQL(create_function10),
         migrations.RunSQL(create_trigger1),
         migrations.RunSQL(create_trigger2),
         migrations.RunSQL(create_trigger3),
@@ -1302,4 +1344,5 @@ class Migration(migrations.Migration):
         migrations.RunSQL(create_trigger7),
         migrations.RunSQL(create_trigger8),
         migrations.RunSQL(create_trigger9),
+        migrations.RunSQL(create_trigger10),
     ]

@@ -193,23 +193,41 @@ def formRegistroAyuda(request):
     })
 
 def aggAyuda(request):
-    mmotivo=AyudasMot.objects.get(id=request.POST.get('motivo'))
+    motivo_id = request.POST.get('motivo')
+    mmotivo=AyudasMot.objects.get(id=motivo_id)
     socios_disponibles=Socios.objects.all()
     total_ayuda_permanente, total_cuota_ordinaria=datos_para_ayuda()
     print(total_ayuda_permanente)
     valorsocio = 0
+    tipo=request.POST.get('aono')
+
+    if 'total' in request.POST:
+        total=request.POST.get('total')
+        if total=='' or total==None:
+            total=0
     
     if 'valorsocio' in request.POST:
         valorsocio_input = request.POST.get('valorsocio')
         if valorsocio_input != '':
             valorsocio = Decimal(valorsocio_input)
-    if(request.POST.get('socio')=="null"):
-        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio ,total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
-    else:
-        socio=Socios.objects.get(id=request.POST['socio'])
-        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = Decimal(request.POST['total']), motivo=mmotivo, fecha=request.POST['fecha'])
+    if(request.POST.get('socio')=="null" and not tipo):
+        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio ,total = total, motivo=mmotivo, fecha=request.POST['fecha'], brinda_ayuda=True)
 
-    if ayuda.total <= total_ayuda_permanente[0][1]:
+    elif request.POST.get('socio')=='null' and tipo:
+        # socio=Socios.objects.get(id=request.POST['socio'])
+        ayuda=AyudasEconomicas(socio=None, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = total, motivo=mmotivo, fecha=request.POST['fecha'],brinda_ayuda=True)
+        consumo_cuota = ConsumosCuotaOrdinaria(
+                descripcion=request.POST['descripcion']+' AYUDA-ECONÓMICA-EXTERNA',
+                valor=total,
+                fecha=request.POST['fecha'],
+                evidencia=None,
+            )
+        consumo_cuota.save()
+    elif request.POST.get('socio')!='null' and tipo:
+        socio=Socios.objects.get(id=request.POST['socio'])
+        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = total, motivo=mmotivo, fecha=request.POST['fecha'],brinda_ayuda=True)
+
+    if Decimal(ayuda.total) <= total_ayuda_permanente[0][1]:
         # Utiliza una transacción para evitar crear detalles de ayuda si ocurre un error
         with transaction.atomic():
             try:

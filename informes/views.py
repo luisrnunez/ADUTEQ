@@ -3,7 +3,7 @@ from multiprocessing import context
 from django.shortcuts import redirect, render
 from Pagos.models import Pagos
 from django.contrib import messages
-from socios.models import Socios, Aportaciones, datos_para_el_pdf, obtener_datos_socioss
+from socios.models import Socios, Aportaciones, datos_para_el_pdf, obtener_datos_socioss, pagos_pendientes
 from proveedores.models import Proveedor
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
@@ -194,10 +194,12 @@ def nuevo_enviar_correo(request, socio_id):
 
         anio = hoy.year if numero_mes != 12 else hoy.year - 1
 
+    pagos_pend= pagos_pendientes(numero_mes,anio,socio_id)
     resultados = obtener_datos_socioss(socio_id, numero_mes, anio)
     informe_data = generar_pdf(datospdf(socio_id, numero_mes, anio))
 
-    if enviarGastoEmail(socio_id, resultados, informe_data):
+    if enviarGastoEmail(socio_id, resultados,pagos_pend, informe_data):
+        print(pagos_pend)
         response = {'status': 'success',
                     'message': 'Informe enviado correctamente'}
     else:
@@ -209,11 +211,14 @@ def nuevo_enviar_correo(request, socio_id):
 ################################### ---ENVIAR CORREO TODOS----############################
 
 
-def enviarGastoEmail(socio_id, context, pdf_buffer):
+def enviarGastoEmail(socio_id, context,pagos_pen, pdf_buffer):
     sociop = Socios.objects.get(id=socio_id)
     gastos = context
     # correo=render_to_string('gastosmensual.html', {"gastos": gastos})
-    context = {'gastos': gastos}
+    if pagos_pen[0][0]>0:
+        context = {'gastos': gastos, 'pagos_pen':pagos_pen}
+    else:
+        context = {'gastos': gastos}
 
     template = get_template('gastosmensual.html')
     content = template.render(context)
@@ -313,7 +318,11 @@ def enviar_correo_todos(request):
 
                 template = get_template('gastosmensual.html')
                 resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
-                context = {'gastos': resultados}
+                pagos_pend= pagos_pendientes(numero_mes,anio,socio.id)
+                if pagos_pend[0][0]>0:
+                    context = {'gastos': resultados, 'pagos_pen':pagos_pend}
+                else:
+                    context = {'gastos': resultados}
                 content = template.render(context)
 
                 pdf_buffer = generar_pdf(datospdf(socio.id, numero_mes, anio))

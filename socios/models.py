@@ -67,8 +67,8 @@ def obtener_datos_socioss(socio_id, mes, anio):
     
     if resultados:
         column_names = [
-            'nombre', 'cedula', 'cuota_prestamos', 'aportacion',
-            'descuento_proveedores', 'aportacion_ayudaseco', 'total'
+            'nombre', 'cedula', 'cuota_cuotas',
+            'cuota_prestamo', 'aportacion', 'descuento_proveedores', 'aportacion_ayudaseco', 'total'
         ]
         resultado_dict = dict(zip(column_names, resultados[0]))
         return resultado_dict
@@ -93,3 +93,10 @@ def datos_para_el_pdf(socio_id, mes, anio):
         consumo_total = cursor.fetchall()
 
     return consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumo_total
+
+def pagos_pendientes(mes, anio, socio_id):
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM total_des_pen({mes}, {anio}, {socio_id});")
+        pagos_pendientes = cursor.fetchall()
+
+    return pagos_pendientes

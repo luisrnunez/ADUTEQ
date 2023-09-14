@@ -22,8 +22,9 @@ class AyudasEconomicas(models.Model):
     descripcion=models.TextField(max_length=200)
     valorsocio=models.DecimalField(max_digits = 8, decimal_places = 2, blank=True, null=True)
     fecha=models.DateField()
-    total=models.DecimalField(max_digits = 8, decimal_places = 2)
+    total=models.DecimalField(max_digits = 8, decimal_places = 2, null=True)
     evidencia=models.FileField(null=True)
+    brinda_ayuda=models.BooleanField(default=False)
 
 class DetallesAyuda(models.Model):
     ayuda=models.ForeignKey(AyudasEconomicas, on_delete=models.CASCADE)
@@ -48,16 +49,16 @@ class ConsumosCuotaOrdinaria(models.Model):
     evidencia=models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
 
 
-@receiver(post_save, sender=AyudasEconomicas)
-def actualizar_total_ayuda_permanente(sender, instance, created, **kwargs):
-    if created:
-        # Obtener el objeto Total_Ayuda_Permanente (supongo que tienes solo un registro)
-        total_ayuda_permanente = Total_Ayuda_Permanente.objects.get(tipo_aportacion='EA')
+# @receiver(post_save, sender=AyudasEconomicas)
+# def actualizar_total_ayuda_permanente(sender, instance, created, **kwargs):
+#     if created:
+#         # Obtener el objeto Total_Ayuda_Permanente (supongo que tienes solo un registro)
+#         total_ayuda_permanente = Total_Ayuda_Permanente.objects.get(tipo_aportacion='EA')
 
-        # Restar el valor de la ayuda económica al total actual
-        total_ayuda_permanente.total_actual -= instance.total
-        total_ayuda_permanente.save()
-post_save.connect(actualizar_total_ayuda_permanente, sender=AyudasEconomicas)
+#         # Restar el valor de la ayuda económica al total actual
+#         total_ayuda_permanente.total_actual -= instance.total
+#         total_ayuda_permanente.save()
+# post_save.connect(actualizar_total_ayuda_permanente, sender=AyudasEconomicas)
 
 # @receiver(post_save, sender=DetallesAyuda)
 # @receiver(post_save, sender=AyudasExternas)
