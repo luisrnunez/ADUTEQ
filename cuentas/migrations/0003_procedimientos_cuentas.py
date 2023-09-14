@@ -262,7 +262,7 @@ $BODY$;
 """
 
 CREATE_FUNCTION10 = """
-
+CREATE EXTENSION IF NOT EXISTS tablefunc;
 CREATE OR REPLACE PROCEDURE public.obtener_consumo_proveedores(
 	IN mes integer,
 	IN anio integer)

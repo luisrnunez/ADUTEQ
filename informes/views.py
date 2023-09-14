@@ -215,7 +215,10 @@ def enviarGastoEmail(socio_id, context,pagos_pen, pdf_buffer):
     sociop = Socios.objects.get(id=socio_id)
     gastos = context
     # correo=render_to_string('gastosmensual.html', {"gastos": gastos})
-    context = {'gastos': gastos, 'pagos_pen':pagos_pen}
+    if pagos_pen[0][0]>0:
+        context = {'gastos': gastos, 'pagos_pen':pagos_pen}
+    else:
+        context = {'gastos': gastos}
 
     template = get_template('gastosmensual.html')
     content = template.render(context)
@@ -316,7 +319,10 @@ def enviar_correo_todos(request):
                 template = get_template('gastosmensual.html')
                 resultados = obtener_datos_socioss(socio.id, numero_mes, anio)
                 pagos_pend= pagos_pendientes(numero_mes,anio,socio.id)
-                context = {'gastos': resultados, 'pagos_pen':pagos_pend}
+                if pagos_pend[0][0]>0:
+                    context = {'gastos': resultados, 'pagos_pen':pagos_pend}
+                else:
+                    context = {'gastos': resultados}
                 content = template.render(context)
 
                 pdf_buffer = generar_pdf(datospdf(socio.id, numero_mes, anio))
