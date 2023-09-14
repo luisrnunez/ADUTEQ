@@ -47,7 +47,7 @@
                     <select name="socio" id="beneficiarios" onchange="mostrarOcultarValor(this)">
                         {% for opcion in opciones %}
                             {% if opcion.user.is_active %}
-                                <option value="{{ opcion.id }}">{{ opcion.user.first_name }}</option>
+                                <option value="{{ opcion.id }}">{{ opcion.user.first_name }} {{ opcion.user.last_name }}</option>
                             {% endif %}
                         {% endfor %}
                         <option value="null">Otro</option>

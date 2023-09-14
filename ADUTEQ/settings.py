@@ -147,8 +147,8 @@ LANGUAGE_CODE = 'es-EC'
 TIME_ZONE = 'America/Guayaquil'
 USE_I18N = True
 USE_TZ = True
-USE_L10N = True
-USE_THOUSAND_SEPARATOR = True
+# USE_L10N = True
+# USE_THOUSAND_SEPARATOR = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -210,5 +210,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
 
 LOGOUT_REDIRECT_URL = 'login'
-
-

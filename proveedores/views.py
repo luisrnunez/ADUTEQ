@@ -150,7 +150,7 @@ def editarPro(request):
         proveedor.telefono=telefonop
         proveedor.ruc=RUCp
         proveedor.direccion=direccionp
-        proveedor.comision=comisionp
+        proveedor.cambiar_comision(comisionp)
         proveedor.cupo=cupop
         proveedor.estado=estadop
         proveedor.save()

@@ -50,211 +50,233 @@
     .highcharts-data-table tr:hover {
         background: #f1f7ff;
     }
-    .cortar{
+
+    .cortar {
         display: flex;
-        align-items: center; /* Alinea verticalmente */
+        align-items: center;
+        /* Alinea verticalmente */
         justify-content: space-between;
     }
-    .final{
+
+    .final {
         display: inline-flex;
     }
+
+    .card {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        margin: 10px 0;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 95%;
+    }
+
+    .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+        width: 100%;
+        display: inline-flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .card-content {
+        display: flex;
+        justify-content:first baseline;
+        width: 98%;
+
+    }
+
+    .titulo_card {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+        color: #ccc;
+    }
+    .numero_card {
+        font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: 20px;
+        color:#62c562 ;
+    };
+
 </style>
 <div class="content-menu">
 
 
     <div class="container">
-        <div class="container-fluid">
-            <br>
+        <div class="card">
             <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box cortar">
+                    <div class="card-header" style="height: 50%;">
                         <h1 style="font-size: 30px; color: #62c562;" class="page-title">HOLA, BIENVENIDOS A ADUTEQ</h1>
-                        <h1 style="font-size: 30px; color: #62c562;" class="page-title final">{{ user }}</h1>
+                        <h1 style="font-size: 30px; color: #62c562;" class="page-title">{{ user }}</h1>
                     </div>
-                </div>
             </div>
             <br>
-            <div class="row">
-                <div class="col-xl-5 col-lg-6">
+            <div class="row" style="width: 100%; display: inline-flex; justify-content: space-between;" >
+                <div class="col" style="width: 45%;">
 
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="card widget-flat">
+                    <div class="row" style="display: inline-flex; width: 100%; justify-content: space-between;">
+                      
+                            <div class="card widget-flat" style="width: 40%;">
                                 <div class="card-body">
-                                    <div class="float-end">
-                                        <i class="mdi mdi-account-multiple widget-icon"></i>
-                                    </div>
-                                    <h5 class="text-muted fw-normal mt-0" title="Number of Customers">Socios
+                                    <h5 class="titulo_card">Socios
                                     </h5>
-                                    <h3 style="color: #62c562;" class="mt-3 mb-3">{{ data2.total_socios }}</h3>
-                                    <p class="mb-0 text-muted">
-                                        <span class="text-danger me-2"><i class="mdi mdi-arrow-down-bold"></i>
-                                            {% if data2.total_socios_inactivos %}  
+                                    <h3 class="numero_card" style="color: #62c562;" >{{ data2.total_socios }}</h3>
+                                    <p >
+                                        <span>
+                                            {% if data2.total_socios_inactivos %}
                                             {{ data2.total_socios_inactivos }}
-                                        {% else %}
+                                            {% else %}
                                             0
-                                        {% endif %}</span>
+                                            {% endif %}</span>
                                         <br>
-                                        <span class="text-nowrap">Socios no afiliados</span>
+                                        <span >Socios no afiliados</span>
                                     </p>
                                 </div> <!-- end card-body-->
                             </div> <!-- end card-->
-                        </div> <!-- end col-->
-
-                        <div class="col-sm-6">
-                            <div class="card widget-flat">
-                                <div class="card-body">
-                                    <div class="float-end">
-                                        <i class="mdi mdi-cart-plus widget-icon"></i>
-                                    </div>
-                                    <h5 class="text-muted fw-normal mt-0" title="Number of Orders">Proveedores
+                                <div class="card widget-flat"  style="width: 40%;">
+                                    <div class="card-body">
+                                    <h5 class="titulo_card">Proveedores
                                     </h5>
-                                    <h3 style="color: #62c562;" class="mt-3 mb-3">{{ data2.total_prov }}</h3>
-                                    <p class="mb-0 text-muted">
-                                        <span class="text-danger me-2"><i class="mdi mdi-arrow-down-bold"></i>
-                                            {% if data2.total_prov_inactivo %}  
+                                    <h3 class="numero_card" style="color: #62c562;" >{{ data2.total_prov }}</h3>
+                                    <p >
+                                        <span ><i class="mdi mdi-arrow-down-bold"></i>
+                                            {% if data2.total_prov_inactivo %}
                                             {{ data2.total_prov_inactivo }}
-                                        {% else %}
+                                            {% else %}
                                             0
-                                        {% endif %}</span>
-                                        <span class="text-nowrap">Proveedores no afiliados</span>
+                                            {% endif %}</span>
+                                            <br>
+                                        <span >Proveedores no afiliados</span>
                                     </p>
                                 </div> <!-- end card-body-->
-                            </div> <!-- end card-->
-                        </div> <!-- end col-->
-                    </div> <!-- end row -->
+                            </div> 
+                    </div> 
 
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="card widget-flat">
+                    <div class="row" style="display: inline-flex; width: 100%; justify-content: space-between;">
+                       
+                        <div class="card widget-flat"  style="width: 40%;">
                                 <div class="card-body">
-                                    <div class="float-end">
-                                        <i class="mdi mdi-currency-usd widget-icon"></i>
-                                    </div>
-                                    <h5 class="text-muted fw-normal mt-0" title="Average Revenue">Ganancia</h5>
-                                    <h3 style="color: #62c562;" class="mt-3 mb-3">${{ data2.total_comision }}</h3>
-                                    <p class="mb-0 text-muted">
-                                        <span class="text-danger me-2"><i class="mdi mdi-arrow-down-bold"></i>
-                                            {% if data2.total_comision_mesantes %}  
+                                    <h5 class="titulo_card">Ganancia</h5>
+                                    <h3 class="numero_card" style="color: #62c562;" >${{ data2.total_comision }}</h3>
+                                    <p >
+                                        <span >
+                                            {% if data2.total_comision_mesantes %}
                                             ${{ data2.total_comision_mesantes }}
-                                        {% else %}
-                                        $0
-                                        {% endif %}</span>
-                                        <span class="text-nowrap">Desde el mes pasado</span>
+                                            {% else %}
+                                            $0
+                                            {% endif %}</span>
+                                        <br>
+                                        <span>Desde el mes pasado</span>
                                     </p>
                                 </div> <!-- end card-body-->
                             </div> <!-- end card-->
-                        </div> <!-- end col-->
+                     
 
-                        <div class="col-sm-6">
-                            <div class="card widget-flat">
+                       
+                            <div class="card widget-flat"  style="width: 40%;">
                                 <div class="card-body">
-                                    <div class="float-end">
-                                        <i class="mdi mdi-pulse widget-icon"></i>
-                                    </div>
-                                    <h5 class="text-muted fw-normal mt-0" title="Growth">Consumos</h5>
-                                    <h3 style="color: #62c562;" class="mt-3 mb-3">${{ data2.suma_consumos }}</h3>
-                                    <p class="mb-0 text-muted">
-                                        <span class="text-success me-2"><i class="mdi mdi-arrow-up-bold"></i>
-                                            {% if data2.suma_consumos_mesante %}  
+                                    <h5 class="titulo_card" >Consumos</h5>
+                                    <h3 class="numero_card" style="color: #62c562;">${{ data2.suma_consumos }}</h3>
+                                    <p >
+                                        <span >
+                                            {% if data2.suma_consumos_mesante %}
                                             ${{ data2.suma_consumos_mesante }}
-                                        {% else %}
-                                        $0
-                                        {% endif %}</span>
+                                            {% else %}
+                                            $0
+                                            {% endif %}
+                                        </span>
+                                        <br>
                                         <span class="text-nowrap">Desde el mes pasado</span>
                                     </p>
                                 </div> <!-- end card-body-->
                             </div> <!-- end card-->
-                        </div> <!-- end col-->
-                    </div> <!-- end row -->
+                  
+                    </div> 
 
-                </div> <!-- end col -->
-
-                <div class="col-xl-7 col-lg-6">
-                    <div class="card card-h-100">
-                        <div class="d-flex card-header justify-content-between align-items-center">
-                            <h4 class="header-title">Comsumos de los socios por mes</h4>
-                            <!-- <div class="dropdown">
-                        <a href="#" class="dropdown-toggle arrow-none card-drop"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="mdi mdi-dots-vertical"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a href="javascript:void(0);" class="dropdown-item">Generar Reporte</a>
-                        </div>
-                    </div> -->
-                        </div>
-                        <div class="card-body pt-0">
-                            <div dir="ltr">
-                                <script src="https://code.highcharts.com/highcharts.js"></script>
-                                <script src="https://code.highcharts.com/modules/exporting.js"></script>
-                                <script src="https://code.highcharts.com/modules/export-data.js"></script>
-                                <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-                                <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/9.3.1/languages/es.js"></script>
-                            </head>
-
-                                <figure class="highcharts-figure">
-                                    <div id="container"></div>
-                                    <p class="highcharts-description">
-
-                                    </p>
-                                </figure>
+                </div>
+       
+                <div class="col" style="width: 50%;">
+                    <div class="card-content">
+                        <div class="card card-h-100">
+                            <div class="d-flex card-header justify-content-between align-items-center">
+                                <h4 class="header-title">Comsumos de los socios por mes</h4>
                             </div>
-                            <script>
-                                Highcharts.chart('container', {
-                                    chart: {
-                                        type: 'column'
-                                    },
-                                    title: {
-                                        text: '',
-                                        align: 'left'
-                                    },
-                                    subtitle: {
-                                        // text:
-                                        //     'Source: <a target="_blank" ' +
-                                        //     'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>',
-                                        align: 'left'
-                                    },
-                                    xAxis: {
-                                        categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep','Oct', 'Nov', 'Dic'],
-                                        crosshair: true,
-                                        accessibility: {
-                                            description: 'Meses'
-                                        }
-                                    },
-                                    yAxis: {
-                                        min: 0,
+                            <div class="card-body pt-0">
+                                <div dir="ltr">
+                                    <script src="https://code.highcharts.com/highcharts.js"></script>
+                                    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+                                    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+                                    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+                                    <script
+                                        src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/9.3.1/languages/es.js"></script>
+                                    </head>
+    
+                                    <figure class="highcharts-figure">
+                                        <div id="container"></div>
+                                        <p class="highcharts-description">
+    
+                                        </p>
+                                    </figure>
+                                </div>
+                                <script>
+                                    Highcharts.chart('container', {
+                                        chart: {
+                                            type: 'column'
+                                        },
                                         title: {
-                                            text: ''
-                                        }
-                                    },
-                                    tooltip: {
-                                        valueSuffix: ''
-                                    },
-                                    plotOptions: {
-                                        column: {
-                                            pointPadding: 0.2,
-                                            borderWidth: 0
-                                        }
-                                    },
-                                    series: [
-                                        {
-                                            name: 'Descuentos',
-                                            color: '#62c562',
-                                            data: {{ data }}
-                                        }
-                                        // {
-                                        //     name: 'Wheat',
-                                        //     data: [51086, 136000, 5500, 141000, 107180, 77000]
-                                        // }
-                                    ]
-                                });
-
-                            </script>
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-
-                </div> <!-- end col -->
+                                            text: '',
+                                            align: 'left'
+                                        },
+                                        subtitle: {
+                                            // text:
+                                            //     'Source: <a target="_blank" ' +
+                                            //     'href="https://www.indexmundi.com/agriculture/?commodity=corn">indexmundi</a>',
+                                            align: 'left'
+                                        },
+                                        xAxis: {
+                                            categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                                            crosshair: true,
+                                            accessibility: {
+                                                description: 'Meses'
+                                            }
+                                        },
+                                        yAxis: {
+                                            min: 0,
+                                            title: {
+                                                text: ''
+                                            }
+                                        },
+                                        tooltip: {
+                                            valueSuffix: ''
+                                        },
+                                        plotOptions: {
+                                            column: {
+                                                pointPadding: 0.2,
+                                                borderWidth: 0
+                                            }
+                                        },
+                                        series: [
+                                            {
+                                                name: 'Descuentos',
+                                                color: '#62c562',
+                                                data: {{ data }}
+                                            }
+                                            // {
+                                            //     name: 'Wheat',
+                                            //     data: [51086, 136000, 5500, 141000, 107180, 77000]
+                                            // }
+                                        ]
+                                    });
+    
+                                </script>
+                            </div> <!-- end card-body-->
+                        </div> <!-- end card-->
+    
+                    </div> <!-- end col -->
+                </div>
+                
             </div>
 
         </div>

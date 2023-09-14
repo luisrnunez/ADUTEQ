@@ -161,20 +161,22 @@ $BODY$;
 
 CREATE_FUNCTION7 = """
 CREATE OR REPLACE FUNCTION public.obtener_informacion_prestamos(
-	mes integer,
-	anio integer)
+    mes integer,
+    anio integer)
     RETURNS TABLE(nombres text, valor_cuota numeric, valor_cuota_interes numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
     ROWS 1000
-
 AS $BODY$
 BEGIN
     RETURN QUERY
     SELECT
         CONCAT(u.last_name, ' ', u.first_name) AS Nombres,
-		pm.monto_pago / (1 + (p.tasa_interes / 100)) AS valor_cuota_original,
+        CASE
+            WHEN p.tasa_interes IS NULL THEN pm.monto_pago
+            ELSE pm.monto_pago / (1 + (p.tasa_interes / 100))
+        END AS valor_cuota_original,
         pm.monto_pago AS valor_cuota
     FROM
         "Prestamos_pagomensual" pm
@@ -187,7 +189,7 @@ BEGIN
     WHERE
         EXTRACT(MONTH FROM pm.fecha_pago) = mes
         AND EXTRACT(YEAR FROM pm.fecha_pago) = anio
-		and pm.cancelado=true;
+        AND pm.cancelado = True;
 
 END;
 $BODY$;

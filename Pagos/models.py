@@ -44,7 +44,7 @@ class Detalle_cuotas(models.Model):
     estado = models.BooleanField(default=False)
     fecha_descuento=models.DateField()
     evidencia = models.FileField(upload_to=upload_to_evidencia, blank=True, null=True)
-    valor_cuota=models.DecimalField(max_digits=8,decimal_places=2, default=120)
+    valor_cuota=models.DecimalField(max_digits=8,decimal_places=2)
 
 
 class pagos_pendientes(models.Model):

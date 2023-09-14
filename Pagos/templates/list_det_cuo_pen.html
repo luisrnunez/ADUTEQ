@@ -75,7 +75,7 @@
                         {% for detalle_cuota in detalle_cuotas %}
                         <tr>
                             <td>{{detalle_cuota.numero_cuota}}</td> 
-                            <td>{{detalle_cuota.pago_cuota_pendientes.valor_cuota}}</td>
+                            <td>{{detalle_cuota.valor_cuota}}</td>
                             <td>{{detalle_cuota.fecha_descuento}}</td>
                             <td>
                                 {% if detalle_cuota.estado %}

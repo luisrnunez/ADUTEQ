@@ -673,10 +673,20 @@ def reportes_datos_socios(request):
 
 
 def generar_pdf_socio(request):
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    image_path = os.path.join(os.path.dirname(
+        __file__), 'static', 'img', 'aduteq.png')
+    fecha_gen = datetime.now()
     socio_id = request.POST.get('socio')
     socio = Socios.objects.get(id=socio_id)
     template = get_template('odf_socio.html')
-    context = {'socio': socio}
+    context = {'socio': socio,
+               'mes': mes,
+               'anio': anio,
+               'image_path': image_path,
+               'fecha_gen': fecha_gen}
 
     html = template.render(context)
 

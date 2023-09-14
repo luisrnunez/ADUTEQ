@@ -55,7 +55,20 @@
 </head>
 
 <body>
-    <h1>Información del Socio {{ socio.user.first_name }} {{ socio.user.last_name }}</h1>
+    <table style="border: 1px solid #ddd; width: 100%; border-collapse: collapse; text-align: center;">
+        <tr>
+            <td style="width: 180px; text-align: left; border: none;">
+                <img src="{{ image_path }}" alt="Logo" style="max-width: 100px; max-height: 100px;">
+            </td>
+            <td style="text-align: center; border: none;">
+                <!-- <h5 style="font-size: large;">Asociación de Docentes Universidad Tecnica Estatal de Quevedo</h5> -->
+                <h5 style="font-size: x-large;">Información del Socio {{ socio.user.first_name }} {{ socio.user.last_name }}</h5>
+            </td>
+            <td style="width: 180px; text-align: right; border: none; margin: 0; padding: 0;">
+                <h3>Fecha de generación: {{fecha_gen}}</h3>
+            </td>
+        </tr>
+    </table>
     <div class="container11">
         <table style="width: 100%; border-collapse: collapse;">
             <tr>
@@ -80,7 +93,7 @@
             <tr>
                 <td>
                     <p><strong>Facultad:</strong> {{socio.facultad}}</p>
-                    <p><strong>Dirección:</strong> {{socio.categoria}}</p>
+                    <p><strong>Categoria:</strong> {{socio.categoria}}</p>
                     <p><strong>Dedicación Academica:</strong> {{ socio.dedicacion_academica }}</p>
                     <p><strong>Fecha de Afiliación:</strong> {{ socio.user.date_joined }}</p>
                     <p><strong>Dirección:</strong> {{socio.direccion_domiciliaria}}</p>
