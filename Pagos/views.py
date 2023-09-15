@@ -695,7 +695,7 @@ def extraer_datos_pdf(request):
         # java_options=['-Xmx4G']
         # tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', pandas_options={'header': None, 'dtype': str})
         tables = tabula.read_pdf(
-            pdf_file, pages="all",  pandas_options={'header': None, 'dtype': str})
+            pdf_file, pages="all", encoding='latin-1',java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
         datos_tabla = []
 
         for table in tables:
