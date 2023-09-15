@@ -686,25 +686,27 @@ def eliminar_pago_pendiente(request, pago_id):
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def extraer_datos_pdf(request):
-    if request.method == 'POST':
-        pdf_file = request.FILES['pdf_file']
-        fs = FileSystemStorage(location=settings.MEDIA_ROOT + '/pdf')
+    try:
+        if request.method == 'POST':
+            pdf_file = request.FILES['pdf_file']
+            fs = FileSystemStorage(location=settings.MEDIA_ROOT + '/pdf')
 
-        # file_path = fs.save('archivo.pdf', pdf_file)
-        # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
-        # java_options=['-Xmx4G']
-        # tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', pandas_options={'header': None, 'dtype': str})
-        tables = tabula.read_pdf(
-            pdf_file, pages="all", encoding='latin-1',java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
-        datos_tabla = []
+            # file_path = fs.save('archivo.pdf', pdf_file)
+            # file_path = os.path.join(settings.MEDIA_ROOT, 'pdf\\', file_path)
+            # java_options=['-Xmx4G']
+            # tables = tabula.read_pdf(pdf_file, pages="all", encoding='latin-1', pandas_options={'header': None, 'dtype': str})
+            tables = tabula.read_pdf(
+                pdf_file, pages="all", encoding='latin-1',java_options=['-Xmx4G'], pandas_options={'header': None, 'dtype': str})
+            datos_tabla = []
 
-        for table in tables:
-            for index, row in table.iterrows():
-                row_data = {}
-                datos_tabla.append(row.tolist())
-        proveedores = Proveedor.objects.filter(estado=True)
-        return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
-
+            for table in tables:
+                for index, row in table.iterrows():
+                    row_data = {}
+                    datos_tabla.append(row.tolist())
+            proveedores = Proveedor.objects.filter(estado=True)
+            return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
+    except Exception as e:
+        messages.warning(request, 'Ups, ha ocurrido un problema'+ e)
     return redirect('/listar_pagos/')
 
 
