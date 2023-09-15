@@ -112,7 +112,7 @@ WSGI_APPLICATION = 'ADUTEQ.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         # Feel free to alter this value to suit your needs.
-        default='postgresql://postgres:root@localhost:5432/dbaduteq',
+        default='postgresql://postgres:postgres@localhost:5432/mysite',
         conn_max_age=600
     )
 }
