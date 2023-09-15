@@ -303,14 +303,29 @@ BEGIN
         CREATE TEMP TABLE consumo_proveedores AS
         SELECT *
         FROM crosstab(
-            ''SELECT s.cedula AS cedula, u.first_name as nombres, u.last_name as apellidos, pr.nombre AS nombre_proveedor, SUM(p.consumo_total) AS total_consumido
-            FROM public."Pagos_pagos" p
-            INNER JOIN public.socios_socios s ON p.socio_id = s.id
-			INNER JOIN public.auth_user u ON s.user_id = u.id
-            INNER JOIN public.proveedores_proveedor pr ON p.proveedor_id = pr.id
-            WHERE EXTRACT(MONTH FROM p.fecha_consumo) = ' || mes || ' AND EXTRACT(YEAR FROM p.fecha_consumo) = ' || anio || '
-            GROUP BY s.cedula, u.first_name, u.last_name, pr.nombre
-            ORDER BY apellidos, nombres, pr.nombre'',
+            ''SELECT 
+    s.cedula AS cedula, 
+    u.first_name AS nombres, 
+    u.last_name AS apellidos, 
+    pr.nombre AS nombre_proveedor, 
+    COALESCE(SUM(p.consumo_total), 0) + COALESCE(SUM(pc.consumo_total), 0) AS total_consumido
+FROM 
+    public.socios_socios s
+	left JOIN 
+    public."Pagos_pagos" p ON s.id = p.socio_id
+	INNER JOIN 
+    public.auth_user u ON s.user_id = u.id
+	INNER JOIN 
+    public.proveedores_proveedor pr ON p.proveedor_id = pr.id
+	LEFT JOIN 
+    public."Pagos_pagos_cuotas" pc ON s.id = pc.socio_id
+	WHERE 
+    EXTRACT(MONTH FROM p.fecha_consumo) = 9 
+    AND EXTRACT(YEAR FROM p.fecha_consumo) = 2023
+	GROUP BY 
+    s.cedula, u.first_name, u.last_name, pr.nombre
+	ORDER BY 
+    apellidos, nombres, pr.nombre;'',
             ''SELECT DISTINCT nombre FROM proveedores_temp ORDER BY 1''
         ) AS ct (
             cedula text,

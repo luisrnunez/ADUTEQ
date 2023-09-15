@@ -484,7 +484,7 @@ def obtener_consumos_proveedores_func(mes, anio):
     return results
 
 
-def obtener_cuota_prestamos_func(mes, anio):
+def obtener_cuota_prestamos_func(mes, anio): 
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT * FROM obtener_cuota_prestamos_func(%s, %s);", [mes, anio])
@@ -613,7 +613,7 @@ def obtener_suma_total(mes, anio):
     return suma_consumo
 
 
-def reportes_socios_general(request):
+def reportes_socios_general(request): 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_general_socios.pdf"'
 
@@ -621,10 +621,15 @@ def reportes_socios_general(request):
     fecha_actual = datetime.strptime(fecha_actual_str, '%Y-%m-%d')
     mes = fecha_actual.month
     anio = fecha_actual.year
-    resultados = obtener_consumo_total_todos_func(mes, anio)
+    resultados = obtener_consumo_total_func(mes, anio)
     image_path = os.path.join(os.path.dirname(
         __file__), 'static', 'img', 'aduteq.png')
-    total = obtener_suma_total(mes, anio) or 0
+    total_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio) or 0
+    total_prestamo = obtener_suma_prestamo_total_func(mes, anio) or 0
+    total_descuento_cuotas = obtener_suma_descuento_cuotas_func(mes, anio) or 0
+    total_ayudas = obtener_suma_ayudas_func(mes, anio) or 0
+
+    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas
     fecha_gen = datetime.now()
 
     template = get_template('reporte_general_socios.html')

@@ -1383,3 +1383,37 @@ def convertir_cuotas2(request, pago_id):
             socios = Socios.objects.filter(user__in=users)
             proveedores = Proveedor.objects.filter(estado=True)
             return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
+
+def aplazar_pagos_cuotas_meses(request, cuotas_seleccionadas):
+    try:
+        meses = request.GET.get('meses')
+        cuotas_seleccionadas = cuotas_seleccionadas.split(',')
+
+        detalles = Detalle_cuotas.objects.filter(id__in=cuotas_seleccionadas)
+
+        for detalle in detalles:
+            detalle.fecha_descuento = detalle.fecha_descuento + relativedelta(months=int(meses))
+            detalle.save()
+
+        response_data = {'status': 'success', 'message': 'Cuotas aplazadas exitosamente'}
+    except ValueError:
+        response_data = {'status': 'error', 'message': 'Ocurrió un error al aplazar las cuotas'}
+
+    return JsonResponse(response_data)
+
+def aplazar_pagos_cuotas_pen(request, cuotas_seleccionadas):
+    try:
+        meses = request.GET.get('meses')
+        cuotas_seleccionadas = cuotas_seleccionadas.split(',')
+
+        detalles = detalle_cuotas_pendientes.objects.filter(id__in=cuotas_seleccionadas)
+
+        for detalle in detalles:
+            detalle.fecha_descuento = detalle.fecha_descuento + relativedelta(months=int(meses))
+            detalle.save()
+
+        response_data = {'status': 'success', 'message': 'Cuotas aplazadas exitosamente'}
+    except ValueError:
+        response_data = {'status': 'error', 'message': 'Ocurrió un error al aplazar las cuotas'}
+
+    return JsonResponse(response_data)

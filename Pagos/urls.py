@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import lista_pagos,agrefar_pagos,editar_pago,eliminar_pago,extraer_datos_pdf,extraer_descuentos,guardar_descuentos_prov,agregar_pagos_cuotas_pen
+from .views import lista_pagos,agrefar_pagos,editar_pago,eliminar_pago,extraer_datos_pdf,extraer_descuentos,guardar_descuentos_prov,agregar_pagos_cuotas_pen,aplazar_pagos_cuotas_meses
 from .views import lista_pagos_cuotas,agregar_pagos_cuotas,detalles_cuota,registra_pago_cuota,eliminar_pago_cuota,agregar_pdf, verificar_registros,convertir_cuotas,buscar_pagos_pendientes
 from .views import generar_reporte_pdf,obtener_periodos_por_anio,buscar_pagos, listar_pagos_pendientes, agregar_pagos_pendiente,editar_pago_pendiente,eliminar_pago_pendiente
-from .views import lista_pagos_cuotas_pendientes,detalles_cuota_pendiente,eliminar_pago_cuota_pendiente,registra_pago_cuota_pen,agregar_pdf2,convertir_cuotas2,principal_resumen
+from .views import lista_pagos_cuotas_pendientes,detalles_cuota_pendiente,eliminar_pago_cuota_pendiente,registra_pago_cuota_pen,agregar_pdf2,convertir_cuotas2,principal_resumen,aplazar_pagos_cuotas_pen
 
 
 urlpatterns = [
@@ -30,6 +30,8 @@ urlpatterns = [
     path('agregar_pdf2/<int:det_id>/',agregar_pdf2, name='agregar_pdf2'),
     path('generar_reporte/', generar_reporte_pdf, name='generar_reporte'),
 
+    path('aplazar_pagos_cuotas_meses/<str:cuotas_seleccionadas>/', aplazar_pagos_cuotas_meses, name='aplazar_pagos_cuotas_meses'),
+    path('aplazar_pagos_cuotas_pen/<str:cuotas_seleccionadas>/', aplazar_pagos_cuotas_pen, name='aplazar_pagos_cuotas_pen'),
     path('verificar_registros/', verificar_registros, name='verificar_registros'),
     path('eliminar_pago/<int:pago_id>/',eliminar_pago, name='eliminarpago'),
     path('eliminar_pago_pendiente/<int:pago_id>/',eliminar_pago_pendiente, name='eliminar_pago_pendiente'),

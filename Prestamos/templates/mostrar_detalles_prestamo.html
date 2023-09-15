@@ -118,9 +118,11 @@
                                     </form>
                                     {% endif %}
                                 </td>
+                                {% if cuota.cancelado == False %}
                                 <td class="checkbox-td">
                                     <input type="checkbox" name="aplazar_cuota" value="{{ cuota.id }}" style="display: none;">
                                 </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         </tbody>

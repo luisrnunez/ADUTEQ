@@ -55,11 +55,11 @@
                 <div class="header">
                     <h3> Detalle Cuotas Pendientes {{pago_cu.socio}} {{pago_cu.socio.user.last_name}}</h3>
                 </div>
-
+                <button id="mostrar-checkboxes-btn" class="add-socio-btn">Aplazar pagos</button>
 
                 <a href="/lista_pagos_cuotas_pendientes/"> <button class="add-socio-btn">Lista Pagos Cuotas Pendientes</button></a>
 
-                <table class="socios-table">
+                <table class="socios-table"> 
                     <thead>
                         <tr>
                             <th scope="col">No Cuota</th>
@@ -69,6 +69,7 @@
                             <th scope="col">Evidencia</th>
                             <th scope="col">Registar Pago</th>
                             <th scope="col">Registar Evidencia</th>
+                            <th scope="col">Aplazar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,11 +120,17 @@
                                 {% endif %}
                             </td>
 
+                            {% if detalle_cuota.estado == False %}
+                            <td class="checkbox-td">
+                                <input type="checkbox" name="aplazar_cuota" value="{{ detalle_cuota.id }}" style="display: none;">
+                            </td>
+                            {% endif %}
+
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-
+                <button id="agregar-mes-btn" class="add-socio-btn" style="display: none; float: right; ">Agregar un mes</button>
             </div>
         </div>
 
@@ -188,6 +195,93 @@
 
     }
 
+</script>
+<script>
+    $(document).ready(function () {
+        $("#mostrar-checkboxes-btn").click(function () {
+            $(".checkbox-td input[type='checkbox']").show();
+            $("#agregar-mes-btn").show();
+        });
+
+        // Manejar el clic en el checkbox de una cuota en la columna "Aplazar"
+        $(".checkbox-td input[type='checkbox']").click(function () {
+            var $checkbox = $(this);
+            var isChecked = $checkbox.prop("checked");
+            var $cuotaRow = $checkbox.closest("tr");
+
+            // Si se marca un checkbox, seleccionar automáticamente los siguientes
+            if (isChecked) {
+                $cuotaRow.nextAll().find(".checkbox-td input[type='checkbox']").prop("checked", true);
+            } else {
+                // Si se desmarca un checkbox, deseleccionar automáticamente los siguientes
+                $cuotaRow.nextAll().find(".checkbox-td input[type='checkbox']").prop("checked", false);
+            }
+        }); 
+
+        $("#agregar-mes-btn").click(function () {
+            var cuotasSeleccionadas = [];
+            $(".checkbox-td input[type='checkbox']:checked").each(function () {
+                cuotasSeleccionadas.push($(this).val());
+            });
+            if (cuotasSeleccionadas.length > 0) {
+                console.log("Cuotas seleccionadas:", cuotasSeleccionadas);
+                Swal.fire({
+                    title: 'Ingrese el número de meses',
+                    input: 'number',
+                    inputAttributes: {
+                        min: 1
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Aplazar',
+                    cancelButtonText: 'Cancelar',
+                    inputValidator: (value) => {
+                        if (!value || value < 1) {
+                            return 'Por favor, ingrese un número válido de meses.';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const meses = result.value;
+ 
+                        $.ajax({
+                            type: "GET",
+                            url: `/aplazar_pagos_cuotas_pen/${cuotasSeleccionadas.join(",")}?meses=${meses}`,
+                            success: function (response_data) {
+                                if (response_data.status === 'success') {
+                                    Swal.fire({
+                                        title: 'Éxito',
+                                        text: response_data.message,
+                                        icon: 'success'
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: response_data.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function () {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Hubo un error al procesar la solicitud.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Debes seleccionar al menos una cuota para agregar un mes.',
+                    icon: 'error'
+                });
+            }
+        });
+    });
 </script>
 
 {% endblock %}
