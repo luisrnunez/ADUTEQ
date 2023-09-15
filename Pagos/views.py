@@ -706,7 +706,8 @@ def extraer_datos_pdf(request):
             proveedores = Proveedor.objects.filter(estado=True)
             return render(request, 'extraer_descuentos.html', {'proveedores': proveedores, 'datos_tabla': datos_tabla})
     except Exception as e:
-        messages.warning(request, 'Ups, ha ocurrido un problema'+ e)
+        error_message = f"Error en Tabula: {e}"
+        messages.warning(request, error_message)
     return redirect('/listar_pagos/')
 
 
