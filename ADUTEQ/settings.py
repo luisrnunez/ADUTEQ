@@ -207,6 +207,6 @@ EMAIL_HOST_PASSWORD = 'pnrriqutcefjsqnd'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
-BASE_URL = 'http://127.0.0.1:8000'  
+BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
 
 LOGOUT_REDIRECT_URL = 'login'
