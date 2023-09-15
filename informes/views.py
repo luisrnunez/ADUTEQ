@@ -383,8 +383,9 @@ def generar_reporte_pdf_total_usuarios(request):
     total_prestamo = obtener_suma_prestamo_total_func(mes, anio) or 0
     total_descuento_cuotas = obtener_suma_descuento_cuotas_func(mes, anio) or 0
     total_ayudas = obtener_suma_ayudas_func(mes, anio) or 0
+    total_aportaciones=obtener_suma_aportaciones_func(mes, anio) or 0
 
-    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas
+    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas + total_aportaciones
     fecha_gen = datetime.now()
 
     template = get_template('reporte_total_consu.html')
@@ -597,6 +598,12 @@ def obtener_suma_descuento_cuotas_func(mes, anio):
 def obtener_suma_ayudas_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute("SELECT obtener_suma_ayudas_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def obtener_suma_aportaciones_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT obtener_suma_aportaciones_func(%s, %s);", [mes, anio])
         suma_consumo = cursor.fetchone()[0]
     return suma_consumo
 

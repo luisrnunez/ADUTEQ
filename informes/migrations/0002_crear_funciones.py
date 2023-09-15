@@ -806,6 +806,35 @@ def obtener_cuota_prestamos_func(apps, schema_editor):
                 """
             )
 
+def obtener_suma_aportaciones_func(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'obtener_suma_aportaciones_func')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.obtener_suma_aportaciones_func(
+                    mes integer,
+                    anio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                DECLARE
+                    total_aportaciones numeric;
+                BEGIN
+                    SELECT SUM(monto) INTO total_aportaciones
+                    FROM public.socios_aportaciones
+                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
+                    RETURN total_aportaciones;
+                END;           
+                $BODY$;
+                """
+            )
+
 def obtener_suma_ayudas_func(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -986,44 +1015,100 @@ def obtener_suma_total(apps, schema_editor):
                     COST 100
                     VOLATILE PARALLEL UNSAFE
                 AS $BODY$
-                                DECLARE
-                                    total NUMERIC;
-                                    total_ayudas NUMERIC;
-                                    total_descuentos NUMERIC;
-                                    descuento_cuotas NUMERIC;
-                                    total_pres NUMERIC;
-                                BEGIN
-                                    total := 0;
-                                    total_ayudas := 0;
-                                    total_descuentos := 0;
-                                    descuento_cuotas := 0;
-                                    total_pres := 0;
+                                                DECLARE
+                                                    total NUMERIC;
+                                                    total_ayudas NUMERIC;
+                                                    total_descuentos NUMERIC;
+                                                    descuento_cuotas NUMERIC;
+                                                    total_pres NUMERIC;
+                                                    total_aport NUMERIC;
+                                                BEGIN
+                                                    total := 0;
+                                                    total_ayudas := 0;
+                                                    total_descuentos := 0;
+                                                    descuento_cuotas := 0;
+                                                    total_pres := 0;
+                                                    total_aport:=0;
 
-                                    SELECT COALESCE(SUM(valor), 0)
-                                    INTO total_ayudas
-                                    FROM public.ayudas_econ_detallesayuda
-                                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
+                                                    SELECT COALESCE(SUM(valor), 0)
+                                                    INTO total_ayudas
+                                                    FROM public.ayudas_econ_detallesayuda
+                                                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
 
-                                    SELECT COALESCE(SUM(consumo_total), 0)
-                                    INTO total_descuentos
-                                    FROM public."Pagos_pagos"
-                                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio;
+                                                    SELECT COALESCE(SUM(consumo_total), 0)
+                                                    INTO total_descuentos
+                                                    FROM public."Pagos_pagos"
+                                                    WHERE EXTRACT(MONTH FROM fecha_consumo) = mes AND EXTRACT(YEAR FROM fecha_consumo) = anio;
 
-                                    SELECT COALESCE(SUM(valor_cuota), 0)
-                                    INTO descuento_cuotas
-                                    FROM public."Pagos_detalle_cuotas"
-                                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio;
+                                                    SELECT COALESCE(SUM(valor_cuota), 0)
+                                                    INTO descuento_cuotas
+                                                    FROM public."Pagos_detalle_cuotas"
+                                                    WHERE EXTRACT(MONTH FROM fecha_descuento) = mes AND EXTRACT(YEAR FROM fecha_descuento) = anio;
 
-                                    SELECT COALESCE(SUM(monto_pago), 0)
-                                    INTO total_pres
-                                    FROM public."Prestamos_pagomensual"
-                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio;
+                                                    SELECT COALESCE(SUM(monto_pago), 0)
+                                                    INTO total_pres
+                                                    FROM public."Prestamos_pagomensual"
+                                                    WHERE EXTRACT(MONTH FROM fecha_pago) = mes AND EXTRACT(YEAR FROM fecha_pago) = anio;
+                                                    
+                                                    SELECT COALESCE(SUM(monto), 0)
+                                                    INTO total_aport
+                                                    FROM public.socios_aportaciones
+                                                    WHERE EXTRACT(MONTH FROM fecha) = mes AND EXTRACT(YEAR FROM fecha) = anio;
 
-                                    total := total_ayudas + total_descuentos + descuento_cuotas + total_pres;
+                                                    total := total_ayudas + total_descuentos + descuento_cuotas + total_pres + total_aport;
 
-                                    RETURN total;
-                                END;
+                                                    RETURN total;
+                                                END;
+                                                
                                 
+                $BODY$;
+                """
+            )
+
+def total_des_pen(apps, schema_editor):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'total_des_pen')")
+        function_exists = cursor.fetchone()[0]
+
+        if not function_exists:
+            cursor.execute(
+                """
+                CREATE OR REPLACE FUNCTION public.total_des_pen(
+                    mes integer,
+                    anio integer,
+                    id_socio integer)
+                    RETURNS numeric
+                    LANGUAGE 'plpgsql'
+                    COST 100
+                    VOLATILE PARALLEL UNSAFE
+                AS $BODY$
+                DECLARE
+                    total1 numeric;
+                    total2 numeric;
+                BEGIN
+                    total1 := 0;
+                    total2 := 0;
+                    SELECT 
+                        COALESCE(SUM(consumo_total), 0) INTO total1
+                    FROM 
+                        public."Pagos_pagos_pendientes"
+                    WHERE 
+                        EXTRACT(MONTH FROM fecha_consumo) = mes 
+                        AND EXTRACT(YEAR FROM fecha_consumo) = anio
+                        AND estado = FALSE 
+                        AND socio_id = id_socio;
+                    SELECT 
+                        COALESCE(SUM(valor_cuota), 0) INTO total2
+                    FROM 
+                        public."Pagos_detalle_cuotas_pendientes"
+                    WHERE 
+                        EXTRACT(MONTH FROM fecha_descuento) = mes 
+                        AND EXTRACT(YEAR FROM fecha_descuento) = anio
+                        AND estado = FALSE 
+                        AND socio_id = id_socio;
+                    RETURN total1+total2;
+                END;
                 $BODY$;
                 """
             )
