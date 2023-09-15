@@ -687,7 +687,6 @@ def eliminar_pago_pendiente(request, pago_id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def extraer_datos_pdf(request):
     if request.method == 'POST':
-
         pdf_file = request.FILES['pdf_file']
         fs = FileSystemStorage(location=settings.MEDIA_ROOT + '/pdf')
 
