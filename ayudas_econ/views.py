@@ -1,7 +1,7 @@
 from datetime import date
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import AyudasMot,AyudasEconomicas, Socios, DetallesAyuda,ConsumosCuotaOrdinaria
+from .models import AyudasMot,AyudasEconomicas, Socios, DetallesAyuda,ConsumosCuotaOrdinaria,Total_Cuota_Ordinaria
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.contrib import messages
 from .models import datos_para_ayuda
@@ -222,7 +222,7 @@ def aggAyuda(request):
                 fecha=request.POST['fecha'],
                 evidencia=None,
             )
-        consumo_cuota.save()
+        consumo_cuota.save()    
     elif request.POST.get('socio')!='null' and tipo:
         socio=Socios.objects.get(id=request.POST['socio'])
         ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = total, motivo=mmotivo, fecha=request.POST['fecha'],brinda_ayuda=True)
@@ -384,25 +384,27 @@ def registrar_aportacion_externa(request, detalle_id):
         nombre = request.POST.get('nombre_aportador')
         cedula = request.POST.get('cedula_aportador')
         valor = request.POST.get('valor1')
-        print(valor)
         fecha = request.POST.get('fecha')
         detalle_id = request.POST.get('detalle_id')  # Asegúrate de agregar un campo oculto en tu formulario HTML para el detalle_id
-        detallea=AyudasEconomicas.objects.get(id=detalle_id)
+        detallea = AyudasEconomicas.objects.get(id=detalle_id)
         
-            
-        # Guardar la aportación externa en la base de datos
+        pertenece_uteq = request.POST.get('pertenece_uteq') == 'true'
+
+        print(pertenece_uteq)
         aportacion_externa = AyudasExternas(
             nombre=nombre,
             cedula=cedula,
             fecha=fecha,
             detalle=detallea,
-            valor=valor
+            estado=False,
+            valor=valor,
+            pertenece_uteq=pertenece_uteq
         )
         aportacion_externa.save()
             
         # Puedes retornar una respuesta JSON si lo deseas
         response_data = {'message': 'Aportación externa registrada con éxito'}
-    return JsonResponse(response_data)
+        return JsonResponse(response_data)
 
 def obtener_ayudas_externas(request, detalle_id):
     detalle = AyudasEconomicas.objects.get(id=detalle_id)
@@ -424,6 +426,27 @@ def editar_evidencia_ayuda(request, ayuda_id):
 
         return redirect('/verayudas/')
 
+
+def guardar_aportacion_externa(request, aporte_id, valor):
+    socio = AyudasExternas.objects.get(id=aporte_id)
+
+    if request.method == 'GET':
+        # Cambiar el estado del socio a inactivo
+        print(valor)
+        if valor == 0:
+            socio.estado = True
+            socio.save()
+            messages.success(
+                request, 'Aportación registrada exitosamente.')
+        else:
+            messages.success(
+                request, 'Algo salio mal.')
+
+        # Agregar un mensaje de confirmación
+    else:
+        messages.warning(request, 'Ocurrio un problema')
+
+    return redirect('/obtener_ayudas_externas/'+str(socio.detalle.id))
 
 #------------------------------------Cuotas Ordinarias--------------------------------------#
 def listar_gastos_cuotas_ordinaria(request):
@@ -456,6 +479,7 @@ def registrar_consumo_ordinaria(request):
         descripcion = request.POST.get('descripcion')
         valor = Decimal(request.POST.get('consumo'))  # Convertir el valor a Decimal
         fecha = request.POST.get('fecha')
+        tipo='r'
         
         if 'evidencia' in request.FILES:
             evidencia = request.FILES['evidencia']
@@ -466,6 +490,7 @@ def registrar_consumo_ordinaria(request):
         if valor <= total_cuota_ordinaria[0][1]:
             # Guardar el consumo en la base de datos
             consumo_cuota = ConsumosCuotaOrdinaria(
+                tipo=tipo,
                 descripcion=descripcion,
                 valor=valor,
                 fecha=fecha,
@@ -496,3 +521,39 @@ def deleteConsumo(request, consumo_id):
     consumo=ConsumosCuotaOrdinaria.objects.get(id=consumo_id)
     consumo.delete()
     return redirect('/lista_cuotas_ordinarias')
+
+
+def registrar_ingreso_capital(request):
+    total_ayuda_permanente, total_cuota_ordinaria = datos_para_ayuda()
+    
+    if request.method == 'POST':
+        descripcion = request.POST.get('descripcion2')
+        valor = Decimal(request.POST.get('consumo2'))  # Convertir el valor a Decimal
+        fecha = request.POST.get('fecha2')
+        
+        if 'evidencia' in request.FILES:
+            evidencia = request.FILES['evidencia']
+        else:
+            evidencia = None
+        
+        if valor > 0:
+            consumo_cuota = ConsumosCuotaOrdinaria(
+                tipo='s',
+                descripcion=descripcion,
+                valor=valor,
+                fecha=fecha,
+                evidencia=evidencia,
+            )
+            consumo_cuota.save()
+
+            # tipo_aportacion = 'CO'
+            # total_cuota_ordinaria_obj = Total_Cuota_Ordinaria.objects.get(tipo_aportacion=tipo_aportacion)
+            # total_cuota_ordinaria_obj.total_actual += valor
+            # print(Total_Cuota_Ordinaria)
+            # total_cuota_ordinaria_obj.save()
+            
+            response_data = {'message': 'Ingreso registrado con éxito'}
+        else:
+            response_data = {'status': 'error', 'message': 'Valor ingresado no valido.'}
+    
+    return JsonResponse(response_data)

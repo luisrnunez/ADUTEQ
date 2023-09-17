@@ -1154,22 +1154,30 @@ $$ LANGUAGE plpgsql;
 """
 
 create_function7="""
-CREATE OR REPLACE FUNCTION actualizar_cuota_ordinaria()
-RETURNS TRIGGER AS $$
-DECLARE
-  valor_consumo numeric(8,2);
+CREATE OR REPLACE FUNCTION public.actualizar_cuota_ordinaria()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
 BEGIN
-  -- Obtener el valor ingresado en la tabla de consumos
-  SELECT valor INTO valor_consumo FROM ayudas_econ_consumoscuotaordinaria WHERE id = NEW.id;
-
-  -- Restar el valor de la cuota ordinaria actual
-  UPDATE socios_total_cuota_ordinaria
-  SET total_actual = total_actual - valor_consumo
-  WHERE tipo_aportacion = 'CO';
+  -- Verificar si el tipo es 'r' (Restar)
+  IF NEW.tipo = 'r' THEN
+    -- Restar el valor de la cuota ordinaria actual
+    UPDATE socios_total_cuota_ordinaria
+    SET total_actual = total_actual - NEW.valor
+    WHERE tipo_aportacion = 'CO';
+  -- Verificar si el tipo es 's' (Sumar)
+  ELSIF NEW.tipo = 's' THEN
+    -- Sumar el valor a la tabla total_ayuda_economica
+    UPDATE socios_total_cuota_ordinaria
+    SET total_actual = total_actual + NEW.valor
+	WHERE tipo_aportacion = 'CO';
+  END IF;
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$BODY$;
 """
 
 create_function8="""

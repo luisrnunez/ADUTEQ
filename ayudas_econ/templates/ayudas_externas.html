@@ -42,9 +42,12 @@
                     <tr>
                         <th scope="col">Nombres</th>
                         <th scope="col">Cedula</th>
+                        <th scope="col">Pertenece UTEQ</th>
+                        <th scope="col">Estado</th>
                         <th scope="col">Fecha</th>
                         <th scope="col">Valor</th>
                         <th scope="col">Ayuda</th>
+                        <th scope="col">Registrar Pago</th>
                     </tr>
                 </thead>
                 <tbody id="socios-body">
@@ -52,9 +55,34 @@
                     <tr>
                         <td>{{ detalle.nombre }}</td>
                         <td>{{ detalle.cedula }}</td>
+                        <td>{% if detalle.pertenece_uteq %}
+                            Si
+                            {% else %}
+                            No
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if detalle.estado %}
+                            <button class="green-button">
+                                Cancelado
+                            </button>
+                            {% else %}
+                            <button class="red-button">
+                                Pendiente
+                            </button>
+                            {% endif %}
+                        </td>
                         <td>{{ detalle.fecha }}</td>
                         <td>{{ detalle.valor }}</td>
-                        <td>{{ detalle.detalle.ayuda.descripcion }}</td>
+                        <td>{{ detalle.detalle.descripcion }}</td>
+                        <td>
+                            {% if detalle.estado == False %}
+                            <button class="edit-btn"
+                                onclick="confirmarEdicion('{{ detalle.id }}','{{ detalle.nombre }}')">
+                                Registrar pago
+                            </button>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
 
@@ -94,7 +122,25 @@
                     </ul>
                 </nav>
             </div>
-            
-
         </div>
+        <script>
+            function confirmarEdicion(detalleId, detalleNombre, detalleActivo) {
+            var valor = detalleActivo ? 1 : 0; // Si detalleActivo es verdadero, valor será 1; de lo contrario, será 0.
+
+            Swal.fire({
+                title: 'Confirmación',
+                text: '¿Deseas registrar la aportación de ' + detalleNombre + '?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // El usuario ha confirmado la edición, redirigir a la página de edición
+                    window.location.href = '/guardar_aportacion_externa/' + detalleId + '/' + valor + '/';
+                }
+            });
+        }
+            </script>
         {% endblock %}

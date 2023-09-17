@@ -19,6 +19,7 @@
                 <div style="display:inline-flex; ">
                     <a style="margin-right: 30px;" href="/verayudas"> <button class="add-socio-btn"> Atrás</button></a>
                     <button class="add-socio-btn" id="agregarConsumoBtn">Agregar Consumo</button>
+                    <button style="margin-left: 30px;" class="add-socio-btn" id="agregarCapital">Sumar capital</button>
 
                     <!-- <div class="search-form" style="margin-left: 6px; margin-block-end:auto;">
                         <input type="text" id="barbusqueda" placeholder="Buscar">
@@ -61,6 +62,7 @@
                 <table class="socios-table">
                     <thead>
                         <tr>
+                            <th>Tipo</th>
                             <th style="white-space: normal; word-wrap: break-word;">Descripcion</th>
                             <th>Monto</th>
                             <th>Fecha</th>
@@ -73,6 +75,11 @@
                     <tbody>
                         {% for gasto in gastos %}
                         <tr>
+                            <td>{% if gasto.tipo == 's' %}
+                                Deposito
+                                {% else %}
+                                Consumo
+                                {% endif %}</td>
                             <td style="white-space: normal; word-wrap: break-word;">{{gasto.descripcion}}</td>
                             <td>{{gasto.valor}}</td>
                             <td>{{gasto.fecha}}</td>
@@ -90,10 +97,12 @@
                             <td>
                                 <button class="edit-btn" onclick="confirmarEdicion('{{gasto.id}}')">Evidencia</button>
                             </td>
+                            {% if gasto.tipo != 's' %}
                             <td>
                                 <a style="text-decoration: none;" class="delete-btn" href="#"
                                     onclick="eliminarMotivo('{{gasto.id}}', '/delete_consumo/', 'Consumo')">Eliminar</a>
                             </td>
+                            {% endif %}
                             <!--<td>{{proveedor.id}}</td>-->
                         </tr>
                         {% endfor %}
@@ -138,6 +147,40 @@
             </div>
         </div>
         <!-- Resto del contenido de la página -->
+
+        <div class="modal fade" id="addCapital" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese datos Ingreso</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="aportacionForm" method="post">
+                            {% csrf_token %}
+                            <!-- <input hidden class="form-control" type="text" id="detalle_id" name="detalle_id" value="{{detalle_id}}"> -->
+                            
+                            <div class="mb-3">
+                                <label class="form-label" for="nombre_aportador">Descripción:</label>
+                                <textarea class="form-control" type="text" id="descripcion2" name="descripcion2" required cols="30" rows="7"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="cedula_aportador">Ingreso (Valor):</label>
+                                <input maxlength="10" class="form-control" type="text" id="consumo2" name="consumo2" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="fecha">Fecha de Ingreso:</label>
+                                <input class="form-control" type="date" id="fecha2" name="fecha2" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarAportacionn2" type="button" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
 
@@ -233,5 +276,71 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Abrir el modal cuando se haga clic en "Agregar Consumo"
+        document.getElementById('agregarCapital').addEventListener('click', function () {
+            $('#addCapital').modal('show');
+        });
+    
+        // Configurar el evento de clic para el botón "Guardar" en el modal
+        document.getElementById('guardarAportacionn2').addEventListener('click', function () {
+            var descripcion2 = $('#descripcion2').val();
+            var consumo2 = $('#consumo2').val();
+            var fecha2 = $('#fecha2').val();
+    
+            // Realizar la verificación del valor ingresado
+            var totalCuotaOrdinaria = parseFloat('{{ total_cuota_ordinaria.0.1 }}'); // Reemplaza '{{ total_cuota_ordinaria }}' con el valor real
+    
+    
+            Swal.fire({
+                title: 'Confirmación',
+                text: '¿Estás seguro de que deseas guardar este ingreso?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/registrar_ingreso_capital/',
+                        data: {
+                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                            descripcion2: descripcion2,
+                            consumo2: consumo2,
+                            fecha2: fecha2,
+                        },
+                        success: function(data) {
+                            if (data.message) {
+                                Swal.fire({
+                                    title: 'Éxito',
+                                    text: data.message,
+                                    icon: 'success'
+                                }).then(() => {
+                                    $('#addCapital').modal('hide');
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ups, ocurrió un error en la transacción',
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ups, ocurrió un error en la transacción',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+    </script>
 </body>
 {% endblock %}
