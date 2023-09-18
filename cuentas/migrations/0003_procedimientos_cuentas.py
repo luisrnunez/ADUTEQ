@@ -272,8 +272,8 @@ $BODY$;
 CREATE_FUNCTION10 = """
 CREATE EXTENSION IF NOT EXISTS tablefunc;
 CREATE OR REPLACE PROCEDURE public.obtener_consumo_proveedores(
-	IN mes integer,
-	IN anio integer)
+    IN mes integer,
+    IN anio integer)
 LANGUAGE 'plpgsql'
 AS $BODY$
 DECLARE
@@ -281,13 +281,11 @@ DECLARE
     sqlt text;
     proveedor_nombre text;
 BEGIN
-    -- Obtener los nombres de proveedores únicos como filas
     CREATE TEMP TABLE proveedores_temp AS
         SELECT DISTINCT nombre
         FROM public.proveedores_proveedor
         ORDER BY nombre;
 
-    -- Construir la lista de nombres de proveedores como columnas en la consulta dinámica
     columnas_proveedores := '';
     FOR proveedor_nombre IN (SELECT nombre FROM proveedores_temp)
     LOOP
@@ -295,50 +293,52 @@ BEGIN
     END LOOP;
     columnas_proveedores := substring(columnas_proveedores FROM 2);
 
-    -- Eliminar la tabla temporal de consumo_proveedores si ya existe
     DROP TABLE IF EXISTS consumo_proveedores;
 
-    -- Construir la consulta dinámicamente con los parámetros mes y anio
     sqlt := '
         CREATE TEMP TABLE consumo_proveedores AS
         SELECT *
         FROM crosstab(
-            ''SELECT 
-    s.cedula AS cedula, 
-    u.first_name AS nombres, 
-    u.last_name AS apellidos, 
-    pr.nombre AS nombre_proveedor, 
-    COALESCE(SUM(p.consumo_total), 0) + COALESCE(SUM(pc.consumo_total), 0) AS total_consumido
-FROM 
-    public.socios_socios s
-	left JOIN 
-    public."Pagos_pagos" p ON s.id = p.socio_id
-	INNER JOIN 
-    public.auth_user u ON s.user_id = u.id
-	INNER JOIN 
-    public.proveedores_proveedor pr ON p.proveedor_id = pr.id
-	LEFT JOIN 
-    public."Pagos_pagos_cuotas" pc ON s.id = pc.socio_id
-	WHERE 
-    EXTRACT(MONTH FROM p.fecha_consumo) = 9 
-    AND EXTRACT(YEAR FROM p.fecha_consumo) = 2023
-	GROUP BY 
-    s.cedula, u.first_name, u.last_name, pr.nombre
-	ORDER BY 
-    apellidos, nombres, pr.nombre;'',
+            ''WITH SociosConConsumo AS (
+                SELECT DISTINCT s.cedula AS cedula, u.first_name as nombres, u.last_name as apellidos, s.id AS socio_id
+                FROM public.socios_socios s
+                INNER JOIN public.auth_user u ON s.user_id = u.id
+                LEFT JOIN public."Pagos_pagos" pp ON s.id = pp.socio_id
+                LEFT JOIN public."Pagos_pagos_cuotas" pc ON s.id = pc.socio_id
+                WHERE (
+                    (EXTRACT(MONTH FROM pp.fecha_consumo) = ' || mes || ' AND EXTRACT(YEAR FROM pp.fecha_consumo) = ' || anio || ')
+                    OR
+                    (EXTRACT(MONTH FROM pc.fecha_descuento) = ' || mes || ' AND EXTRACT(YEAR FROM pc.fecha_descuento) = ' || anio || ')
+                )
+            )
+            SELECT sc.cedula AS cedula, sc.nombres, sc.apellidos, pr.nombre AS nombre_proveedor, 
+                SUM(COALESCE(pp.consumo_total, 0) + COALESCE(pc.consumo_total, 0)) AS total_consumido
+            FROM SociosConConsumo sc
+            CROSS JOIN public.proveedores_proveedor pr
+            LEFT JOIN (
+                SELECT socio_id, proveedor_id, SUM(consumo_total) AS consumo_total
+                FROM public."Pagos_pagos"
+                WHERE EXTRACT(MONTH FROM fecha_consumo) = ' || mes || ' AND EXTRACT(YEAR FROM fecha_consumo) = ' || anio || '
+                GROUP BY socio_id, proveedor_id
+            ) pp ON sc.socio_id = pp.socio_id AND pr.id = pp.proveedor_id
+            LEFT JOIN (
+                SELECT socio_id, proveedor_id, SUM(consumo_total) AS consumo_total
+                FROM public."Pagos_pagos_cuotas"
+                WHERE EXTRACT(MONTH FROM fecha_descuento) = ' || mes || ' AND EXTRACT(YEAR FROM fecha_descuento) = ' || anio || '
+                GROUP BY socio_id, proveedor_id
+            ) pc ON sc.socio_id = pc.socio_id AND pr.id = pc.proveedor_id
+            GROUP BY sc.cedula, sc.nombres, sc.apellidos, pr.nombre
+            ORDER BY sc.apellidos, sc.nombres, pr.nombre'',
             ''SELECT DISTINCT nombre FROM proveedores_temp ORDER BY 1''
         ) AS ct (
             cedula text,
-			nombres text,
-			apellidos text,
+            nombres text,
+            apellidos text,
             ' || columnas_proveedores || '
         )
     ';
-
-    -- Ejecutar la consulta dinámicamente
     EXECUTE sqlt;
 
-    -- Eliminar la tabla temporal de proveedores_temp
     DROP TABLE IF EXISTS proveedores_temp;
 END;
 $BODY$;

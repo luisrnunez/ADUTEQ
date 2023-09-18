@@ -47,7 +47,11 @@
                     <input type="text" id="lugar_nacimiento" name="lugar_nacimiento"
                         value="{{ socio.lugar_nacimiento }}" required>
 
-
+                    <label for="genero">Género:</label>
+                    <select id="genero" name="genero">
+                        <option value="Masculino" {% if socio.genero == "Masculino" %}selected{% endif %}>Masculino</option>
+                        <option value="Femenino" {% if socio.genero == "Femenino" %}selected{% endif %}>Femenino</option>
+                    </select>
 
                     <label for="email">Correo Electrónico:</label>
                     <input type="email" id="email" name="email"

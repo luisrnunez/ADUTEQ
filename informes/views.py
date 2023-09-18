@@ -720,3 +720,35 @@ def generar_pdf_socio(request):
         return HttpResponse('Error al generar el PDF', status=500)
 
     return response
+
+
+def reporte_genero(request): 
+    gen = request.POST.get('genero')
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_genero.pdf"'
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    socios=Socios.objects.filter(genero=gen)
+    image_path = os.path.join(os.path.dirname(
+        __file__), 'static', 'img', 'aduteq.png')
+    fecha_gen = datetime.now()
+    template = get_template('reporte_genero.html')
+    context = {'socios': socios,
+               'mes': mes,
+               'image_path': image_path,
+               'anio': anio,
+               'fecha_gen': fecha_gen,
+               'gen': gen
+               }
+
+    html = template.render(context)
+    result = BytesIO()
+
+    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+
+    if not pdf.err:
+        response.write(result.getvalue())
+        return response
+
+    return HttpResponse("Error al generar el PDF", status=500)

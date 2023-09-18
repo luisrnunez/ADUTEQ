@@ -155,7 +155,7 @@ def guardar_socio(request):
                 dedicacion_academica = request.POST.get('dedicacion_academica')
                 titulo = request.POST.get('titulo')
                 aporte = request.POST.get('aporte')
-
+                genero = request.POST.get('genero')
 
                 if 'foto' in request.FILES:
                     foto = request.FILES['foto']
@@ -202,7 +202,7 @@ def guardar_socio(request):
                                     numero_telefonico=numero_telefonico,numero_convencional=numero_convencional, direccion_domiciliaria=direccion_domiciliaria,
                                     categoria=categoria,facultad=facultad,
                                     dedicacion_academica=dedicacion_academica,aporte=aporte,
-                                    titulo=titulo,foto=foto)
+                                    titulo=titulo,foto=foto, genero=genero)
             
             
                 socios.save()
@@ -254,6 +254,7 @@ def editar_socio(request, socio_id):
             socio.dedicacion_academica = request.POST.get(
                 'dedicacion_academica')
             socio.titulo = request.POST.get('titulo')
+            socio.genero = request.POST.get('genero')
             # socio.aporte = request.POST.get('aporte')
 
             # if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():

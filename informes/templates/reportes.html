@@ -155,6 +155,38 @@
       <h3>Generar Reportes Información de Socios ADUTEQ</h3>
     </div>
 
+    <form method="post" action="{% url 'reportes_datos_socios' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
+        <div class="text">
+          <p>Datos de socios</p>
+          <input disabled style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpgds"
+            required>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <form method="post" action="{% url 'reporte_genero' %}">
+      {% csrf_token %}
+      <div class="image-card">
+        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
+        <div class="text">
+          <p>Información Genero</p>
+          <select class="form-control mb-1" id="genero" name="genero" required>
+            <option value="">-- Selecciona el género --</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+          </select>
+          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
+            Reporte
+          </button>
+        </div>
+      </div>
+    </form>
 
     <form method="POST" action="{% url 'generar_pdf_socio' %}">
       {% csrf_token %}
@@ -168,21 +200,6 @@
             <option value="{{ socio.id }}">{{ socio.user.last_name }} {{ socio.user.first_name }}</option>
             {% endfor %}
           </select>
-          <button style="margin-top: 10px;" class="add-socio-btn"> Generar
-            Reporte
-          </button>
-        </div>
-      </div>
-    </form>
-
-    <form method="post" action="{% url 'reportes_datos_socios' %}">
-      {% csrf_token %}
-      <div class="image-card">
-        <img src="{% static 'img/reportessocios.png' %}" alt="Imagen 3">
-        <div class="text">
-          <p>Datos de socios</p>
-          <input disabled style=" width: 80%; margin: auto;" class="form-control mb-2" type="date" name="fecharpgds"
-            required>
           <button style="margin-top: 10px;" class="add-socio-btn"> Generar
             Reporte
           </button>

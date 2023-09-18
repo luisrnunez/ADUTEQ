@@ -23,6 +23,7 @@ class Socios(models.Model):
     titulo = models.CharField(max_length=100)
     foto = models.ImageField(null=True, blank=True)
     aporte = models.DecimalField(max_digits=8,decimal_places=2)
+    genero = models.CharField(max_length=10)
 
     def __str__(self):
         return self.user.first_name
