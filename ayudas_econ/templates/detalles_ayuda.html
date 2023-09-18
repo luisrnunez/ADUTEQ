@@ -230,6 +230,10 @@
                                 <input class="form-control" type="text" id="nombre_aportador" name="nombre_aportador"
                                     required>
                             </div>
+                            <div style="display: flex; align-items: center;">
+                                <label style="margin: 5px 5px 5px 5px;" for="pertenece_uteq">Pertenece  a la UTEQ?:</label>
+                                <input type="checkbox" id="pertenece_uteq" name="pertenece_uteq" style="transform: scale(1); margin-left: 10px;">
+                            </div>
                             <div class="mb-3">
                                 <label class="form-label" for="cedula_aportador">Cédula del Aportador:</label>
                                 <input maxlength="10" class="form-control" type="text" id="cedula_aportador"
@@ -386,61 +390,64 @@
     </script>
     <script>
         document.getElementById('guardarAportacionn').addEventListener('click', function () {
-            var nombre = $('#nombre_aportador').val();
-            var cedula = $('#cedula_aportador').val();
-            var valor1 = $('#valor1').val();
-            var fecha = $('#fecha').val();
-            var detalle_id = $('#detalle_id').val();
+        var nombre = $('#nombre_aportador').val();
+        var cedula = $('#cedula_aportador').val();
+        var valor1 = $('#valor1').val();
+        var fecha = $('#fecha').val();
+        var detalle_id = $('#detalle_id').val();
+        var pertenece_uteq = $('#pertenece_uteq').prop('checked');
 
-            Swal.fire({
-                title: 'Confirmación',
-                text: '¿Estás seguro de que deseas guardar la aportación?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Guardar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: 'POST',
-                        url: '/registrar_aportacion_externa/' + detalle_id + '/',
-                        data: {
-                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-                            nombre_aportador: nombre,
-                            cedula_aportador: cedula,
-                            valor1: valor1,
-                            fecha: fecha,
-                            detalle_id: detalle_id
-                        },
-                        success: function (data) {
-                            if (data.message) {
-                                Swal.fire({
-                                    title: 'Éxito',
-                                    text: data.message,
-                                    icon: 'success'
-                                }).then(() => {
-                                    $('#exampleModalexternal').modal('hide');
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Ups, ocurrió un error en la transacción',
-                                    icon: 'error'
-                                });
-                            }
-                        },
-                        error: function () {
+        Swal.fire({
+            title: 'Confirmación',
+            text: '¿Estás seguro de que deseas guardar la aportación?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log(pertenece_uteq)
+                $.ajax({
+                    type: 'POST',
+                    url: '/registrar_aportacion_externa/' + detalle_id + '/',
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                        nombre_aportador: nombre,
+                        cedula_aportador: cedula,
+                        valor1: valor1,
+                        fecha: fecha,
+                        detalle_id: detalle_id,
+                        pertenece_uteq: pertenece_uteq
+                    },
+                    success: function (data) {
+                        if (data.message) {
+                            Swal.fire({
+                                title: 'Éxito',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                $('#exampleModalexternal').modal('hide');
+                                location.reload();
+                            });
+                        } else {
                             Swal.fire({
                                 title: 'Error',
                                 text: 'Ups, ocurrió un error en la transacción',
                                 icon: 'error'
                             });
                         }
-                    });
-                }
-            });
+                    },
+                    error: function () {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Ups, ocurrió un error en la transacción',
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
         });
+    });
     </script>
 
     {% endblock %}

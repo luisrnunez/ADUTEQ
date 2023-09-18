@@ -41,8 +41,11 @@ class AyudasExternas(models.Model):
     valor=models.DecimalField(max_digits = 8, decimal_places = 2)
     fecha=models.DateField()
     detalle=models.ForeignKey(AyudasEconomicas, on_delete=models.CASCADE)
+    pertenece_uteq = models.BooleanField(default=False)
+    estado = models.BooleanField(default=False)
 
 class ConsumosCuotaOrdinaria(models.Model):
+    tipo=models.CharField(max_length=1)
     descripcion=models.TextField(max_length=300)
     valor=models.DecimalField(max_digits = 8, decimal_places = 2)
     fecha=models.DateField()

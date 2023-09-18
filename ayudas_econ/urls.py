@@ -39,6 +39,9 @@ urlpatterns = [
     path('registrar_consumo_ordinario/', views.registrar_consumo_ordinaria, name='registrar_co'),
     path('editar_evidencia_ordinaria/<int:consumo_id>/', views.editar_evidencia_consumo, name='editar_evidencia_consumo'),
     path('delete_consumo/<int:consumo_id>/', views.deleteConsumo, name='delete_consumo'),
+    path('registrar_ingreso_capital/', views.registrar_ingreso_capital, name='registrar_ingreso_capital'),
+
+    path('guardar_aportacion_externa/<int:aporte_id>/<int:valor>/', views.guardar_aportacion_externa, name='guardar_aportacion_externa'),
 
 
 ]
