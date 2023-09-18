@@ -546,11 +546,6 @@ def registrar_ingreso_capital(request):
             )
             consumo_cuota.save()
 
-            # tipo_aportacion = 'CO'
-            # total_cuota_ordinaria_obj = Total_Cuota_Ordinaria.objects.get(tipo_aportacion=tipo_aportacion)
-            # total_cuota_ordinaria_obj.total_actual += valor
-            # print(Total_Cuota_Ordinaria)
-            # total_cuota_ordinaria_obj.save()
             
             response_data = {'message': 'Ingreso registrado con éxito'}
         else:
