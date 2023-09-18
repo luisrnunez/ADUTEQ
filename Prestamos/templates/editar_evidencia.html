@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Agregar Proveedor</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form method="post" action="{% url 'editar_evidencia' prestamo.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                  
+                    <label for="evidencia">Evidencia:</label>
+                    <input accept="application/pdf" type="file" id="evidencia" name="evidencia" value="{{ prestamo.evidencia }}" required>
+                  
+                    <input type="submit" value="Guardar">
+
+                    <a href="/prestamos"> <input type="button" value="Cancelar"
+                        style="background-color: red;"></a>
+                  </form>                     
+                </form>
+            </div>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const evidenciaInput = document.getElementById('evidencia');
+
+    evidenciaInput.addEventListener('change', function () {
+
+        if (evidenciaInput.files.length > 0) {
+            const selectedFile = evidenciaInput.files[0];
+
+            if (selectedFile.type !== 'application/pdf') {
+                evidenciaInput.value = ''; 
+                Swal.fire({
+                    title: 'Formato no permitido',
+                    text: 'Por favor, seleccione un archivo en formato PDF.',
+                    icon: 'error',
+                });
+            }
+        }
+    });
+});
+    </script>
+{% endblock %}

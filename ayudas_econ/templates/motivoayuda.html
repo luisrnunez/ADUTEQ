@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html>
 
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <title>ADUTEQ - Ayudas</title>
-    
+
 </head>
 <style>
     .pagination-container {
@@ -15,84 +16,124 @@
         justify-content: center;
         margin-top: 20px;
     }
+
+    .botones_arriba {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-right: 10px;
+        flex-flow: row wrap;
+        border: 1px solid rgb(187, 189, 186);
+        width: 100%;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgb(134, 134, 134);
+        margin: 5px;
+        border-radius: 1%;
+        background-color: #34b234;
+    }
+
+    .image-header {
+        margin-bottom: 20px;
+        background-color: #34b234;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 5px;
+        /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+    }
+
+    h3 {
+        font-weight: bold;
+        color: white;
+    }
+
+    table {
+        margin-top: 20px;
+    }
 </style>
 
 <body>
-
-    
-    {% block content %}
     <!-- Aquí va el contenido de la página -->
-    <div class="content-menu" style="padding-top: 0%;">
+    <div class="content-menu">
+        <div class="socios-content">
+            <div class="botones-sup">
+                <div class="botones_arriba">
+                    <div class="header">
+                        <h3>Motivos</h3>
+                    </div>
 
-        <div class="header">
-            <h1>Motivos</h1>
-        </div>
 
-        <div class="socios-content "> <div class="botones-sup">
-            <a href="/formotivos"> <button class="add-socio-btn"> Agregar Motivo</button></a>
-            <div class="search-form">
-                <input type="text" id="barbusqueda" placeholder="Buscar">
-                <button type="submit">Buscar</button>
-                <div id="searchResults"></div>
-            </div>
 
-        </div>
+                    <a href="/formotivos"> <button class="add-socio-btn"> Agregar Motivo</button></a>
+                    <div class="search-form">
+                        <input type="text" id="barbusqueda" placeholder="Buscar">
+                        <button type="submit">Buscar</button>
+                        <div id="searchResults"></div>
+                    </div>
+
+
+
+
+
+
+                    <!--barra de busqueda-->
+                    <!---
+                        <div class="input-group">
+                            <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                                aria-describedby="search-addon" />
+                            <button type="button" class="btn btn-outline-primary">search</button>
+                        </div>-->
+
+                    <table class="socios-table">
+                        <thead>
+                            <tr>
+                                <th>Motivo</th>
+                                <th>Descripción</th>
+                                <!-- <th>Evidencia</th> -->
+                                <th>Editar</th>
+                                <th>Eliminar</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for motivo in motivos %}
+                            <tr>
+                                <td>{{motivo.motivo}}</td>
+                                <td>{{motivo.descripcion}}</td>
+                                <!-- <td>{{motivo.evidencia}}</td> -->
+
+                                <!--{% if proveedor.estado == False %}
+                                    <td>Desabilitado</td>
+                                    {% else %}
+                                    <td>Habilitado</td>
             
-    
+                                    {% endif %}-->
+                                <td class="actions">
+                                    <!--<button class="edit-btn">Editar</button>
+                                        <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
+                                    <a style="text-decoration: none;" class="edit-btn"
+                                        href="/editmotivo/{{motivo.id}}">Editar</a>
+                                    <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
 
+                                </td>
+                                <td> <a style="text-decoration: none;" class="delete-btn" href="#"
+                                        onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/', 'Motivo')">Eliminar</a>
+                                </td>
+                                <!--<td>{{proveedor.id}}</td>-->
+                            </tr>
+                            {% endfor %}
+                            <!-- Agrega más filas con información de socios aquí -->
+                        </tbody>
+                    </table>
 
-            <!--barra de busqueda-->
-            <!---
-            <div class="input-group">
-                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
-                    aria-describedby="search-addon" />
-                <button type="button" class="btn btn-outline-primary">search</button>
-            </div>-->
-
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th>Motivo</th>
-                        <th>Descripción</th>
-                        <!-- <th>Evidencia</th> -->
-                        <th>Editar</th>
-                        <th>Eliminar</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for motivo in motivos %}
-                    <tr>
-                        <td>{{motivo.motivo}}</td>
-                        <td>{{motivo.descripcion}}</td>
-                        <!-- <td>{{motivo.evidencia}}</td> -->
-
-                        <!--{% if proveedor.estado == False %}
-                        <td>Desabilitado</td>
-                        {% else %}
-                        <td>Habilitado</td>
-
-                        {% endif %}-->
-                        <td class="actions">
-                            <!--<button class="edit-btn">Editar</button>
-                            <button class="delete-btn"><a href="deleteProveedor/{{proveedor.id}}">Eliminar</a></button>-->
-                            <a style="text-decoration: none;" class="edit-btn" href="/editmotivo/{{motivo.id}}">Editar</a>
-                            <!--<a class="delete-btn" href="/deleteProveedor/{{proveedor.id}}">Eliminar</a>-->
-                           
-                        </td>
-                        <td> <a style="text-decoration: none;" class="delete-btn" href="#" onclick="eliminarMotivo('{{motivo.id}}', '/eliminarmotivo/', 'Motivo')">Eliminar</a>
-                        </td>
-                        <!--<td>{{proveedor.id}}</td>-->
-                    </tr>
-                    {% endfor %}
-                    <!-- Agrega más filas con información de socios aquí -->
-                </tbody>
-            </table>
-        </div>
-        <div class="pagination-container">
-            <nav aria-label="...">
-                <ul class="pagination">
-                    {% if motivos.has_previous %}
+                </div>
+            </div>
+            <div class="pagination-container">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if motivos.has_previous %}
                         <li class="page-item">
                             <a class="page-link" href="?page=1" aria-label="Primero">
                                 Primero
@@ -103,11 +144,11 @@
                                 Anterior
                             </a>
                         </li>
-                    {% endif %}
-                    <li class="pagination-item active">
-                        <span class="page-link">{{ motivos.number }}</span>
-                    </li>
-                    {% if motivos.has_next %}
+                        {% endif %}
+                        <li class="pagination-item active">
+                            <span class="page-link">{{ motivos.number }}</span>
+                        </li>
+                        {% if motivos.has_next %}
                         <li class="page-item">
                             <a class="page-link" href="?page={{ motivos.next_page_number }}" aria-label="Siguiente">
                                 Siguiente
@@ -118,13 +159,13 @@
                                 Último
                             </a>
                         </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
         </div>
-        
     </div>
-    {% endblock %}
 </body>
 
 </html>
+{% endblock %}

@@ -1,10 +1,12 @@
 from datetime import date
+import datetime
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Periodo
 from .models import AjustesSistema
 # Create your views here.
+
 @login_required
 def mostrar_ajustes(request):
     periodos_activos = Periodo.objects.filter(activo=True)

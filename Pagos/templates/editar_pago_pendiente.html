@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <title>Editar Pago Pendiente</title>
+</head>
+
+<body>
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>DESCUENTOS</h1>
+        </div>
+        <div class="socios-content ">
+            <form class="container" action="{% url 'editar_pago_pendiente' pago_id=pagos.id %}" method="POST">
+                {%csrf_token%}
+                <div class="card" style="max-width: 40%; margin: auto;">
+                    <div class="card text-center">
+                        <div class="card-header" style="background-color: rgb(69, 180, 69);">
+                            <strong>Agregar descuento</strong>
+                        </div>
+                        <div class="card-body">
+                            <label class="fw-bold" for="socio">Socio:</label>
+                            <input class="form-control mb-2" type="text" name="socio"
+                                value=" {{pagos.socio.user.last_name}} {{ pagos.socio.user.first_name }}" required>
+
+                            <!-- <label class="fw-bold" for="proveedor">Proveedor:</label>
+                            <input class="form-control mb-2" type="text" name="proveedor"
+                                value="{{ pagos.proveedor.nombre }}" required> -->
+
+                            <label class="fw-bold" for="consumo_total">Descuento:</label>
+                            <input step="any" name="consumo_total" class="form-control mb-2" type="number"
+                                value="{{ pagos.consumo_total|stringformat:'s' }}" placeholder="Ingrese el descuento" required>
+
+                            <label class="fw-bold" for="fecha_consumo">Fecha:</label>
+                            <input class="form-control mb-2" type="date" name="fecha_consumo"
+                                value="{{ pagos.fecha_consumo|date:'Y-m-d' }}" required>
+
+                            <label class="fw-bold" for="estado">Estado:</label>
+                            <select  class="form-control mb-2"id="estado" name="estado">
+                                <option value="True" {% if pagos.estado %}selected{% endif %}>Pagado</option> 
+                                <option value="False" {% if not pagos.estado %}selected{% endif %}>Pendiente
+                                </option>
+                            </select>
+                            <br>
+                            <!-- <form method="post">
+                                {%csrf_token%} -->
+                            <button class="btn btn-success form-control mb-2"
+                                style="background-color: rgb(69, 180, 69); width: 30%;">
+                                Aceptar</button>
+                            <!-- </form> -->
+                            <br>
+                            <a class="btn btn-danger form-control mb-2" style="width: 30%;"
+                                href="/listar_pagos_pendientes/">Salir</a>
+                        </div>
+                    </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+<script>
+    oninput = "validarPorcentaje(this)"
+    function validarPorcentaje(input) {
+        if (input.value < 0 || input.value > 100) {
+            input.setCustomValidity("El valor debe ser un porcentaje entre 0 y 100.");
+        } else {
+            input.setCustomValidity("");
+        }
+    }
+
+</script>
+
+</html>
+
+{% endblock %}

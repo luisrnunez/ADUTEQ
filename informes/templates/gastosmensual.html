@@ -62,6 +62,7 @@ td {
                   <th style="padding: 10px;">Cedula</th>
                   <th style="padding: 10px;">Aportaciones</th>
                   <th style="padding: 10px;">Consumo Proveedores</th>
+                  <th style="padding: 10px;">Cuota Prestamo</th>
                   <th style="padding: 10px;">Cuota Consumo</th>
                   <th style="padding: 10px;">Aportación Ayudas Economicas</th>
                   <th style="padding: 10px;">Total</th>
@@ -75,7 +76,8 @@ td {
                   <td>{{ gastos.cedula }}</td>
                   <td>{{ gastos.aportacion }}</td>
                   <td>{{ gastos.descuento_proveedores }}</td>
-                  <td>{{ gastos.cuota_prestamos }}</td>
+                  <td>{{ gastos.cuota_prestamo }}</td>
+                  <td>{{ gastos.cuota_cuotas }}</td>
                   <td>{{ gastos.aportacion_ayudaseco }}</td>
                   <td>{{ gastos.total }}</td>
                 </tr>
@@ -86,6 +88,9 @@ td {
                 </tr> -->
               </tbody>
             </table>
+            {% if pagos_pen %}
+            <p>Tu consumo total de este mes fue de {{ gastos.total }}, pero no se le descontó todo, quedando pendiente un valor de {{ pagos_pen.0.0 }}</p>
+            {% endif %}
         </td>
       </tr>
     </table>

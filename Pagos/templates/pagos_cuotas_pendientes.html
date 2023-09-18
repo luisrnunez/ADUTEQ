@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<style>
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .botones_arriba {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-right: 10px;
+        flex-flow: row wrap;
+        border: 1px solid rgb(187, 189, 186);
+        width: 100%;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgb(134, 134, 134);
+        margin: 5px;
+        border-radius: 1%;
+        background-color: #34b234;
+    }
+
+    .image-header {
+        margin-bottom: 20px;
+        background-color: #34b234;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 5px;
+        /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+    }
+
+    h3 {
+        font-weight: bold;
+        color: white;
+    }
+
+    table {
+        margin-top: 20px;
+    }
+</style>
+
+<div class="content-menu">
+    <div class="socios-content">
+        <div class="botones-sup">
+            <div class="botones_arriba">
+                <div class="header">
+                    <h3>Pagos Cuotas Pendientes</h3>
+                </div>
+                <!-- <div style="height: min-content;"> -->
+                <a href="/agregar_pagos_cuotas_pen/"> <button class="add-socio-btn">Agregar Descuento
+                        Cuotas</button></a>
+                <a href="/listar_pagos_pendientes/"> <button class="add-socio-btn">Lista de Descuentos</button></a>
+
+                <div style="display: flex; justify-content: center; width: min-content;">
+                    <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>
+                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;"
+                        class="form-control mb-2" name="anio" id="select-anio" aria-placeholder="Asño" required>
+                        {% for anio in anos %}
+                        <option value="{{ anio }}">{{ anio }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;"
+                        class="form-control mb-2" name="periodo" id="select-periodo" aria-placeholder="Periodo"
+                        required>
+                        {% for periodo in periodos %}
+                        {% if periodo.anio == anos.0 %}
+                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                            {{ periodo.nombre }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="width: 100%;" id="lista-pagos">
+                    <table class="socios-table">
+                        <thead>
+                            <tr>
+                                <!-- <th scope="col">ID</th> -->
+                                <th scope="col">Socio</th>
+                                <!-- <th scope="col">Proveedor</th> -->
+                                <th scope="col">Numero Cuotas</th>
+                                <!-- <th scope="col">Cuota Actual</th> -->
+                                <th scope="col">Consumo Total</th>
+                                <!-- <th scope="col">Valor Cuota</th> -->
+                                <th scope="col">Fecha Descuento</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Detalle</th>
+                                {% if periodo_seleccionado.activo %}
+                                <th scope="col">Eliminar</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pago_cuota in pago_cuotas %}
+                            <tr>
+                                <!-- <td>{{pago_cuota.id}}</td> -->
+                                <td>{{pago_cuota.socio.user.last_name }} {{pago_cuota.socio.user.first_name }}</td>
+                                <!-- <td>{{pago_cuota.proveedor.nombre}}</td> -->
+                                <td>{{pago_cuota.numero_cuotas}}</td>
+                                <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
+                                <td>{{pago_cuota.consumo_total}}</td>
+                                <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
+                                <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
+                                <td>
+                                    {% if pago_cuota.estado %}
+                                    <button class="green-button">
+                                        Cancelado
+                                    </button>
+                                    {% else %}
+                                    <button class="red-button">
+                                        Pendiente
+                                    </button>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="{% url 'detalles_cuota_pendiente' pago_cuota.id %}">
+                                        <button class="edit-btn">Ver Detalle</button>
+                                    </form>
+                                </td>
+                                <!-- <td>
+                                        <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
+                                            <button class="edit-btn">Eliminar</button>
+                                        </form>
+                                    </td> -->
+                                {% if periodo_seleccionado.activo %}
+                                <td>
+                                    <button class="edit-btn"
+                                        onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
+                                </td>
+                                {% endif %}
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="pagination-container">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    {% if pago_cuotas.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="Primero">
+                            Primero
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pago_cuotas.previous_page_number }}" aria-label="Anterior">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="pagination-item active">
+                        <span class="page-link">{{ pago_cuotas.number }}</span>
+                    </li>
+                    {% if pago_cuotas.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pago_cuotas.next_page_number }}" aria-label="Siguiente">
+                            Siguiente
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ pago_cuotas.paginator.num_pages }}" aria-label="Último">
+                            Último
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmarEliminacion(prestamo_id, socioNombre) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Deseas eliminar el descuento del soci@ ' + socioNombre,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar',
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // El usuario ha confirmado la edición, redirigir a la página de edición
+                window.location.href = '/eliminar_pago_cuota_pendiente/' + prestamo_id;
+                print(valor)
+            }
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $("#select-periodo").on("click", function () {
+            console.log('ENTRAR AL SELECT')
+            var periodoid = $(this).val();
+            $.ajax({
+                url: '{% url "listar_pagos_cuotas" %}',
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    periodoid: periodoid
+                },
+                success: function (data) {
+                    $("#lista-pagos").html(data.rendered_table);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

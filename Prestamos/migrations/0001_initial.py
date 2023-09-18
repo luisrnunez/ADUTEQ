@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('socios', '0002_remove_socios_activo_remove_socios_apellidos_and_more'),
+       
     ]
 
     operations = [

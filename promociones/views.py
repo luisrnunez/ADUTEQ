@@ -84,7 +84,7 @@ def aggPromo(request):
         if 'fecha_inicio' in request.POST:
             fecha_inicio = request.POST.get('fecha_inicio')
         else:
-            fecha_fin=None
+            fecha_inicio=None
 
         if 'fecha_fin'in request.POST:
             fecha_fin = request.POST.get('fecha_fin')

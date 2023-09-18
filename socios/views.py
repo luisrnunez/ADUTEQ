@@ -1,5 +1,6 @@
 import datetime
 from gettext import translation
+from ipaddress import summarize_address_range
 import re
 import datetime
 import re
@@ -85,7 +86,8 @@ def Principal(request):
     except :
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.') 
         periodo={}
-    return render(request, "base.html",{'periodo': periodo})
+    return redirect('/principal/resumen/')
+    # return render(request, "principal.html",{'periodo': periodo})
 
 
 @login_required
@@ -153,7 +155,7 @@ def guardar_socio(request):
                 dedicacion_academica = request.POST.get('dedicacion_academica')
                 titulo = request.POST.get('titulo')
                 aporte = request.POST.get('aporte')
-
+                genero = request.POST.get('genero')
 
                 if 'foto' in request.FILES:
                     foto = request.FILES['foto']
@@ -200,7 +202,7 @@ def guardar_socio(request):
                                     numero_telefonico=numero_telefonico,numero_convencional=numero_convencional, direccion_domiciliaria=direccion_domiciliaria,
                                     categoria=categoria,facultad=facultad,
                                     dedicacion_academica=dedicacion_academica,aporte=aporte,
-                                    titulo=titulo,foto=foto)
+                                    titulo=titulo,foto=foto, genero=genero)
             
             
                 socios.save()
@@ -252,6 +254,7 @@ def editar_socio(request, socio_id):
             socio.dedicacion_academica = request.POST.get(
                 'dedicacion_academica')
             socio.titulo = request.POST.get('titulo')
+            socio.genero = request.POST.get('genero')
             # socio.aporte = request.POST.get('aporte')
 
             # if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():
@@ -406,7 +409,7 @@ def ListaSocios(request):
     usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
     socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
     periodo={}
-    items_por_pagina = 10
+    items_por_pagina = 20
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     

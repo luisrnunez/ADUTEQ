@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<body>
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Consumos Cuota Ordinaria</h1>
+        </div>
+
+        <div class="socios-content ">
+            <div class="botones-sup">
+                <div style="display:inline-flex; ">
+                    <a style="margin-right: 30px;" href="/verayudas"> <button class="add-socio-btn"> Atrás</button></a>
+                    <button class="add-socio-btn" id="agregarConsumoBtn">Agregar Consumo</button>
+
+                    <!-- <div class="search-form" style="margin-left: 6px; margin-block-end:auto;">
+                        <input type="text" id="barbusqueda" placeholder="Buscar">
+                        <button class="add-socio-btn" type="submit">Buscar</button>
+
+                    </div> -->
+                </div>
+                <div style="display: flex; justify-content: center; width: min-content;">
+                    <input style="color: black; border-radius: 1%; margin-right: 30px;" disabled type="text" value="Fondo Actual: {{ total_cuota_ordinaria.0.1 }}">
+                    <!-- <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
+                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
+                        aria-placeholder="Asño" required>
+                        {% for anio in anos %}
+                        <option value="{{ anio }}">{{ anio }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
+                        aria-placeholder="Periodo" required>
+                        {% for periodo in periodos %}
+                        {% if periodo.anio == anos.0 %}
+                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                            {{ periodo.nombre }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select> -->
+                </div>
+            </div>
+
+
+            <!--barra de busqueda-->
+            <!---
+            <div class="input-group">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+                    aria-describedby="search-addon" />
+                <button type="button" class="btn btn-outline-primary">search</button>
+            </div>-->
+            <div  id="lista-pagos">
+                <table class="socios-table">
+                    <thead>
+                        <tr>
+                            <th style="white-space: normal; word-wrap: break-word;">Descripcion</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                            <th>Evidencia</th>
+                            <!-- <th>Editar</th> -->
+                            <th>Editar Evidencia</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gasto in gastos %}
+                        <tr>
+                            <td style="white-space: normal; word-wrap: break-word;">{{gasto.descripcion}}</td>
+                            <td>{{gasto.valor}}</td>
+                            <td>{{gasto.fecha}}</td>
+                            <td>
+                                {% if gasto.evidencia %}
+                                <a href="{{ gasto.evidencia.url }}" target="_blank">
+                                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                </a>
+                                {% else %}
+                                Sin evidencia
+                                {% endif %}
+                
+                            </td>
+    
+                            <td>
+                                <button class="edit-btn" onclick="confirmarEdicion('{{gasto.id}}')">Evidencia</button>
+                            </td>
+                            <td>
+                                <a style="text-decoration: none;" class="delete-btn" href="#"
+                                    onclick="eliminarMotivo('{{gasto.id}}', '/delete_consumo/', 'Consumo')">Eliminar</a>
+                            </td>
+                            <!--<td>{{proveedor.id}}</td>-->
+                        </tr>
+                        {% endfor %}
+                        <!-- Agrega más filas con información de socios aquí -->
+                    </tbody>
+                </table>
+            </div>
+           
+        </div>
+
+        <div class="modal fade" id="exampleModalordinari" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese datos consumo</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="aportacionForm" method="post">
+                            {% csrf_token %}
+                            <!-- <input hidden class="form-control" type="text" id="detalle_id" name="detalle_id" value="{{detalle_id}}"> -->
+                            
+                            <div class="mb-3">
+                                <label class="form-label" for="nombre_aportador">Descripción:</label>
+                                <textarea class="form-control" type="text" id="descripcion" name="descripcion" required cols="30" rows="7"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="cedula_aportador">Consumo (Valor):</label>
+                                <input maxlength="10" class="form-control" type="text" id="consumo" name="consumo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="fecha">Fecha de consumo:</label>
+                                <input class="form-control" type="date" id="fecha" name="fecha" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarAportacionn" type="button" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Resto del contenido de la página -->
+    </div>
+    
+
+    <script>
+        function confirmarEdicion(consumo_id) {
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: 'Deseas editar evidencia de este consumo?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí',
+                        cancelButtonText: 'Cancelar',
+                        dangerMode: true,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // El usuario ha confirmado la edición, redirigir a la página de edición
+                            window.location.href = '/editar_evidencia_ordinaria/' + consumo_id;
+                        }
+                    });
+            }
+    </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Abrir el modal cuando se haga clic en "Agregar Consumo"
+    document.getElementById('agregarConsumoBtn').addEventListener('click', function () {
+        $('#exampleModalordinari').modal('show');
+    });
+
+    // Configurar el evento de clic para el botón "Guardar" en el modal
+    document.getElementById('guardarAportacionn').addEventListener('click', function () {
+        var descripcion = $('#descripcion').val();
+        var consumo = $('#consumo').val();
+        var fecha = $('#fecha').val();
+
+        // Realizar la verificación del valor ingresado
+        var totalCuotaOrdinaria = parseFloat('{{ total_cuota_ordinaria.0.1 }}'); // Reemplaza '{{ total_cuota_ordinaria }}' con el valor real
+
+        if (parseFloat(consumo) > totalCuotaOrdinaria) {
+            Swal.fire({
+                title: 'Error',
+                text: 'El consumo ingresado supera el cupo disponible actualmente de {{ total_cuota_ordinaria.0.1 }}',
+                icon: 'error'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Confirmación',
+            text: '¿Estás seguro de que deseas guardar el consumo?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/registrar_consumo_ordinario/',
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                        descripcion: descripcion,
+                        consumo: consumo,
+                        fecha: fecha,
+                    },
+                    success: function(data) {
+                        if (data.message) {
+                            Swal.fire({
+                                title: 'Éxito',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                $('#exampleModalordinari').modal('hide');
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Ups, ocurrió un error en la transacción',
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Ups, ocurrió un error en la transacción',
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+</body>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    <style>
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Detalles de aportaciones de ayudas económicas</b></h1>
+        </div>
+        <div class="socios-content ">
+            <div class="botones-sup">
+                <a href="/detalleayuda/{{detalle_id}}"> <button class="add-socio-btn"> Atras</button></a>
+                <div style="display: inline-flex; justify-content: end; width: max-content;">
+                    <div class="search-form">
+    
+                        <select id="criterio" name="criterio">
+                            <option value="nombres">Nombre</option>
+                            <option value="apellidos">Apellido</option>
+                        </select>
+                        <input type="text" id="buscador_input" name="valor" placeholder="Buscar aportador...">
+                        <!-- <button type="submit">Buscar</button> -->
+    
+                    </div>
+            </div>
+            </div>
+            <table class="socios-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nombres</th>
+                        <th scope="col">Cedula</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Ayuda</th>
+                    </tr>
+                </thead>
+                <tbody id="socios-body">
+                    {% for detalle in ayudas_externas %}
+                    <tr>
+                        <td>{{ detalle.nombre }}</td>
+                        <td>{{ detalle.cedula }}</td>
+                        <td>{{ detalle.fecha }}</td>
+                        <td>{{ detalle.valor }}</td>
+                        <td>{{ detalle.detalle.ayuda.descripcion }}</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+            <div class="pagination-container">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if detalles.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="Primero">
+                                Primero
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.previous_page_number }}" aria-label="Anterior">
+                                Anterior
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="pagination-item active">
+                            <span style="border-radius: 5px;" class="page-link">{{ detalles.number }}</span>
+                        </li>
+                        {% if detalles.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.next_page_number }}" aria-label="Siguiente">
+                                Siguiente
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ detalles.paginator.num_pages }}" aria-label="Último">
+                                Último
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            
+
+        </div>
+        {% endblock %}
