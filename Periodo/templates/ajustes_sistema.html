@@ -106,7 +106,7 @@
                         <br>
                         <br>
                             <div style="display: inline-flex; ; width: 80%;">
-                                <h3 style="width: 44%">Dia de cierre:</h3> <br> <br>
+                                <h3 style="width: 44%; color: black;">Dia de cierre:</h3> <br> <br>
                                 <input type="text" id="numero_mes" name="numero_mes" 
                                 {% if ajustes.periodoAutomatico %}    
                                 value="{{ ajustes.dia_cierre }}" 
@@ -123,7 +123,7 @@
                             </script>
 
                             <div style="display: inline-flex; justify-content: space-between; width: 80%;">
-                                <h3 style="width: 80%;">Cierre Automático:</h3>
+                                <h3 style="width: 80%; color: black;">Cierre Automático:</h3>
                                 <select style="border-color: red;" name="cierre_automatico" id="cierre_automatico">
                                     <option value="no" {% if not ajustes.periodoAutomatico %}selected{% endif %}>No
                                     </option>

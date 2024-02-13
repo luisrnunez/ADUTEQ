@@ -109,7 +109,7 @@
       </div>
     </form>
 
-    <form method="post" action="{% url 'reportes_socios' %}">
+    <form method="post" action="{% url 'reportes_socios' %}"> 
       {% csrf_token %}
       <div class="image-card">
         <img src="{% static 'img/reportessocios.png' %}" alt="Reporte Socios">

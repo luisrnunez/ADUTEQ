@@ -71,6 +71,42 @@
                 <td style="text-align: right;">{{total}}</td>
             </tbody>
         </table>
+
+        {% if suma_ext %}
+    <table style="width: 100%; border-collapse: collapse; text-align: center; margin-top: 40px;">
+        <tr>
+            <td style="text-align: center; border: none;">
+                <h1 style="font-size: x-large;">Aportaciones Externas - {{ mes }}/{{ anio }}</h1>
+                <h1 style="font-size: x-large;">Total: ${{suma_ext}}</h1>
+            </td>
+        </tr>
+    </table>
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr>
+                <th>N°</th>
+                <th>Nombre</th>
+                <th>Cédula</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in ayudas_ext %}
+            <tr>
+                <td style="text-align: center; width: 5%;">{{ forloop.counter }}</td>
+                <td style="text-align: start;">{{ row.0 }}</td>
+                <td>{{ row.1 }}</td>
+                <td style="text-align: right; width: 15%;">{{ row.3 }}</td>
+            </tr>
+            {% endfor %}
+            <td style="text-align: center;">Total</td>
+            <td>----</td>
+            <td>----</td>
+            <td style="text-align: right;">{{suma_ext}}</td>
+        </tbody>
+    </table>
+    {% endif %}
     </div>
 </body>
 

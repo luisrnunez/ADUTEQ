@@ -384,6 +384,8 @@ def generar_reporte_pdf_total_usuarios(request):
     total_descuento_cuotas = obtener_suma_descuento_cuotas_func(mes, anio) or 0
     total_ayudas = obtener_suma_ayudas_func(mes, anio) or 0
     total_aportaciones=obtener_suma_aportaciones_func(mes, anio) or 0
+    ayudas_ext=obtener_aportaciones_externas_func(mes,anio)
+    suma_ext=obtener_suma_aportaciones_externas_func(mes,anio) or 0
 
     total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas + total_aportaciones
     fecha_gen = datetime.now()
@@ -394,7 +396,9 @@ def generar_reporte_pdf_total_usuarios(request):
                'image_path': image_path,
                'anio': anio,
                'total': intcomma(total),
-               'fecha_gen': fecha_gen
+               'fecha_gen': fecha_gen,
+               'ayudas_ext': ayudas_ext,
+               'suma_ext': suma_ext
                }
 
     html = template.render(context)
@@ -468,11 +472,14 @@ def cerrar_periodo(request):
         suma_des_cuot = obtener_suma_descuento_cuotas_func(mes, anio)
         ayudas_des = obtener_ayudas_func(mes, anio)
         suma_ayudas = obtener_suma_ayudas_func(mes, anio)
+        ayudas_ext=obtener_aportaciones_externas_func(mes,anio)
+        suma_ext=obtener_suma_aportaciones_externas_func(mes,anio)
         return render(request, "cerrar_periodo.html",
                       {'consumos_proveedores': consumos_proveedores, 'suma_consumo': suma_consumo,
                        'prestamos_cuotas': prestamos_cuotas, 'suma_prestamos': suma_prestamos,
                        'descuento_cuotas': descuento_cuotas, 'suma_des_cuot': suma_des_cuot,
-                       'ayudas_des': ayudas_des, 'suma_ayudas': suma_ayudas})
+                       'ayudas_des': ayudas_des, 'suma_ayudas': suma_ayudas,
+                       'ayudas_ext': ayudas_ext,'suma_ext': suma_ext})
     else:
         return render(request, 'login.html')
 
@@ -570,12 +577,37 @@ def actualizar_descuentos(request):
                 "SELECT * FROM actualizar_descuentos(%s, %s, %s);", [mes, anio, id_pago])
     return redirect(cerrar_periodo)
 
+def actualizar_estados_ayudas_exter(request):
+    checks = request.POST.getlist('ext_id[]')
+    fecha_actual = datetime.now()
+    mes = fecha_actual.month
+    anio = fecha_actual.year
+    with connection.cursor() as cursor:
+        for id_pago in checks:
+            cursor.execute(
+                "SELECT * FROM actualizar_estados_ayudas_exter(%s, %s, %s);", [mes, anio, id_pago])
+    return redirect(cerrar_periodo)
+
+
+def obtener_suma_aportaciones_externas_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT obtener_suma_aportaciones_externas_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
 
 def obtener_suma_consumo_total_descuentos_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT obtener_suma_consumo_total_descuentos_func(%s, %s);", [mes, anio])
         suma_consumo = cursor.fetchone()[0]
+    return suma_consumo
+
+def obtener_aportaciones_externas_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM obtener_aportaciones_externas_func(%s, %s);", [mes, anio])
+        suma_consumo = cursor.fetchall()
     return suma_consumo
 
 
@@ -635,8 +667,11 @@ def reportes_socios_general(request):
     total_prestamo = obtener_suma_prestamo_total_func(mes, anio) or 0
     total_descuento_cuotas = obtener_suma_descuento_cuotas_func(mes, anio) or 0
     total_ayudas = obtener_suma_ayudas_func(mes, anio) or 0
+    ayudas_ext=obtener_aportaciones_externas_func(mes,anio)
+    suma_ext=obtener_suma_aportaciones_externas_func(mes,anio) or 0
+    total_aportaciones=obtener_suma_aportaciones_func(mes, anio) or 0
 
-    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas
+    total = total_consumo + total_prestamo + total_descuento_cuotas + total_ayudas + total_aportaciones
     fecha_gen = datetime.now()
 
     template = get_template('reporte_general_socios.html')
@@ -645,7 +680,9 @@ def reportes_socios_general(request):
                'image_path': image_path,
                'anio': anio,
                'total': intcomma(total),
-               'fecha_gen': fecha_gen
+               'fecha_gen': fecha_gen,
+               'ayudas_ext': ayudas_ext,
+               'suma_ext': suma_ext
                }
 
     html = template.render(context)
