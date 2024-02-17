@@ -365,22 +365,25 @@ def buscar_socios(request):
         if criterio:
             # Realiza las consultas según el criterio y el valor ingresados
             if criterio == 'nombres':
-                users = User.objects.filter(first_name__icontains=valor)
+                users = User.objects.filter(first_name__icontains=valor, is_active=True)
                 socios = Socios.objects.filter(user__in=users)
             elif criterio == 'apellidos':
-                users = User.objects.filter(last_name__icontains=valor)
+                users = User.objects.filter(last_name__icontains=valor, is_active=True)
                 socios = Socios.objects.filter(user__in=users)
             elif criterio == 'categoria':
-                socios = Socios.objects.filter(categoria__icontains=valor)
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(categoria__icontains=valor, user__in=users)
             elif criterio == 'facultad':
-                socios = Socios.objects.filter(facultad__icontains=valor)
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(facultad__icontains=valor, user__in=users)
             elif criterio == 'cedula':
-                socios = Socios.objects.filter(cedula__icontains=valor)
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(cedula__icontains=valor, user__in=users)
             elif criterio == '1':
                 users = User.objects.filter(is_active=True)
                 socios = Socios.objects.filter(user__in=users)
             elif criterio == '0':
-                users = User.objects.filter(is_active=False)
+                users = User.objects.filter(is_active=False) 
                 socios = Socios.objects.filter(user__in=users)
 
         items_por_pagina = 10  # Cambia esto según tus necesidades
