@@ -5,9 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Periodo
 from .models import AjustesSistema
+from django.views.decorators.cache import cache_control
 # Create your views here.
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def mostrar_ajustes(request):
     periodos_activos = Periodo.objects.filter(activo=True)
     
@@ -28,6 +30,7 @@ def mostrar_ajustes(request):
 
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def agregar_periodo(request):
     print('entra a funcion')
     if request.method == 'POST':
@@ -47,11 +50,12 @@ def agregar_periodo(request):
     return render(request, 'agregar_periodo.html')
 
 
-@login_required
+@login_required 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def cerrar_periodo(request):
     try:
         codigo = request.POST.get('codigo')
-        periodo = Periodo.objects.get(id=codigo)
+        periodo = Periodo.objects.get(id=codigo) 
         periodo.activo = False
         periodo.save()
 
@@ -62,6 +66,7 @@ def cerrar_periodo(request):
     
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def guardar_cierre_automatico(request):
     if request.method == 'POST' :
         cierre_automatico = request.POST.get('cierre_automatico')

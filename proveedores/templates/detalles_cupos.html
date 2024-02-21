@@ -23,7 +23,7 @@
                 <div class="search-form">
 
                     <select id="criterio" name="criterio">
-                        <option value="nombres">Nombre</option>
+                        <option value="nombres">Apellido</option>
                         <!-- <option value="ruc">RUC</option>
                         <option value="telefono">Telefono</option>
                         <option value="1">Activo</option>
@@ -49,7 +49,7 @@
                 <tbody id="detalles-body">
                     {% for cupo in cupos %}
                     <tr>
-                        <td>{{ cupo.socio.user.first_name }} {{ cupo.socio.user.last_name }}</td>
+                        <td>{{ cupo.socio.user.last_name }} {{ cupo.socio.user.first_name }}</td>
                         <td>{{ cupo.proveedor.nombre}}</td>
                         <td>{{ cupo.cupo}}$</td>
                        <td>
@@ -111,7 +111,7 @@
                     </ul>
                 </nav>
             </div>
-            
+             
 
         </div>
         <script>
@@ -147,35 +147,19 @@
                 $("#buscador_input").on("input", function () {
                     var query = $(this).val();
                     var criterio = document.getElementById('criterio').value;
+                    var proveedor_id = "{{ proveedor.id }}";
                     console.log(criterio)
                     console.log(query)
                     $.ajax({
-                        url: '{% url "searchcupo" %}',  // Cambia esto a la URL de tu vista de búsqueda
+                        url: '{% url "searchcupo" proveedor_id=proveedor.id %}',  // Cambia esto a la URL de tu vista de búsqueda
                         type: "POST",
                         data: {
                             csrfmiddlewaretoken: '{{ csrf_token }}',  // Agrega el token CSRF
                             query: query,
-                            criterio: criterio
+                            criterio: criterio,
+                            proveedor_id: proveedor_id
                         },
                         success: function (data) {  // Verifica los datos devueltos por el servidor
-                            $("#detalles-body").html(data.rendered_table);
-                        }
-                    });
-                });
-            });
-        
-            $(document).ready(function () {
-                $("#criterio").on("change", function () {
-                    var criterio = $(this).val();
-                    $.ajax({
-                        url: '{% url "searchcupo" %}',
-                        type: "POST",
-                        data: {
-                            csrfmiddlewaretoken: '{{ csrf_token }}',
-                            query: "",
-                            criterio: criterio
-                        },
-                        success: function (data) {
                             $("#detalles-body").html(data.rendered_table);
                         }
                     });

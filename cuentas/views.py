@@ -8,8 +8,11 @@ from xhtml2pdf import pisa
 from informes.views import obtener_suma_consumo_total_descuentos_func, obtener_suma_descuento_cuotas_func, obtener_suma_prestamo_total_func
 from datetime import datetime
 from django.db import connection
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_control
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def cuentas(request):
     if request.method == 'POST':
         fecha_actual_str = request.POST.get('fechacuentas')
@@ -60,6 +63,8 @@ def cuentas(request):
                                                       'total_com': total_com})
 
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_total_comisiones(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -67,6 +72,8 @@ def obtener_total_comisiones(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_suma_prestamo_total_Pagados_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -74,6 +81,8 @@ def obtener_suma_prestamo_total_Pagados_func(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_suma_descuento_cuotas_pagados_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -81,6 +90,8 @@ def obtener_suma_descuento_cuotas_pagados_func(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_suma_consumo_total_descuentos_Pagados_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -88,7 +99,8 @@ def obtener_suma_consumo_total_descuentos_Pagados_func(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_total_comisiones_desc(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -96,7 +108,8 @@ def obtener_total_comisiones_desc(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_suma_intereses_prestamos(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -107,6 +120,8 @@ def obtener_suma_intereses_prestamos(mes, anio):
 
 from django.http import JsonResponse
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_informacion_prestamos(request, mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -125,6 +140,8 @@ def obtener_informacion_prestamos(request, mes, anio):
 
     return JsonResponse({'data': data})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_comision_descuentos(request, mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -143,6 +160,8 @@ def obtener_comision_descuentos(request, mes, anio):
 
     return JsonResponse({'data': data})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_comision_descuentos_cuotas(request, mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -162,8 +181,8 @@ def obtener_comision_descuentos_cuotas(request, mes, anio):
     return JsonResponse({'data': data})
 
 
-
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def reportes_cuentas_mensuales(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reportes_cuentas_mensuales.pdf"'

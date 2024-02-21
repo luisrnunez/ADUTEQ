@@ -193,6 +193,7 @@ def formRegistroAyuda(request):
     })
 
 def aggAyuda(request):
+    ayuda=None
     motivo_id = request.POST.get('motivo')
     mmotivo=AyudasMot.objects.get(id=motivo_id)
     socios_disponibles=Socios.objects.all()
@@ -226,8 +227,11 @@ def aggAyuda(request):
     elif request.POST.get('socio')!='null' and tipo:
         socio=Socios.objects.get(id=request.POST['socio'])
         ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = total, motivo=mmotivo, fecha=request.POST['fecha'],brinda_ayuda=True)
-
-    if Decimal(ayuda.total) <= total_ayuda_permanente[0][1]:
+    elif request.POST.get('socio')!='null' and not tipo:
+        socio=Socios.objects.get(id=request.POST['socio'])
+        ayuda=AyudasEconomicas(socio=socio, descripcion=request.POST['descripcion'], evidencia=None, valorsocio=valorsocio, total = total, motivo=mmotivo, fecha=request.POST['fecha'],brinda_ayuda=True)
+    if ayuda is not None and Decimal(ayuda.total) <= total_ayuda_permanente[0][1]:
+    #if Decimal(ayuda.total) <= total_ayuda_permanente[0][1]:
         # Utiliza una transacción para evitar crear detalles de ayuda si ocurre un error
         with transaction.atomic():
             try:
@@ -254,7 +258,7 @@ def aggAyuda(request):
     else:
         response = {
             'status': 'error',
-            'message': 'El total es mayor que el valor permitido.'
+            'message': 'El total es mayor que el valor permitido. {}'.format(total_ayuda_permanente[0][1])
         }
     
     return JsonResponse(response)

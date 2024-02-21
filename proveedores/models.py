@@ -24,7 +24,7 @@ class Proveedor(models.Model):
     class Meta:
         ordering = ['nombre']
 
-class ComisionHistorica(models.Model):
+class ComisionHistorica(models.Model): 
     proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
     comision_anterior = models.IntegerField()
     fecha_registro = models.DateTimeField(auto_now_add=True) 
@@ -35,6 +35,8 @@ class detallesCupos(models.Model):
     cupo=models.DecimalField(max_digits = 8, decimal_places = 2)
     permanente=models.BooleanField(default=True)
     fechaccupo=models.DateField(null=True)
+    class Meta:
+        ordering = ['socio__user__last_name']
 
 #SE ACTIVA AL CREAR UN PROVEEDOR CON EL FIN DE ASIGNAR EL CUPO A CADA SOCIO YA EXISTENTE
 # @receiver(post_save, sender=Proveedor)

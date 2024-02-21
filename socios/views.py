@@ -13,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from socios.models import Socios
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
 from django.views import View
 from socios.models import Socios, Aportaciones
 from django.utils import timezone
@@ -577,6 +577,8 @@ def eliminar_titulo (request):
 
 
 #----------------------APORTACIONES-----------------------------------------
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def registrar_aportaciones_mensuales(request):
     socios = Socios.objects.all()
 
@@ -606,6 +608,8 @@ def registrar_aportaciones_mensuales(request):
 
     return redirect('/socios/')
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def veraportaciones(request):
      aportaciones=Aportaciones.objects.all()
      items_por_pagina = 8
@@ -617,6 +621,8 @@ def veraportaciones(request):
           aport_paginadas=paginator.get_page(1)
      return render (request, "aportaciones.html" ,{'aportaciones': aport_paginadas})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def veraportacionesocio(request, socio_id):
     socio=Socios.objects.get(id=socio_id)
     aportaciones=Aportaciones.objects.filter(socio=socio)

@@ -34,12 +34,15 @@ from django.template.loader import get_template
 from django.template import Context
 import os
 import calendar
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_control
 
 from Periodo.models import Periodo
 
 # Create your views here.
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_gastos_socio(socio_id):
     # Obtener el socio específico
     socio = Socios.objects.get(id=socio_id)
@@ -116,7 +119,8 @@ def obtener_gastos_socio(socio_id):
 
 #     return context
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def generar_pdf(context):
     template_path = 'info_detalle_pdf.html'
     template = get_template(template_path)
@@ -128,7 +132,8 @@ def generar_pdf(context):
     if not pdf.err:
         return result.getvalue()
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def datospdf(socio_id, mes, anio):
 
     nombres_meses = [
@@ -173,7 +178,8 @@ def datospdf(socio_id, mes, anio):
 
 
 ########################## -------NUEVO ENVIAR CORREO------##############################
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def nuevo_enviar_correo(request, socio_id):
     socio = Socios.objects.get(id=socio_id)
     hoy = datetime.today()
@@ -210,7 +216,8 @@ def nuevo_enviar_correo(request, socio_id):
 
 ################################### ---ENVIAR CORREO TODOS----############################
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def enviarGastoEmail(socio_id, context,pagos_pen, pdf_buffer):
     sociop = Socios.objects.get(id=socio_id)
     gastos = context
@@ -284,6 +291,8 @@ def enviarGastoEmail(socio_id, context,pagos_pen, pdf_buffer):
 #                 print(str(e))
 #     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def enviar_correo_todos(request):
     # Obtener el mes seleccionado del POST
     selected_mes = request.POST.get('mes', 'mes_actual')
@@ -341,13 +350,15 @@ def enviar_correo_todos(request):
 
     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def reportes(request):
     periodo_seleccionado = Periodo.objects.filter(activo=True).first()
     socios = Socios.objects.all()
     return render(request, "reportes.html", {'periodo': periodo_seleccionado, 'socios': socios})
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_consumo_total_func(mes, anio):
 
     with connection.cursor() as cursor:
@@ -357,7 +368,8 @@ def obtener_consumo_total_func(mes, anio):
         result = cursor.fetchall()
     return result
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_consumo_total_todos_func(mes, anio):
 
     with connection.cursor() as cursor:
@@ -367,7 +379,8 @@ def obtener_consumo_total_todos_func(mes, anio):
         result = cursor.fetchall()
     return result
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def generar_reporte_pdf_total_usuarios(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_consumo_pendientes.pdf"'
@@ -412,7 +425,8 @@ def generar_reporte_pdf_total_usuarios(request):
 
     return HttpResponse("Error al generar el PDF", status=500)
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def generar_reporte_consumo_todos(request):
     if request.method == 'POST':
         response = HttpResponse(content_type='application/pdf')
@@ -451,14 +465,16 @@ def generar_reporte_consumo_todos(request):
     else:
         return HttpResponse("Error al generar el PDF", status=500)
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def cargar_imagen(path):
     imagen = Image(path)
     imagen.drawHeight = 50  # Ajusta la altura de la imagen
     imagen.drawWidth = 50   # Ajusta el ancho de la imagen
     return imagen
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True) 
 def cerrar_periodo(request):
     fecha_actual = datetime.now()
     mes = fecha_actual.month
