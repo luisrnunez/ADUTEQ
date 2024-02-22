@@ -357,8 +357,6 @@ def reportes(request):
     socios = Socios.objects.all()
     return render(request, "reportes.html", {'periodo': periodo_seleccionado, 'socios': socios})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_consumo_total_func(mes, anio):
 
     with connection.cursor() as cursor:
@@ -368,8 +366,6 @@ def obtener_consumo_total_func(mes, anio):
         result = cursor.fetchall()
     return result
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_consumo_total_todos_func(mes, anio):
 
     with connection.cursor() as cursor:
@@ -379,8 +375,7 @@ def obtener_consumo_total_todos_func(mes, anio):
         result = cursor.fetchall()
     return result
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def generar_reporte_pdf_total_usuarios(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_consumo_pendientes.pdf"'
@@ -425,8 +420,6 @@ def generar_reporte_pdf_total_usuarios(request):
 
     return HttpResponse("Error al generar el PDF", status=500)
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def generar_reporte_consumo_todos(request):
     if request.method == 'POST':
         response = HttpResponse(content_type='application/pdf')

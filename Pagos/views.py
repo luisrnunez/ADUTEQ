@@ -172,7 +172,7 @@ def lista_pagos(request):
             'fecha_fin': periodo_seleccionado.fecha_fin
         }
         pagos = Pagos.objects.filter(fecha_consumo__range=(
-            fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("socio")
+            fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("estado", "socio")
         items_por_pagina = 20
         paginator = Paginator(pagos, items_por_pagina)
         numero_pagina = request.GET.get('page')

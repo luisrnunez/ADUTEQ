@@ -63,8 +63,6 @@ def cuentas(request):
                                                       'total_com': total_com})
 
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_total_comisiones(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -72,8 +70,7 @@ def obtener_total_comisiones(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def obtener_suma_prestamo_total_Pagados_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -81,8 +78,7 @@ def obtener_suma_prestamo_total_Pagados_func(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def obtener_suma_descuento_cuotas_pagados_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -90,17 +86,15 @@ def obtener_suma_descuento_cuotas_pagados_func(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def obtener_suma_consumo_total_descuentos_Pagados_func(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT obtener_suma_consumo_total_descuentos_Pagados_func(%s, %s);", [mes, anio])
+            "SELECT obtener_suma_consumo_total_descuentos_pagados_func(%s, %s);", [mes, anio])
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def obtener_total_comisiones_desc(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -108,8 +102,7 @@ def obtener_total_comisiones_desc(mes, anio):
         suma_comision = cursor.fetchone()[0]
     return suma_comision
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def obtener_suma_intereses_prestamos(mes, anio):
     with connection.cursor() as cursor:
         cursor.execute(
