@@ -136,18 +136,18 @@
         <table>
             <tr>
                 <th>Motivo</th>
-                <th>Valor</th>
                 <th>Fecha</th>
                 <th>Descripción</th>
+                <th>Valor</th>
             </tr>
             {% for consumo in consumos_totales %}
             <tr {% if forloop.last %}class="last-row"{% endif %} >
 
                 {% if forloop.last %}
                     <td>{{ consumo.0 }}</td>
-                    <td>{{ consumo.1 }}</td>
-                    <td>----</td>
-                    <td>----</td>
+                    <td>     </td>
+                    <td>     </td>
+                    <td style="text-align: right;">{{ consumo.1 }}</td>
                 {% else %}
                 {% if consumo.0 == "AE" %}
                     <td>Ayuda Permanente</td>
@@ -158,9 +158,9 @@
                         <td>{{ consumo.0 }}</td>
                     {% endif %}
                 {% endif %}
-                    <td>{{ consumo.1 }}</td>
                     <td>{{ consumo.2 }}</td>
                     <td>{{ consumo.3 }}</td>
+                    <td style="text-align: right;">{{ consumo.1 }}</td>
                 {% endif %}
             </tr>
             {% endfor %}

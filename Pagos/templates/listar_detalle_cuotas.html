@@ -46,10 +46,11 @@
     table {
         margin-top: 20px;
     }
+
     #boton-derecha {
-        
-    justify-content: flex-end;
-}
+
+        justify-content: flex-end;
+    }
 </style>
 
 
@@ -127,14 +128,16 @@
                             </td>
                             {% if detalle_cuota.estado == False %}
                             <td class="checkbox-td">
-                                <input type="checkbox" name="aplazar_cuota" value="{{ detalle_cuota.id }}" style="display: none;">
+                                <input type="checkbox" name="aplazar_cuota" value="{{ detalle_cuota.id }}"
+                                    style="display: none;">
                             </td>
                             {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <button id="agregar-mes-btn" class="add-socio-btn" style="display: none; float: right; ">Agregar un mes</button>
+                <button id="agregar-mes-btn" class="add-socio-btn" style="display: none; float: right; ">Agregar un
+                    mes</button>
             </div>
         </div>
 
@@ -220,7 +223,7 @@
                 // Si se desmarca un checkbox, deseleccionar automáticamente los siguientes
                 $cuotaRow.nextAll().find(".checkbox-td input[type='checkbox']").prop("checked", false);
             }
-        }); 
+        });
 
         $("#agregar-mes-btn").click(function () {
             var cuotasSeleccionadas = [];
@@ -246,7 +249,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         const meses = result.value;
- 
+
                         $.ajax({
                             type: "GET",
                             url: `/aplazar_pagos_cuotas_meses/${cuotasSeleccionadas.join(",")}?meses=${meses}`,
@@ -285,6 +288,7 @@
                 });
             }
         });
+
     });
 </script>
 

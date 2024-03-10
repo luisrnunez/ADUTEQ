@@ -36,6 +36,7 @@ from django.template.loader import get_template
 from xhtml2pdf.default import DEFAULT_FONT
 from reportlab.lib.units import inch
 from .models import PagosProveedor
+from .models import Pagos_cuotas
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -116,6 +117,20 @@ def principal_resumen(request):
     prov = Proveedor.objects.filter(estado=False)
     total_prov_inactivo = len(prov) if prov is not None else 0
   # MOSTRAR SUMA TOTAL DE COMISION DEL MES ACTUAL
+    
+    suma_consumos = round(suma_consumos, 2)
+    suma_consumos = '{:,.2f}'.format(suma_consumos)
+
+    suma_consumos_mesante = round(suma_consumos_mesante, 2)
+    suma_consumos_mesante = '{:,.2f}'.format(suma_consumos_mesante)
+
+    total_comision = round(total_comision, 2)
+    total_comision = '{:,.2f}'.format(total_comision)
+
+    total_comision_mesantes = round(total_comision_mesantes, 2)
+    total_comision_mesantes = '{:,.2f}'.format(total_comision_mesantes)
+
+
 
     data2 = {}
     data2.update({
@@ -150,9 +165,9 @@ def lista_pagos(request):
                 'fecha_fin': periodo_seleccionado.fecha_fin
             }
 
-            print(periodo_seleccionado)
+            print(periodo_seleccionado) 
             pagos = Pagos.objects.filter(fecha_consumo__range=(
-                fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("fecha_consumo,socio")
+                fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("fecha_consumo", "estado", "socio")
             context = {
                 'pagos': pagos,
                 'periodos': periodos,
@@ -420,6 +435,7 @@ def agregar_pagos_cuotas(request):
 
                 fecha_descuento = str(request.POST.get('fecha_descuento'))
                 fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
+                descripcion = request.POST.get('descripcion', '')
 
                 if fecha_actual.day < 15:
                     fecha_inicio_pagos = fecha_actual.replace(day=15)
@@ -441,7 +457,7 @@ def agregar_pagos_cuotas(request):
                 if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
                     pagoscuotas = Pagos_cuotas.objects.create(
                         socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha_descuento,
-                        numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo
+                        numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo, descripcion=descripcion
                     )
                     pagoscuotas.save()
 
@@ -479,6 +495,7 @@ def agregar_pagos_cuotas(request):
                     return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
 
     except Exception as e:
+        print(e)
         messages.warning(
             request, 'Ups, ha ocurrido un problema, verifica los valores ingresados')
     return redirect('/lista_pagos_cuotas/')
@@ -960,6 +977,8 @@ def convertir_cuotas(request, pago_id):
         fecha_descuento = str(request.POST.get('fecha_descuento'))
         fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
 
+        descripcion = request.POST.get('descripcion', '')
+
         if fecha_actual.day < 15:
             fecha_inicio_pagos = fecha_actual.replace(day=15)
         else:
@@ -977,7 +996,7 @@ def convertir_cuotas(request, pago_id):
         if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
             pagoscuotas = Pagos_cuotas.objects.create(
                 socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha_descuento,
-                numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo
+                numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo, descripcion=descripcion
             )
             pagoscuotas.save()
 
@@ -1019,36 +1038,60 @@ def buscar_pagos(request):
     if request.method == "POST":
         criterio = request.POST.get('criterio')
         valor = request.POST.get('query')
+        periodo_id = request.POST.get('periodo')  # Obtener el ID del periodo seleccionado
         pagos = []
 
-        if criterio:
-            # Realiza las consultas según el criterio y el valor ingresados
-            if criterio == 'nombres':
-                pagos = Pagos.objects.filter(socio__user__first_name__icontains=valor) | Pagos.objects.filter(
-                    socio__user__last_name__icontains=valor)
-            elif criterio == 'proveedor':
-                pagos = Pagos.objects.filter(
-                    proveedor__nombre__icontains=valor)
-            elif criterio == 'fecha':
-                pagos = Pagos.objects.filter(fecha_consumo__icontains=valor)
-            elif criterio == '1':
-                pagos = Pagos.objects.filter(estado=True)
-            elif criterio == '0':
-                pagos = Pagos.objects.filter(estado=False)
+        # Obtener el periodo seleccionado
+        periodo_seleccionado = Periodo.objects.get(pk=periodo_id)
 
-        items_por_pagina = 10  # Cambia esto según tus necesidades
-        paginator = Paginator(pagos, items_por_pagina)
-        numero_pagina = request.GET.get('page')
-        try:
-            pagos_paginados = paginator.get_page(numero_pagina)
-        except PageNotAnInteger:
-            pagos_paginados = paginator.get_page(1)
+        if periodo_seleccionado:
+            fecha_inicio_periodo = periodo_seleccionado.fecha_inicio
+            fecha_fin_periodo = periodo_seleccionado.fecha_fin
 
-        # Renderiza una tabla parcial con los resultados
-        rendered_table = render_to_string("lista_pagos_partial.html", {
-                                          "pagos": pagos_paginados})
+            if criterio:
+                # Realiza las consultas según el criterio y el valor ingresados
+                if criterio == 'nombres':
+                    pagos = Pagos.objects.filter(
+                        socio__user__first_name__icontains=valor,
+                        fecha_consumo__range=(fecha_inicio_periodo, fecha_fin_periodo)
+                    ) | Pagos.objects.filter(
+                        socio__user__last_name__icontains=valor,
+                        fecha_consumo__range=(fecha_inicio_periodo, fecha_fin_periodo)
+                    )
+                elif criterio == 'proveedor':
+                    pagos = Pagos.objects.filter(
+                        proveedor__nombre__icontains=valor,
+                        fecha_consumo__range=(fecha_inicio_periodo, fecha_fin_periodo)
+                    )
+                elif criterio == 'fecha':
+                    pagos = Pagos.objects.filter(
+                        fecha_consumo__icontains=valor,
+                        fecha_consumo__range=(fecha_inicio_periodo, fecha_fin_periodo)
+                    )
+                elif criterio == '1':
+                    pagos = Pagos.objects.filter(
+                        estado=True,
+                        fecha_consumo__range=(fecha_inicio_periodo, fecha_fin_periodo)
+                    )
+                elif criterio == '0':
+                    pagos = Pagos.objects.filter(
+                        estado=False,
+                        fecha_consumo__range=(fecha_inicio_periodo, fecha_fin_periodo)
+                    )
 
-        return JsonResponse({"rendered_table": rendered_table})
+            items_por_pagina = 10  # Cambia esto según tus necesidades
+            paginator = Paginator(pagos, items_por_pagina)
+            numero_pagina = request.GET.get('page')
+            try:
+                pagos_paginados = paginator.get_page(numero_pagina)
+            except PageNotAnInteger:
+                pagos_paginados = paginator.get_page(1)
+
+            # Renderiza una tabla parcial con los resultados
+            rendered_table = render_to_string("lista_pagos_partial.html", {
+                "pagos": pagos_paginados})
+
+            return JsonResponse({"rendered_table": rendered_table})
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
@@ -1417,5 +1460,20 @@ def aplazar_pagos_cuotas_pen(request, cuotas_seleccionadas):
         response_data = {'status': 'success', 'message': 'Cuotas aplazadas exitosamente'}
     except ValueError:
         response_data = {'status': 'error', 'message': 'Ocurrió un error al aplazar las cuotas'}
+
+    return JsonResponse(response_data)
+
+def actualizar_descripcion(request, id_pago_cu):
+    if request.method == 'POST':
+        descri = request.POST.get('descripcion', '')
+        try:
+            pago_cu = Pagos_cuotas.objects.get(id=id_pago_cu)
+            pago_cu.descripcion = descri
+            pago_cu.save()
+            response_data = {'success': True, 'message': 'Descripción actualizada correctamente.'}
+        except Pagos_cuotas.DoesNotExist:
+            response_data = {'success': False, 'message': 'El pago por cuotas no existe.'}
+    else:
+        response_data = {'success': False, 'message': 'Método no permitido.'}
 
     return JsonResponse(response_data)

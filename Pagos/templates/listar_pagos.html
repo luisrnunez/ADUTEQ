@@ -217,15 +217,17 @@
                 $("#buscador_input").on("input", function () {
                     var query = $(this).val();
                     var criterio = document.getElementById('criterio').value;
+                    var periodoSeleccionado = $("#select-periodo").val(); // Obtener el ID del periodo seleccionado
                     console.log(criterio);
                     console.log(query);
                     $.ajax({
-                        url: '{% url "buscar_pagos" %}',
+                        url: '{% url "buscar_pagos" %}', 
                         type: "POST",
                         data: {
                             csrfmiddlewaretoken: '{{ csrf_token }}',
                             query: query,
-                            criterio: criterio
+                            criterio: criterio,
+                            periodo: periodoSeleccionado // Pasar el ID del periodo seleccionado
                         },
                         success: function (data) {
                             $(".socios-table").html(data.rendered_table);
@@ -233,6 +235,7 @@
                     });
                 });
             });
+
 
             $(document).ready(function () {
                 $("#criterio").on("change", function () {

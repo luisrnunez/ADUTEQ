@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import enviar_correo_todos, nuevo_enviar_correo,reportes, generar_reporte_pdf_total_usuarios,cerrar_periodo,actualizar_cancelados,actualizar_estados, actualizar_descuentos,generar_reporte_consumo_todos, reportes_socios_general
-from .views import reportes_datos_socios, actualizar_estados_ayudas,generar_pdf_socio, reporte_genero,actualizar_estados_ayudas_exter
+from .views import reportes_datos_socios, actualizar_estados_ayudas,generar_pdf_socio, reporte_genero,actualizar_estados_ayudas_exter,obtener_consumos_por_proveedor,resultados_consulta,resultados_consulta_cuotas
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -22,6 +22,10 @@ urlpatterns = [
     path('reportes_socios_general/', reportes_socios_general, name='reportes_socios_general'),
     path('generar_pdf_socio/', generar_pdf_socio, name='generar_pdf_socio'),
     path('reporte_genero/', reporte_genero, name='reporte_genero'),
+    path('obtener_consumos_por_proveedor/', obtener_consumos_por_proveedor, name='obtener_consumos_por_proveedor'),
+    path('resultados_consulta/', resultados_consulta, name='resultados_consulta'),
+    path('resultados_consulta_cuotas/', resultados_consulta_cuotas, name='resultados_consulta_cuotas'),
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

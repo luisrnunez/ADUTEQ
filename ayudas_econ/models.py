@@ -34,6 +34,8 @@ class DetallesAyuda(models.Model):
     fecha=models.DateField(null=True)
     cancelado = models.BooleanField(default=False)
     pagado = models.BooleanField(default=False)
+    class Meta:
+        ordering = ['socio__user__last_name'] 
 
 class AyudasExternas(models.Model):
     nombre=models.TextField(max_length=200)

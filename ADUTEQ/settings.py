@@ -167,7 +167,7 @@ if not DEBUG:
     
 TINYMCE_JS_URL = os.path.join(STATIC_URL, "path/to/tiny_mce/tiny_mce.js")
 
-LOGIN_URL = '/login'
+LOGIN_URL = '/login' 
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ADUTEQ/static')

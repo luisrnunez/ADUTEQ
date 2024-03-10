@@ -454,7 +454,7 @@ def cargar_categorias():
     }
     return response
 
-@csrf_exempt
+@csrf_exempt 
 def agregar_facultad_socios (request):
     nombre = request.POST.get('nom_facu')
     descripcion = request.POST.get('descripcion')

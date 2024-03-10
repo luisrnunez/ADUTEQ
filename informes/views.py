@@ -41,8 +41,8 @@ from Periodo.models import Periodo
 
 # Create your views here.
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_gastos_socio(socio_id):
     # Obtener el socio específico
     socio = Socios.objects.get(id=socio_id)
@@ -119,8 +119,8 @@ def obtener_gastos_socio(socio_id):
 
 #     return context
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def generar_pdf(context):
     template_path = 'info_detalle_pdf.html'
     template = get_template(template_path)
@@ -132,8 +132,8 @@ def generar_pdf(context):
     if not pdf.err:
         return result.getvalue()
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def datospdf(socio_id, mes, anio):
 
     nombres_meses = [
@@ -178,8 +178,8 @@ def datospdf(socio_id, mes, anio):
 
 
 ########################## -------NUEVO ENVIAR CORREO------##############################
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def nuevo_enviar_correo(request, socio_id):
     socio = Socios.objects.get(id=socio_id)
     hoy = datetime.today()
@@ -216,8 +216,8 @@ def nuevo_enviar_correo(request, socio_id):
 
 ################################### ---ENVIAR CORREO TODOS----############################
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def enviarGastoEmail(socio_id, context,pagos_pen, pdf_buffer):
     sociop = Socios.objects.get(id=socio_id)
     gastos = context
@@ -291,8 +291,8 @@ def enviarGastoEmail(socio_id, context,pagos_pen, pdf_buffer):
 #                 print(str(e))
 #     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def enviar_correo_todos(request):
     # Obtener el mes seleccionado del POST
     selected_mes = request.POST.get('mes', 'mes_actual')
@@ -350,8 +350,8 @@ def enviar_correo_todos(request):
 
     return JsonResponse({'status': 'success', 'message': 'Correos enviados a todos los socios'})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def reportes(request):
     periodo_seleccionado = Periodo.objects.filter(activo=True).first()
     socios = Socios.objects.all()
@@ -477,12 +477,44 @@ def cerrar_periodo(request):
         suma_consumo = obtener_suma_consumo_total_descuentos_func(mes, anio)
         prestamos_cuotas = obtener_cuota_prestamos_func(mes, anio)
         suma_prestamos = obtener_suma_prestamo_total_func(mes, anio)
-        descuento_cuotas = obtener_cuota_descuentos_func(mes, anio)
+        descuento_cuotas = obtener_cuota_descuentos_total_func(mes, anio)
         suma_des_cuot = obtener_suma_descuento_cuotas_func(mes, anio)
         ayudas_des = obtener_ayudas_func(mes, anio)
         suma_ayudas = obtener_suma_ayudas_func(mes, anio)
         ayudas_ext=obtener_aportaciones_externas_func(mes,anio)
         suma_ext=obtener_suma_aportaciones_externas_func(mes,anio)
+
+        # if suma_consumo is not None:
+        #     suma_consumo = round(suma_consumo, 2)
+        #     suma_consumo = '{:,.2f}'.format(suma_consumo)
+        # else:
+        #     suma_consumo = '0.00'
+
+        # if suma_prestamos is not None:
+        #     suma_prestamos = round(suma_prestamos, 2)
+        #     suma_prestamos = '{:,.2f}'.format(suma_prestamos)
+        # else:
+        #     suma_prestamos = '0.00'
+
+        # if suma_des_cuot is not None:
+        #     suma_des_cuot = round(suma_des_cuot, 2)
+        #     suma_des_cuot = '{:,.2f}'.format(suma_des_cuot)
+        # else:
+        #     suma_des_cuot = '0.00'
+
+        # if suma_ayudas is not None:
+        #     suma_ayudas = round(suma_ayudas, 2)
+        #     suma_ayudas = '{:,.2f}'.format(suma_ayudas)
+        # else:
+        #     suma_ayudas = '0.00'
+
+        # if suma_ext is not None:
+        #     suma_ext = round(suma_ext, 2)
+        #     suma_ext = '{:,.2f}'.format(suma_ext)
+        # else:
+        #     suma_ext = '0.00'
+
+
         return render(request, "cerrar_periodo.html",
                       {'consumos_proveedores': consumos_proveedores, 'suma_consumo': suma_consumo,
                        'prestamos_cuotas': prestamos_cuotas, 'suma_prestamos': suma_prestamos,
@@ -516,6 +548,67 @@ def obtener_cuota_descuentos_func(mes, anio):
         results = cursor.fetchall()
     return results
 
+def obtener_cuota_descuentos_total_func(mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM obtener_cuota_descuentos_total_func(%s, %s);", [mes, anio])
+        results = cursor.fetchall()
+    return results
+
+def resultados_consulta(request):
+    socio = request.GET.get('socio')
+    mes = request.GET.get('mes')
+    anio = request.GET.get('anio')
+
+    idsoc=Socios.objects.get(cedula=socio)
+    print(idsoc)
+    resultados = obtener_consumos_por_proveedor(idsoc.id, mes, anio)
+    # Crear la tabla HTML para los resultados
+    html_response = "<h4>" + idsoc.user.last_name + " " + idsoc.user.first_name + "</h4>"
+    html_response += "<table border='1'>"
+    html_response += "<tr><th>Proveedor</th><th>Cantidad</th></tr>"
+    for resultado in resultados:
+        html_response += "<tr>"
+        html_response += "<td>" + resultado[0] + "</td>"
+        html_response += "<td>" + str(resultado[1]) + "</td>"
+        html_response += "</tr>"
+    html_response += "</table>"
+    
+    return HttpResponse(html_response)
+
+def obtener_consumos_por_proveedor(socio, mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM obtener_consumos_por_proveedor(%s, %s, %s);", [socio, mes, anio])
+        results = cursor.fetchall()
+    return results
+
+def resultados_consulta_cuotas(request):
+    socio = request.GET.get('socio')
+    mes = request.GET.get('mes')
+    anio = request.GET.get('anio')
+
+    idsoc=Socios.objects.get(cedula=socio)
+    resultados = obtener_consumos_por_proveedor_detalle_cuotas(idsoc.id, mes, anio)
+    # html_response = "<h2>Descuentos por Cuotas</h2>"
+    html_response = "<h4>" + idsoc.user.last_name + " " + idsoc.user.first_name + "</h4>"
+    html_response += "<table border='1'>"
+    html_response += "<tr><th>Proveedor</th><th>Cantidad</th></tr>"
+    for resultado in resultados:
+        html_response += "<tr>"
+        html_response += "<td>" + resultado[0] + "</td>"
+        html_response += "<td>" + str(resultado[1]) + "</td>"
+        html_response += "</tr>"
+    html_response += "</table>"
+    
+    return HttpResponse(html_response)
+
+def obtener_consumos_por_proveedor_detalle_cuotas(socio, mes, anio):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM obtener_consumos_por_proveedor_detalle_cuotas(%s, %s, %s);", [socio, mes, anio])
+        results = cursor.fetchall()
+    return results
 
 def obtener_ayudas_func(mes, anio):
     with connection.cursor() as cursor:
