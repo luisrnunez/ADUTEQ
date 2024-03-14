@@ -42,8 +42,8 @@ def ListaPromociones(request):
         promociones_pag = paginator.get_page(1)
     return render(request, "promociones.html", {'promociones': promociones_pag})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def habilitar_desabilitar_promocion(request, promo_id, valor):
     promocion = models.Promocion.objects.get(id=promo_id)
 
@@ -74,8 +74,8 @@ def formRegistro(request):
 
     return render(request,'agg_promocion.html', {'proveedores':proveedores})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def aggPromo(request):
     if request.method == 'POST':
         tipo=request.POST.get('selectipo')
@@ -146,8 +146,8 @@ def userexist(titulo):
         return False
     
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editar_promo(request, promo_id):
     promocion = models.Promocion.objects.get(id=promo_id)
     promocion.descripcion=unescape(promocion.descripcion)
@@ -189,8 +189,8 @@ def editar_promo(request, promo_id):
     else:
         return render(request, 'edit_promocion.html', {'promocion':promocion, 'proveedores':proveedores})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)    
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)    
 def eliminarpromo(request, promo_id):
     promocion=models.Promocion.objects.get(id=promo_id)
     if request.method == 'POST':
@@ -265,8 +265,8 @@ def eliminarpromo(request, promo_id):
 
 #     return JsonResponse(respuesta)
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def enviar_promocion_a_todos(request, promo_id):
     socios = Socios.objects.filter(user__is_active=True)
     promocion = models.Promocion.objects.get(id=promo_id)
