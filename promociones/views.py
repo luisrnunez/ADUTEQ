@@ -337,8 +337,8 @@ def enviar_promocion_a_todos(request, promo_id):
 
     return JsonResponse(respuesta)
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def buscar_promo(request):
     if request.method == "POST":
         criterio = request.POST.get('criterio')
@@ -356,8 +356,8 @@ def buscar_promo(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_resultados(request):
     seleccion = request.GET.get('seleccion')
     page_number = request.GET.get('page', 1)
@@ -377,8 +377,8 @@ def obtener_resultados(request):
 
     return render(request, 'promociones.html', {'page': page, 'seleccion': seleccion})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def buscar_proveedores(request):
     query = request.GET.get('query', '')  # Obtiene el texto de búsqueda
     proveedores_sugeridos = []
@@ -390,8 +390,8 @@ def buscar_proveedores(request):
     sugerencias = [{'id': proveedor.id, 'nombre': proveedor.nombre} for proveedor in proveedores_sugeridos]
     return JsonResponse({'sugerencias': sugerencias})
 
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def contiene_tabla(descripcion):
     soup = BeautifulSoup(descripcion, 'html.parser')
     tablas = soup.find_all('table')
