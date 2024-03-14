@@ -399,7 +399,7 @@ def actualizar_estados(apps, schema_editor):
             "SELECT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'actualizar_estados')")
         function_exists = cursor.fetchone()[0]
 
-        if not function_exists:
+        if not function_exists: 
             cursor.execute(
                 """
                 CREATE OR REPLACE FUNCTION public.actualizar_estados(
@@ -1467,7 +1467,7 @@ EXECUTE FUNCTION restar_valor_despues_insert();
 """
 
 
-class Migration(migrations.Migration):
+class Migration(migrations.Migration): 
 
     dependencies = [
         # Otras dependencias de migración

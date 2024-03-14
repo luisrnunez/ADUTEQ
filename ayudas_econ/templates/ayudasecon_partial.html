@@ -67,7 +67,10 @@
             </td>
             {% endif %}
             <td>
-                <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Detalles Ayuda</a>
+                <a style="text-decoration: none;" class="delete-btn" href="/detalleayuda/{{ayuda.id}}">Aportaciones</a>
+            </td>
+            <td>
+                <button class="edit-btn" onclick="confirmarEdicion('{{ayuda.id}}','{{ayuda.socio.user.first_name}}')">Evidencia</button>
             </td>
             <!--<td>{{proveedor.id}}</td>-->
         </tr>

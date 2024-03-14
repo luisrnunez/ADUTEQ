@@ -69,7 +69,7 @@
                         <input style="color: black; border-radius: 1%; margin-right: 30px;" disabled type="text" value="Fondo Actual: {{ total_ayuda_permanente.0.1 }}">
                         <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>
                         <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;"
-                            class="form-control mb-2" name="anio" id="select-anio" aria-placeholder="Asño" required>
+                            class="form-control mb-2" name="anio" id="select-anio" aria-placeholder="Asño" required hidden>
                             {% for anio in anos %}
                             <option value="{{ anio }}">{{ anio }}</option>
                             {% endfor %}
@@ -79,11 +79,11 @@
                             class="form-control mb-2" name="periodo" id="select-periodo" aria-placeholder="Periodo"
                             required>
                             {% for periodo in periodos %}
-                            {% if periodo.anio == anos.0 %}
+                            
                             <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
                                 {{ periodo.nombre }}
                             </option>
-                            {% endif %}
+                            
                             {% endfor %}
                         </select>
                     </div>

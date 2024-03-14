@@ -51,7 +51,7 @@
 <div class="content-menu">
     <div class="socios-content">
         <div class="botones-sup">
-            <div class="botones_arriba">
+            <div class="botones_arriba"> 
                 <div class="header">
                     <h3>Pagos Cuotas Pendientes</h3>
                 </div>
@@ -63,7 +63,7 @@
                 <div style="display: flex; justify-content: center; width: min-content;">
                     <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>
                     <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;"
-                        class="form-control mb-2" name="anio" id="select-anio" aria-placeholder="Asño" required>
+                        class="form-control mb-2" name="anio" id="select-anio" aria-placeholder="Asño" required hidden>
                         {% for anio in anos %}
                         <option value="{{ anio }}">{{ anio }}</option>
                         {% endfor %}
@@ -73,11 +73,11 @@
                         class="form-control mb-2" name="periodo" id="select-periodo" aria-placeholder="Periodo"
                         required>
                         {% for periodo in periodos %}
-                        {% if periodo.anio == anos.0 %}
+                        
                         <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
                             {{ periodo.nombre }}
                         </option>
-                        {% endif %}
+                        
                         {% endfor %}
                     </select>
                 </div>
@@ -94,7 +94,9 @@
                                 <th scope="col">Consumo Total</th>
                                 <!-- <th scope="col">Valor Cuota</th> -->
                                 <th scope="col">Fecha Descuento</th>
+                                <th scope="col">Descripción</th>
                                 <th scope="col">Estado</th>
+                                <th scope="col">Editar Descripción</th>
                                 <th scope="col">Detalle</th>
                                 {% if periodo_seleccionado.activo %}
                                 <th scope="col">Eliminar</th>
@@ -112,6 +114,7 @@
                                 <td>{{pago_cuota.consumo_total}}</td>
                                 <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
                                 <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
+                                <td style="text-align: justify;" id="descripcion-cuota-{{ pago_cuota.id }}">{{pago_cuota.descripcion}}</td>
                                 <td>
                                     {% if pago_cuota.estado %}
                                     <button class="green-button">
@@ -124,8 +127,12 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    <button class="edit-btn btn-des" data-id="{{ pago_cuota.id }}">Editar</button>
+                                </td>
+
+                                <td>
                                     <form action="{% url 'detalles_cuota_pendiente' pago_cuota.id %}">
-                                        <button class="edit-btn">Ver Detalle</button>
+                                        <button class="edit-btn">Detalle</button>
                                     </form>
                                 </td>
                                 <!-- <td>
@@ -147,6 +154,33 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal" id="editar-descripcion-modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Encabezado del modal -->
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar Descripción de Cuota</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Cuerpo del modal -->
+                    <div class="modal-body">
+                        <textarea id="descripcion-cuota" class="form-control" rows="4"
+                            placeholder="Ingrese la descripción"></textarea>
+                    </div>
+
+                    <!-- Pie del modal -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" id="guardar-descripcion-btn">Guardar
+                            Cambios</button>
+                    </div> 
+                </div>
+            </div>
+        </div>
+
         <div class="pagination-container">
             <nav aria-label="...">
                 <ul class="pagination">
@@ -208,7 +242,7 @@
             console.log('ENTRAR AL SELECT')
             var periodoid = $(this).val();
             $.ajax({
-                url: '{% url "listar_pagos_cuotas" %}',
+                url: '{% url "lista_pagos_cuotas_pendientes" %}',
                 type: "POST",
                 data: {
                     csrfmiddlewaretoken: '{{ csrf_token }}',
@@ -216,6 +250,56 @@
                 },
                 success: function (data) {
                     $("#lista-pagos").html(data.rendered_table);
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Manejar el clic en el botón de editar
+        $(".btn-des").click(function () {
+            // Obtener el ID del pago por cuotas desde el atributo data
+            var idPagoCu = $(this).data("id");
+
+            // Obtener la descripción actual del pago por cuotas
+            var descripcionActual = $("#descripcion-cuota-" + idPagoCu).text();
+
+            // Asignar la descripción actual al textarea del modal
+            $("#descripcion-cuota").val(descripcionActual);
+
+            // Establecer el ID del pago por cuotas como valor de un atributo data en el botón guardar
+            $("#guardar-descripcion-btn").data("id-pago-cu", idPagoCu);
+
+            // Mostrar el modal de edición de descripción
+            $("#editar-descripcion-modal").modal("show");
+        });
+
+        // Agregar un manejador para el botón de guardar del modal
+        $("#guardar-descripcion-btn").click(function () {
+            // Obtener el ID del pago por cuotas desde el atributo data del botón
+            var idPagoCu = $(this).data("id-pago-cu");
+
+            // Obtener la nueva descripción desde el textarea del modal
+            var nuevaDescripcion = $("#descripcion-cuota").val();
+
+            // Realizar una solicitud AJAX para actualizar la descripción
+            $.ajax({
+                url: '/actualizar_descripcion_pendientes/' + idPagoCu + '/',
+                type: 'POST',
+                data: {
+                    'descripcion': nuevaDescripcion,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // Si la actualización es exitosa, cerrar el modal
+                    $("#editar-descripcion-modal").modal("hide");
+                    // Puedes agregar aquí cualquier otra acción después de actualizar la descripción
+                    $("#descripcion-cuota-" + idPagoCu).text(nuevaDescripcion);
+                },
+                error: function (xhr, errmsg, err) {
+                    // Manejar errores si la actualización falla
+                    console.log(errmsg);
                 }
             });
         });

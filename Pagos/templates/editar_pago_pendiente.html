@@ -43,6 +43,10 @@
                             <input class="form-control mb-2" type="date" name="fecha_consumo"
                                 value="{{ pagos.fecha_consumo|date:'Y-m-d' }}" required>
 
+                            <label class="fw-bold" for="descripcion">Descripción (máximo 500 caracteres):</label>
+                            <textarea class="form-control mb-2" name="descripcion" maxlength="500"
+                            >{{pagos.descripcion}}</textarea>
+
                             <label class="fw-bold" for="estado">Estado:</label>
                             <select  class="form-control mb-2"id="estado" name="estado">
                                 <option value="True" {% if pagos.estado %}selected{% endif %}>Pagado</option> 

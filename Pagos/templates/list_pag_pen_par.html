@@ -5,10 +5,11 @@
             <th scope="col">Socio</th>
             <th scope="col">Descuento</th>
             <th scope="col">Fecha</th>
+            <th scope="col">Descripción</th>
             <th scope="col">Estado</th>
             <th scope="col">Editar</th>
             <th scope="col">Eliminar</th>
-            <th scope="col">Convertir Cuotas</th>
+            <th scope="col">Convertir a Cuotas</th>
         </tr>
     </thead>
     <tbody>
@@ -18,6 +19,7 @@
             <td>{{ pago.socio.user.last_name }} {{ pago.socio.user.first_name }}</td>
             <td>{{pago.consumo_total}}$</td>
             <td>{{ pago.fecha_consumo|date:"j - n - Y" }}</td>
+            <td>{{pago.descripcion}}</td>
             <td>
                 {% if pago.estado %}
                 <button class="green-button">

@@ -43,6 +43,9 @@
                             
                             <label class="fw-bold" for="fecha_descuento">Fecha:</label>
                             <input  class="form-control mb-2" value="{{ pagos.fecha_consumo|date:'Y-m-d' }}" type="date" name="fecha_descuento" required>
+
+                            <label class="fw-bold" for="descripcion">Descripción (máximo 500 caracteres):</label>
+                            <textarea class="form-control mb-2" name="descripcion" maxlength="500">{{pagos.descripcion}}</textarea>
                             
                             <input hidden name="id_pago" value="{{pagos.id}}" class="form-control mb-2" type="number" required>
 

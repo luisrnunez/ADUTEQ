@@ -153,6 +153,7 @@ def lista_pagos(request):
 
     periodos = Periodo.objects.all()  # Obtener todos los períodos
     anos = periodos.values_list('anio', flat=True).distinct()
+    print(anos)
     # listar periodo por el select
     periodoid = request.POST.get('periodoid')
     fechas_periodo = {}
@@ -167,7 +168,7 @@ def lista_pagos(request):
 
             print(periodo_seleccionado) 
             pagos = Pagos.objects.filter(fecha_consumo__range=(
-                fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("fecha_consumo", "estado", "socio")
+                fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])).order_by("estado", "socio")
             context = {
                 'pagos': pagos,
                 'periodos': periodos,
@@ -315,7 +316,7 @@ def lista_pagos_cuotas(request):
             Q(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
             Q(fecha_descuento__lt=fechas_periodo['fecha_inicio'],
               estado="False")
-        ).order_by("-id", "estado")
+        ).order_by("estado")
         items_por_pagina = 10
         paginator = Paginator(pagos, items_por_pagina)
         numero_pagina = request.GET.get('page')
@@ -392,12 +393,13 @@ def agregar_pagos_pendiente(request):
         socios = Socios.objects.get(id=socio_id)
         fecha = request.POST.get('fecha_consumo')
         cantidad = request.POST.get('consumo_total')
+        descripcion = request.POST.get('descripcion', '')
 
         periodo_seleccionado = Periodo.objects.filter(activo=True).first()
         if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
             if (float(cantidad) <= 10000):
                 pagos = pagos_pendientes.objects.create(
-                    socio=socios, consumo_total=cantidad, fecha_consumo=fecha)
+                    socio=socios, consumo_total=cantidad, fecha_consumo=fecha, descripcion=descripcion)
                 messages.success(request, 'Exito')
                 return redirect('/listar_pagos_pendientes/')
             else:
@@ -529,6 +531,7 @@ def editar_pago_pendiente(request, pago_id):
         pagos.consumo_total = request.POST.get('consumo_total')
         pagos.fecha_consumo = request.POST.get('fecha_consumo')
         pagos.estado = request.POST.get('estado')
+        pagos.descripcion = request.POST.get('descripcion', '')
         pagos.save()
         messages.success(request, 'Se ha editado el descuento exitosamente.')
         return redirect('/listar_pagos_pendientes/')
@@ -955,83 +958,88 @@ def generar_reporte_pdf(request):
     buffer.close()
     return HttpResponse("Error al generar el PDF", status=500)
 
-
+from django.http import HttpResponseRedirect
 @login_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def convertir_cuotas(request, pago_id):
-    if request.method == 'GET':
-        pagos = Pagos.objects.get(id=pago_id)
-        # form = PagosForm(instance=pagos)
-        print(pagos.consumo_total)
-        return render(request, 'convertir_cuotas.html', {'pagos': pagos})
-    else:
-        socio_id = request.POST.get('socio')
-        socios = Socios.objects.get(id=socio_id)
-
-        proveedor_id = request.POST.get('proveedor')
-        proveedores = Proveedor.objects.get(id=proveedor_id)
-
-        cantidad = request.POST.get('consumo_total')
-        numero_cuota = request.POST.get('numero_cuotas')
-
-        fecha_descuento = str(request.POST.get('fecha_descuento'))
-        fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
-
-        descripcion = request.POST.get('descripcion', '')
-
-        if fecha_actual.day < 15:
-            fecha_inicio_pagos = fecha_actual.replace(day=15)
+    try:
+        if request.method == 'GET':
+            pagos = Pagos.objects.get(id=pago_id)
+            # form = PagosForm(instance=pagos)
+            print(pagos.consumo_total)
+            return render(request, 'convertir_cuotas.html', {'pagos': pagos})
         else:
-            next_month = fecha_actual.replace(day=1) + timedelta(days=32)
-            fecha_inicio_pagos = next_month.replace(day=15)
+            socio_id = request.POST.get('socio')
+            socios = Socios.objects.get(id=socio_id)
 
-        cantidadval = Decimal(cantidad)
-        n_cuota = Decimal(numero_cuota)
-        valor_cuo = cantidadval / n_cuota
-        valor_cuo = valor_cuo.quantize(Decimal('0.00'), rounding=ROUND_DOWN)
+            proveedor_id = request.POST.get('proveedor')
+            proveedores = Proveedor.objects.get(id=proveedor_id)
 
-        sobrante = cantidadval - (valor_cuo * n_cuota)
+            cantidad = request.POST.get('consumo_total')
+            numero_cuota = request.POST.get('numero_cuotas')
 
-        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
-        if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
-            pagoscuotas = Pagos_cuotas.objects.create(
-                socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha_descuento,
-                numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo, descripcion=descripcion
-            )
-            pagoscuotas.save()
+            fecha_descuento = str(request.POST.get('fecha_descuento'))
+            fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
 
-            fechas_pago = [
-                fecha_inicio_pagos + timedelta(days=(30 * i)) for i in range(int(numero_cuota))]
+            descripcion = request.POST.get('descripcion', '')
 
-            valor_cuota1 = Decimal('0.00')
-            for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
-                if numero_cuota == len(fechas_pago):
-                    valor_cuota1 = valor_cuo + sobrante
-                else:
-                    valor_cuota1 = valor_cuo
-                detalle_cuotas = Detalle_cuotas(
-                    pago_cuota=pagoscuotas,
-                    numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago,
-                    valor_cuota=valor_cuota1,
-                    socio=socios, proveedor=proveedores
+            if fecha_actual.day < 15:
+                fecha_inicio_pagos = fecha_actual.replace(day=15)
+            else:
+                next_month = fecha_actual.replace(day=1) + timedelta(days=32)
+                fecha_inicio_pagos = next_month.replace(day=15)
+
+            cantidadval = Decimal(cantidad)
+            n_cuota = Decimal(numero_cuota)
+            valor_cuo = cantidadval / n_cuota
+            valor_cuo = valor_cuo.quantize(Decimal('0.00'), rounding=ROUND_DOWN)
+
+            sobrante = cantidadval - (valor_cuo * n_cuota)
+
+            periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+            if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+                pagoscuotas = Pagos_cuotas.objects.create(
+                    socio=socios, proveedor=proveedores, consumo_total=cantidad, fecha_descuento=fecha_descuento,
+                    numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo, descripcion=descripcion
                 )
-                detalle_cuotas.save()
+                pagoscuotas.save()
 
-            pagox = request.POST.get('id_pago')
-            print(pagox)
-            eliminar_pago(request, pagox)
+                fechas_pago = [
+                    fecha_inicio_pagos + timedelta(days=(30 * i)) for i in range(int(numero_cuota))]
 
-            messages.success(
-                request, 'Se ha agregado con exito el descuento por cuotas')
-            return redirect('/lista_pagos_cuotas/')
-        else:
-            messages.warning(
-                request, f'La fecha que ingresaste no está dentro del período actual de {periodo_seleccionado.nombre}')
-            users = User.objects.filter(is_active=True)
-            socios = Socios.objects.filter(user__in=users)
-            proveedores = Proveedor.objects.filter(estado=True)
-            return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
+                valor_cuota1 = Decimal('0.00')
+                for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                    if numero_cuota == len(fechas_pago):
+                        valor_cuota1 = valor_cuo + sobrante
+                    else:
+                        valor_cuota1 = valor_cuo
+                    detalle_cuotas = Detalle_cuotas(
+                        pago_cuota=pagoscuotas,
+                        numero_cuota=numero_cuota,
+                        fecha_descuento=fecha_pago,
+                        valor_cuota=valor_cuota1,
+                        socio=socios, proveedor=proveedores
+                    )
+                    detalle_cuotas.save()
+
+                pagox = request.POST.get('id_pago')
+                print(pagox)
+                eliminar_pago(request, pagox)
+
+                messages.success(
+                    request, 'Se ha agregado con exito el descuento por cuotas')
+                return redirect('/lista_pagos_cuotas/')
+            else:
+                messages.warning(
+                    request, f'La fecha que ingresaste no está dentro del período actual de {periodo_seleccionado.nombre}')
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(user__in=users)
+                proveedores = Proveedor.objects.filter(estado=True)
+                return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
+    except Exception as e:
+        # Manejar la excepción
+        print("Error:", e)
+        return HttpResponseRedirect('/lista_pagos_cuotas/')
 
 
 def buscar_pagos(request):
@@ -1089,7 +1097,8 @@ def buscar_pagos(request):
 
             # Renderiza una tabla parcial con los resultados
             rendered_table = render_to_string("lista_pagos_partial.html", {
-                "pagos": pagos_paginados})
+                "pagos": pagos_paginados,
+                "periodo_seleccionado": periodo_seleccionado})
 
             return JsonResponse({"rendered_table": rendered_table})
 
@@ -1158,6 +1167,8 @@ def agregar_pagos_cuotas_pen(request):
                 fecha_descuento = str(request.POST.get('fecha_descuento'))
                 fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
 
+                descripcion = request.POST.get('descripcion', '')
+
                 if fecha_actual.day < 15:
                     fecha_inicio_pagos = fecha_actual.replace(day=15)
                 else:
@@ -1176,7 +1187,7 @@ def agregar_pagos_cuotas_pen(request):
                 if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
                     pagoscuotas = pagos_cuotas_pendientes.objects.create(
                         socio=socios, consumo_total=cantidad, fecha_descuento=fecha_descuento,
-                        numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo
+                        numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo, descripcion=descripcion
                     )
                     pagoscuotas.save()
 
@@ -1247,7 +1258,7 @@ def lista_pagos_cuotas_pendientes(request):
                 'periodo_seleccionado': periodo_seleccionado,
             }
             rendered_table = render_to_string(
-                "pagos_cuotas_partial.html", context)
+                "list_pg_cuo_pen_par.html", context)
             return JsonResponse({"rendered_table": rendered_table})
 
     # listar periodo actual
@@ -1261,7 +1272,7 @@ def lista_pagos_cuotas_pendientes(request):
             Q(fecha_descuento__range=(fechas_periodo['fecha_inicio'], fechas_periodo['fecha_fin'])) |
             Q(fecha_descuento__lt=fechas_periodo['fecha_inicio'],
               estado="False")
-        ).order_by("-id", "estado")
+        ).order_by("estado")
         items_por_pagina = 10
         paginator = Paginator(pagos, items_por_pagina)
         numero_pagina = request.GET.get('page')
@@ -1363,71 +1374,78 @@ def convertir_cuotas2(request, pago_id):
             return redirect('/lista_pagos_cuotas_pendientes/')
 
     else:
-        socio_id = request.POST.get('socio')
-        socios = Socios.objects.get(id=socio_id)
+        try:
+            socio_id = request.POST.get('socio')
+            socios = Socios.objects.get(id=socio_id)
 
-        # proveedor_id = request.POST.get('proveedor')
-        # proveedores = Proveedor.objects.get(id=proveedor_id)
+            # proveedor_id = request.POST.get('proveedor')
+            # proveedores = Proveedor.objects.get(id=proveedor_id)
 
-        cantidad = request.POST.get('consumo_total')
-        numero_cuota = request.POST.get('numero_cuotas')
+            cantidad = request.POST.get('consumo_total')
+            numero_cuota = request.POST.get('numero_cuotas')
 
-        fecha_descuento = str(request.POST.get('fecha_descuento'))
-        fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
+            fecha_descuento = str(request.POST.get('fecha_descuento'))
+            fecha_actual = datetime.strptime(fecha_descuento, "%Y-%m-%d")
 
-        if fecha_actual.day < 15:
-            fecha_inicio_pagos = fecha_actual.replace(day=15)
-        else:
-            next_month = fecha_actual.replace(day=1) + timedelta(days=32)
-            fecha_inicio_pagos = next_month.replace(day=15)
+            descripcion = request.POST.get('descripcion', '')
 
-        cantidadval = Decimal(cantidad)
-        n_cuota = Decimal(numero_cuota)
-        valor_cuo = cantidadval / n_cuota
-        valor_cuo = valor_cuo.quantize(Decimal('0.00'), rounding=ROUND_DOWN)
+            if fecha_actual.day < 15:
+                fecha_inicio_pagos = fecha_actual.replace(day=15)
+            else:
+                next_month = fecha_actual.replace(day=1) + timedelta(days=32)
+                fecha_inicio_pagos = next_month.replace(day=15)
 
-        sobrante = cantidadval - (valor_cuo * n_cuota)
+            cantidadval = Decimal(cantidad)
+            n_cuota = Decimal(numero_cuota)
+            valor_cuo = cantidadval / n_cuota
+            valor_cuo = valor_cuo.quantize(Decimal('0.00'), rounding=ROUND_DOWN)
 
-        periodo_seleccionado = Periodo.objects.filter(activo=True).first()
-        if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
-            pagoscuotas = pagos_cuotas_pendientes.objects.create(
-                socio=socios, consumo_total=cantidad, fecha_descuento=fecha_descuento,
-                numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo
-            )
-            pagoscuotas.save()
+            sobrante = cantidadval - (valor_cuo * n_cuota)
 
-            fechas_pago = [
-                fecha_inicio_pagos + timedelta(days=(30 * i)) for i in range(int(numero_cuota))]
-
-            valor_cuota1 = Decimal('0.00')
-            for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
-                if numero_cuota == len(fechas_pago):
-                    valor_cuota1 = valor_cuo + sobrante
-                else:
-                    valor_cuota1 = valor_cuo
-                detalle_cuotas = detalle_cuotas_pendientes(
-                    pago_cuota_pendientes=pagoscuotas,
-                    numero_cuota=numero_cuota,
-                    fecha_descuento=fecha_pago,
-                    valor_cuota=valor_cuota1,
-                    socio=socios
+            periodo_seleccionado = Periodo.objects.filter(activo=True).first()
+            if periodo_seleccionado and periodo_seleccionado.fecha_inicio <= datetime.strptime(fecha_descuento, '%Y-%m-%d').date() <= periodo_seleccionado.fecha_fin:
+                pagoscuotas = pagos_cuotas_pendientes.objects.create(
+                    socio=socios, consumo_total=cantidad, fecha_descuento=fecha_descuento,
+                    numero_cuotas=numero_cuota, cuota_actual=0, valor_cuota=valor_cuo,descripcion=descripcion
                 )
-                detalle_cuotas.save()
+                pagoscuotas.save()
 
-            pagox = request.POST.get('id_pago')
-            print(pagox)
-            eliminar_pago_pendiente(request, pagox)
+                fechas_pago = [
+                    fecha_inicio_pagos + timedelta(days=(30 * i)) for i in range(int(numero_cuota))]
 
-            messages.success(
-                request, 'Se ha agregado con exito el descuento por cuotas')
+                valor_cuota1 = Decimal('0.00')
+                for numero_cuota, fecha_pago in enumerate(fechas_pago, start=1):
+                    if numero_cuota == len(fechas_pago):
+                        valor_cuota1 = valor_cuo + sobrante
+                    else:
+                        valor_cuota1 = valor_cuo
+                    detalle_cuotas = detalle_cuotas_pendientes(
+                        pago_cuota_pendientes=pagoscuotas,
+                        numero_cuota=numero_cuota,
+                        fecha_descuento=fecha_pago,
+                        valor_cuota=valor_cuota1,
+                        socio=socios
+                    )
+                    detalle_cuotas.save()
+
+                pagox = request.POST.get('id_pago')
+                print(pagox)
+                eliminar_pago_pendiente(request, pagox)
+
+                messages.success(
+                    request, 'Se ha agregado con exito el descuento por cuotas')
+                return redirect('/lista_pagos_cuotas_pendientes/')
+            else:
+                messages.warning(
+                    request, f'La fecha que ingresaste no está dentro del período actual de {periodo_seleccionado.nombre}')
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(user__in=users)
+                proveedores = Proveedor.objects.filter(estado=True)
+                return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
+        except Exception as e:
+            print(e)
+            messages.warning(request, 'Ups, ha ocurrido un problema')
             return redirect('/lista_pagos_cuotas_pendientes/')
-        else:
-            messages.warning(
-                request, f'La fecha que ingresaste no está dentro del período actual de {periodo_seleccionado.nombre}')
-            users = User.objects.filter(is_active=True)
-            socios = Socios.objects.filter(user__in=users)
-            proveedores = Proveedor.objects.filter(estado=True)
-            return render(request, 'agregar_pago_cuotas.html', {'socios': socios, 'proveedores': proveedores})
 
 def aplazar_pagos_cuotas_meses(request, cuotas_seleccionadas):
     try:
@@ -1468,6 +1486,21 @@ def actualizar_descripcion(request, id_pago_cu):
         descri = request.POST.get('descripcion', '')
         try:
             pago_cu = Pagos_cuotas.objects.get(id=id_pago_cu)
+            pago_cu.descripcion = descri
+            pago_cu.save()
+            response_data = {'success': True, 'message': 'Descripción actualizada correctamente.'}
+        except Pagos_cuotas.DoesNotExist:
+            response_data = {'success': False, 'message': 'El pago por cuotas no existe.'}
+    else:
+        response_data = {'success': False, 'message': 'Método no permitido.'}
+
+    return JsonResponse(response_data)
+
+def actualizar_descripcion_pendientes(request, id_pago_cu):
+    if request.method == 'POST':
+        descri = request.POST.get('descripcion', '')
+        try:
+            pago_cu = pagos_cuotas_pendientes.objects.get(id=id_pago_cu)
             pago_cu.descripcion = descri
             pago_cu.save()
             response_data = {'success': True, 'message': 'Descripción actualizada correctamente.'}

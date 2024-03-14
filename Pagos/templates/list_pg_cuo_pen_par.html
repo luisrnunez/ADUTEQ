@@ -3,15 +3,16 @@
         <tr>
             <!-- <th scope="col">ID</th> -->
             <th scope="col">Socio</th>
-            <th scope="col">Proveedor</th>
+            <!-- <th scope="col">Proveedor</th> -->
             <th scope="col">Numero Cuotas</th>
-            <th scope="col">Descripción</th>
+            <!-- <th scope="col">Cuota Actual</th> -->
             <th scope="col">Consumo Total</th>
             <!-- <th scope="col">Valor Cuota</th> -->
             <th scope="col">Fecha Descuento</th>
+            <th scope="col">Descripción</th>
             <th scope="col">Estado</th>
             <th scope="col">Editar Descripción</th>
-            <th scope="col">Detalle Pagos</th>
+            <th scope="col">Detalle</th>
             {% if periodo_seleccionado.activo %}
             <th scope="col">Eliminar</th>
             {% endif %}
@@ -22,14 +23,14 @@
         <tr>
             <!-- <td>{{pago_cuota.id}}</td> -->
             <td>{{pago_cuota.socio.user.last_name }} {{pago_cuota.socio.user.first_name }}</td>
-            <td>{{pago_cuota.proveedor.nombre}}</td>
+            <!-- <td>{{pago_cuota.proveedor.nombre}}</td> -->
             <td>{{pago_cuota.numero_cuotas}}</td>
-            <td style="text-align: justify;" id="descripcion-cuota-{{ pago_cuota.id }}">{{pago_cuota.descripcion}}</td>
+            <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
             <td>{{pago_cuota.consumo_total}}</td>
             <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
-          
             <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
-              <td>
+            <td style="text-align: justify;" id="descripcion-cuota-{{ pago_cuota.id }}">{{pago_cuota.descripcion}}</td>
+            <td>
                 {% if pago_cuota.estado %}
                 <button class="green-button">
                     Cancelado
@@ -43,19 +44,21 @@
             <td>
                 <button class="edit-btn btn-des" data-id="{{ pago_cuota.id }}">Editar</button>
             </td>
+
             <td>
-                <form action="{% url 'detalles_cuota' pago_cuota.id %}">
+                <form action="{% url 'detalles_cuota_pendiente' pago_cuota.id %}">
                     <button class="edit-btn">Detalle</button>
                 </form>
             </td>
             <!-- <td>
-                <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
-                    <button class="edit-btn">Eliminar</button>
-                </form>
-            </td> -->
+                    <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
+                        <button class="edit-btn">Eliminar</button>
+                    </form>
+                </td> -->
             {% if periodo_seleccionado.activo %}
             <td>
-                <button class="edit-btn" onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
+                <button class="edit-btn"
+                    onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
             </td>
             {% endif %}
 
@@ -93,7 +96,7 @@
 
             // Realizar una solicitud AJAX para actualizar la descripción
             $.ajax({
-                url: '/actualizar_descripcion/' + idPagoCu + '/',
+                url: '/actualizar_descripcion_pendientes/' + idPagoCu + '/',
                 type: 'POST',
                 data: {
                     'descripcion': nuevaDescripcion,

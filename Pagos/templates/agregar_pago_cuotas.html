@@ -38,7 +38,7 @@
                                 {% for proveedor in proveedores %}
                                 <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
                                 {% endfor %}
-                            </select>
+                            </select> 
                             <label class="fw-bold" for="numero_cuotas">Numero Cuotas:</label>
                             <input name="numero_cuotas" class="form-control mb-2" type="number"  placeholder="Ingrese el numero de cuotas" required>
 
@@ -49,7 +49,7 @@
                             <input class="form-control mb-2" type="date" name="fecha_descuento" required>
 
                             <label class="fw-bold" for="descripcion">Descripción (máximo 500 caracteres):</label>
-                            <textarea class="form-control mb-2" name="descripcion" maxlength="500"></textarea> 
+                            <textarea class="form-control mb-2" name="descripcion" maxlength="500"></textarea>  
                             
                             <br>
                             <!-- <form method="post">

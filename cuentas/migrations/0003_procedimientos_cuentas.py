@@ -1,6 +1,6 @@
 from django.db import migrations
 
-CREATE_FUNCTION = """
+CREATE_FUNCTION = """  
 CREATE OR REPLACE FUNCTION public.obtener_total_comisiones(
 	mes integer,
 	anio integer)
@@ -293,7 +293,7 @@ BEGIN
     END LOOP;
     columnas_proveedores := substring(columnas_proveedores FROM 2);
 
-    DROP TABLE IF EXISTS consumo_proveedores;
+    DROP TABLE IF EXISTS consumo_proveedores; 
 
     sqlt := '
         CREATE TEMP TABLE consumo_proveedores AS
