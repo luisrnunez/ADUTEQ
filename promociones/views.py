@@ -25,8 +25,8 @@ from bs4 import BeautifulSoup
 from django.views.decorators.cache import cache_control
 
 # Create your views here.
-@login_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def ListaPromociones(request):
     promociones = models.Promocion.objects.all().order_by('estado')
 
