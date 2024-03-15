@@ -40,14 +40,19 @@
                     <input type="text" maxlength="10" id="cedula" name="cedula" value="{{ socio.cedula }}" required>
 
                     <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ socio.fecha_nacimiento}}"
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ socio.fecha_nacimiento}}" required
                         >
 
                     <label for="lugar_nacimiento">Lugar de Nacimiento:</label>
                     <input type="text" id="lugar_nacimiento" name="lugar_nacimiento"
                         value="{{ socio.lugar_nacimiento }}" >
 
-
+                    <label for="genero">Género:</label>
+                    <select id="genero" name="genero" required>
+                        <option value="">-- Selecciona el género --</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                    </select>
 
                     <label for="email">Correo Electrónico:</label>
                     <input type="email" id="email" name="email" value="{{ usuario.email }}" required>
@@ -58,7 +63,7 @@
 
                     <label for="numero_convencional">Teléfono Convencional:</label>
                     <input type="text" id="numero_convencional" name="numero_convencional"
-                        value="{{ socio.numero_convencional }}" >
+                        value="{{ socio.numero_convencional }}">
 
                     <label for="direccion_domiciliaria">Dirección Domiciliaria:</label>
                     <input type="text" id="direccion_domiciliaria" name="direccion_domiciliaria"
@@ -196,7 +201,7 @@
                                         id="descripcion_facu" rows="3" placeholder="Ingrese una descripcion"></textarea>
                                 </div>
                                 <div class="modal-footer" style="display: inline-block; width: 100%;">
-                                    <button id="btnAgregarFacultad" class="btn btn-success"
+                                    <button type="button" id="btnAgregarFacultad" class="btn btn-success"
                                         style="width: 45%;">Aceptar</button>
                                     <button style="width: 48%; background-color: red; right: 0px;" type="button"
                                         class="btn btn-secondary" data-bs-dismiss="modal">

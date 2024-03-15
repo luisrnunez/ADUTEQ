@@ -1,110 +1,156 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.2/dist/js/bootstrap.bundle.min.js"></script>
-</head>
-
-<body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         .pagination-container {
             display: flex;
             justify-content: center;
             margin-top: 20px;
         }
+
+        .botones_arriba {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-right: 10px;
+            flex-flow: row wrap;
+            border: 1px solid rgb(187, 189, 186);
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgb(134, 134, 134);
+            margin: 5px;
+            border-radius: 1%;
+            background-color: #34b234;
+        }
+
+        .image-header {
+            margin-bottom: 20px;
+            background-color: #34b234;
+            width: 100%;
+            margin: auto;
+            text-align: center;
+            margin-bottom: 5px;
+            /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+        }
+
+        h3 {
+            font-weight: bold;
+            color: white;
+        }
+
+        table {
+            margin-top: 20px;
+        }
     </style>
-    <div class="content-menu" style="padding-top: 0%;">
+</head>
 
-        <div class="header">
-            <h1>Detalles de aportaciones de ayudas económicas</b></h1>
-        </div>
-        <div class="socios-content ">
+<body>
+    <div class="content-menu">
+        <div class="socios-content">
             <div class="botones-sup">
-                <a href="/verayudas/"> <button class="add-socio-btn"> Atras</button></a>
-                <div style="display: inline-flex; justify-content: end; width: max-content;">
-                    <div class="search-form">
-    
-                        <select id="criterio" name="criterio">
-                            <option value="nombres">Nombre</option>
-                            <option value="apellidos">Apellido</option>
-                        </select>
-                        <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
-                        <!-- <button type="submit">Buscar</button> -->
-    
+                <div class="botones_arriba">
+                    <div class="header">
+                        <h3>Detalles de aportaciones de ayudas económicas</b></h3>
+                        <a href="/verayudas/"> <button class="add-socio-btn"> Atras</button></a>
+                        <a href="#" id="abrirModal">
+                            <button class="add-socio-btn">Registrar aportación externa</button>
+                        </a>
+                        <a href="/obtener_ayudas_externas/{{detalle_id}}/"> <button class="add-socio-btn"> Aportaciones
+                                externas</button></a>
                     </div>
+                    <div style="display: inline-flex; justify-content: end; width: max-content;">
+                        <div class="search-form">
+
+                            <select id="criterio" name="criterio">
+                                <option value="nombres">Nombre</option>
+                                <option value="apellidos">Apellido</option>
+                            </select>
+                            <input type="text" id="buscador_input" name="valor" placeholder="Buscar socio...">
+                            <!-- <button type="submit">Buscar</button> -->
+
+                        </div>
+                    </div>
+
+                    <table class="socios-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Ayuda</th>
+                                <th scope="col">Valor a pagar</th>
+                                <th scope="col">Evidencia</th>
+                                <th scope="col">Cancelado</th>
+                                <th scope="col">Socio</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Registrar</th>
+                                <th scope="col">Evidencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="socios-body">
+                            {% for detalle in detalles %}
+                            <tr>
+                                <td>{{ detalle.ayuda.motivo }}</td>
+                                <!-- <td>{{ detalle.valor}}</td> -->
+                                {% if detalle.valor|floatformat:2 == "0,00" %}
+                                <td>Voluntario</td>
+                                {% else %}
+                                <td>{{ detalle.valor }}</td>
+                                {% endif %}
+                                <td>
+
+                                    {% if detalle.evidencia %}
+                                    <a href="{{ cuota.evidencia.url }}" target="_blank">
+                                        <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                    </a>
+                                    {% else %}
+                                    Sin evidencia
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+                                    {% if detalle.cancelado %}
+                                    <button class="green-button">
+                                        Cancelado
+                                    </button>
+                                    {% else %}
+                                    <button class="red-button">
+                                        Pendiente
+                                    </button>
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ detalle.socio.user.last_name }} {{ detalle.socio.user.first_name }}</td>
+                                <td>{{ detalle.fecha }}</td>
+                                <td>
+                                    {% if detalle.cancelado == False %}
+                                    <button class="edit-btn" data-detalle-id="{{ detalle.id }}"
+                                        data-socio-nombre="{{ detalle.ayuda.socio.user.first_name }}"
+                                        data-cancelado="{{ detalle.cancelado }}" data-toggle="modal"
+                                        data-target="#exampleModal">
+                                        Registrar pago
+                                    </button>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if detalle.cancelado %}
+
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                </div>
             </div>
-            </div>
-            <table class="socios-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Ayuda</th>
-                        <th scope="col">Valor a pagar</th>
-                        <th scope="col">Evidencia</th>
-                        <th scope="col">Cancelado</th>
-                        <th scope="col">Socio</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Registrar</th>
-                        <th scope="col">Evidencia</th>
-                    </tr>
-                </thead>
-                <tbody id="socios-body">
-                    {% for detalle in detalles %}
-                    <tr>
-                        <td>{{ detalle.ayuda.motivo }}</td>
-                        <!-- <td>{{ detalle.valor}}</td> -->
-                        {% if detalle.valor|floatformat:2 == "0,00" %}
-                            <td>Voluntario</td>
-                        {% else %}
-                            <td>{{ detalle.valor }}</td>
-                        {% endif %}
-                        <td>
-
-                            {% if detalle.evidencia %}
-                            <a href="{{ cuota.evidencia.url }}" target="_blank">
-                                <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
-                            </a>
-                            {% else %}
-                            Sin evidencia
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-                            {% if detalle.cancelado %}
-                            <button class="green-button">
-                                Cancelado
-                            </button>
-                            {% else %}
-                            <button class="red-button">
-                                Pendiente
-                            </button>
-                            {% endif %}
-                        </td>
-
-                        <td>{{ detalle.socio.user.first_name }} {{ detalle.socio.user.last_name }}</td>
-                        <td>{{ detalle.fecha }}</td>
-                        <td>
-                            {% if detalle.cancelado == False %}
-                            <button class="edit-btn"
-                                onclick="confirmarregistro('{{ detalle.id }}','{{ detalle.ayuda.socio.user.first_name }}','{{ detalle.cancelado }}')">
-                                Registrar pago
-                            </button>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if detalle.cancelado %}
-                            
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-
-                </tbody>
-            </table>
-
             <div class="pagination-container">
                 <nav aria-label="...">
                     <ul class="pagination">
@@ -138,7 +184,7 @@
                     </ul>
                 </nav>
             </div>
-            
+
 
         </div>
 
@@ -163,47 +209,97 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="modal fade" id="exampleModalexternal" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Ingrese aportación</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="aportacionForm" method="post">
+                            {% csrf_token %}
+                            <input hidden class="form-control" type="text" id="detalle_id" name="detalle_id"
+                                value="{{detalle_id}}">
+
+                            <div class="mb-3">
+                                <label class="form-label" for="nombre_aportador">Nombre del Aportador:</label>
+                                <input class="form-control" type="text" id="nombre_aportador" name="nombre_aportador"
+                                    required>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <label style="margin: 5px 5px 5px 5px;" for="pertenece_uteq">Pertenece  a la UTEQ?:</label>
+                                <input type="checkbox" id="pertenece_uteq" name="pertenece_uteq" style="transform: scale(1); margin-left: 10px;">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="cedula_aportador">Cédula del Aportador:</label>
+                                <input maxlength="10" class="form-control" type="text" id="cedula_aportador"
+                                    name="cedula_aportador" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="valor1">Valor de Aportación:</label>
+                                <input class="form-control" type="number" step="any" id="valor1" name="valor1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="fecha">Fecha de Aportación:</label>
+                                <input class="form-control" type="date" id="fecha" name="fecha" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="guardarAportacionn" type="button" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
 
-$(document).ready(function() {
-    $("#buscador_input").on("input", function() {
-        var query = $(this).val();
-        var criterio = document.getElementById('criterio').value;
-        console.log(criterio);
-        console.log(query);
-        $.ajax({
-            url: '{% url "buscar_detalle" %}',
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                query: query,
-                criterio: criterio
-            },
-            success: function(data) {
-                $("#socios-body").html(data.rendered_table);
-            }
-        });
-    });
-    
-    $("#criterio").on("change", function() {
-        var criterio = $(this).val();
+        $(document).ready(function () {
+            $("#buscador_input").on("input", function () {
+                var query = $(this).val();
+                var criterio = document.getElementById('criterio').value;
+                var detalle_id = '{{detalle_id}}';
+                console.log(criterio);
+                console.log(query);
+                $.ajax({
+                    url: '/buscar_detalle/' + detalle_id,
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        query: query,
+                        criterio: criterio
+                    },
+                    success: function (data) {
+                        $("#socios-body").html(data.rendered_table);
+                    }
+                });
+            });
 
-        $.ajax({
-            url: '{% url "buscar_detalle" %}',
-            type: "POST",
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                query: "",  // Deja el campo de búsqueda vacío al cambiar el criterio
-                criterio: criterio
-            },
-            success: function(data) {
-                $("#socios-body").html(data.rendered_table);
-            }
+            $("#criterio").on("change", function () {
+                var criterio = $(this).val();
+                var detalle_id = '{{detalle_id}}';
+
+                $.ajax({
+                    url: '/buscar_detalle/' + detalle_id,
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        query: "",  // Deja el campo de búsqueda vacío al cambiar el criterio
+                        criterio: criterio
+                    },
+                    success: function (data) {
+                        $("#socios-body").html(data.rendered_table);
+                    }
+                });
+            });
         });
-    });
-});
 
         $(document).ready(function () {
             $('#filtro-nombre-socio').on('keyup', function () {
@@ -219,52 +315,88 @@ $(document).ready(function() {
             });
         });
     </script>
+    <script>
 
-        <script>
+        $(document).ready(function () {
+            $('.edit-btn').click(function () {
+                confirmarregistro(this); // Llama a la función confirmarregistro pasando el botón como argumento
+            });
+        });
 
-            function confirmarregistro(detalle_id, socioNombre, cancelado) {
-                var valor;
+        function confirmarregistro(button) {
+            var detalle_id = $(button).data('detalle-id');
+            var socioNombre = $(button).data('socio-nombre');
+            var cancelado = $(button).data('cancelado');
 
-                if (cancelado == 'False') {
-                    valor = 0;
-                    $.ajax({
-                        type: "GET",
-                        url: "/verificar_socio/" + detalle_id + "/",
-                        success: function(response) {
-                            if (response.socio_id_null) {
-                                mostrarModal(detalle_id);
-                            } else {
+            // Abre el modal
+            $('#exampleModal').modal('show');
+
+            $('#guardarAportacion').click(function (e) {
+                e.preventDefault(); // Evita que el formulario se envíe y el modal se cierre automáticamente
+
+                var valor = $('#valor').val();
+
+                Swal.fire({
+                    title: '¿Deseas guardar la aportación?',
+                    text: 'Estás a punto de registrar este aporte a la ayuda del soci@ ' + socioNombre,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Guardar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Realiza la llamada AJAX para guardar la aportación
+                        $.ajax({
+                            type: 'POST',
+                            url: '/guardar_aportacion/' + detalle_id + '/',
+                            data: {
+                                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                                valor: valor
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    // Cierra el modal después de guardar la aportación
+                                    Swal.fire({
+                                        title: 'Exitó',
+                                        text: 'Aportación realizada con exito',
+                                        icon: 'success'
+                                    });
+                                    $('#exampleModal').modal('hide');
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: 'Ups, ocurrió un error en la transacción',
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function () {
                                 Swal.fire({
-                                    title: '¿Estás seguro?',
-                                    text: 'Registrar el pago de este prestamo al soci@ ' + socioNombre,
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonText: 'Sí',
-                                    cancelButtonText: 'Cancelar',
-                                    dangerMode: true,
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // El usuario ha confirmado la edición, redirigir a la página de edición
-                                        window.location.href = '/registrarayuda/' + detalle_id + '/' + valor + '/';
-                                        print(valor)
-                                    }
+                                    title: 'Error',
+                                    text: 'Ups, ocurrió un error en la transacción',
+                                    icon: 'error'
                                 });
                             }
-                        }
-                    });
-                }
-            }
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+    <script>
+        document.getElementById('abrirModal').addEventListener('click', function () {
+            $('#exampleModalexternal').modal('show');
+        });
+    </script>
+    <script>
+        document.getElementById('guardarAportacionn').addEventListener('click', function () {
+        var nombre = $('#nombre_aportador').val();
+        var cedula = $('#cedula_aportador').val();
+        var valor1 = $('#valor1').val();
+        var fecha = $('#fecha').val();
+        var detalle_id = $('#detalle_id').val();
+        var pertenece_uteq = $('#pertenece_uteq').prop('checked');
 
-
-            
-
-
-function mostrarModal(detalle_id) {
-    $('#exampleModal').modal('show');
-    
-    $('#guardarAportacion').click(function() {
-        var valor = $('#valor').val();
-        
         Swal.fire({
             title: 'Confirmación',
             text: '¿Estás seguro de que deseas guardar la aportación?',
@@ -274,17 +406,29 @@ function mostrarModal(detalle_id) {
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
+                console.log(pertenece_uteq)
                 $.ajax({
                     type: 'POST',
-                    url: '/guardar_aportacion/' + detalle_id + '/',
+                    url: '/registrar_aportacion_externa/' + detalle_id + '/',
                     data: {
                         csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-                        valor: valor
+                        nombre_aportador: nombre,
+                        cedula_aportador: cedula,
+                        valor1: valor1,
+                        fecha: fecha,
+                        detalle_id: detalle_id,
+                        pertenece_uteq: pertenece_uteq
                     },
-                    success: function(data) {
-                        if (data.success) {
-                            $('#exampleModal').modal('hide');
-                            location.reload();
+                    success: function (data) {
+                        if (data.message) {
+                            Swal.fire({
+                                title: 'Éxito',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                $('#exampleModalexternal').modal('hide');
+                                location.reload();
+                            });
                         } else {
                             Swal.fire({
                                 title: 'Error',
@@ -293,7 +437,7 @@ function mostrarModal(detalle_id) {
                             });
                         }
                     },
-                    error: function() {
+                    error: function () {
                         Swal.fire({
                             title: 'Error',
                             text: 'Ups, ocurrió un error en la transacción',
@@ -304,8 +448,7 @@ function mostrarModal(detalle_id) {
             }
         });
     });
-}
-        </script>
+    </script>
 
-        {% endblock %}
+    {% endblock %}
 </body>

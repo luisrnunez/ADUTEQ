@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Aquí va el contenido de la página -->
+    <div class="content-menu" style="padding-top: 0%;">
+
+        <div class="header">
+            <h1>Agregar Evidencia</h1>
+        </div>
+        <div class="content">
+            <div class="form-container">
+                <form action="{% url 'agregar_pdf2' detalle_cuotas.id %}" method="post" enctype="multipart/form-data"> 
+                    {% csrf_token %}
+     
+                    <label for="evidencia">Evidencia:</label>
+                    <input type="file" id="evidencia" name="evidencia" value="{{ detalle_cuota.evidencia }}" required>
+                  
+                    <input type="submit" value="Guardar">
+
+                    <a href="/lista_pagos_cuotas_pendientes"> <input type="button" value="Cancelar"
+                        style="background-color: red;"></a>
+                  </form>                     
+                </form>
+            </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from . import views
+from . import views 
 
 urlpatterns = [
     path('proveedores/', views.proveedor),
@@ -13,7 +13,7 @@ urlpatterns = [
     path('verificarexiste/', views.verificarexi),
     #barra de busqueda
     path('busqueda/', views.busqueda, name='search'),
-    path('busquedadetallescupos/', views.busqueda_detalles_cupos, name='searchcupo'),
+    path('busquedadetallescupos/<int:proveedor_id>', views.busqueda_detalles_cupos, name='searchcupo'),
 
     path('prueba/', views.prueba),
     #------------------------------------------------------------

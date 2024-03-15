@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
 <body>
     <style>
         .pagination-container {
@@ -9,189 +11,278 @@
             justify-content: center;
             margin-top: 20px;
         }
-        </style>
 
-    <div class="content-menu" style="padding-top: 0%;">
+        .botones_arriba {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-right: 10px;
+            flex-flow: row wrap;
+            border: 1px solid rgb(187, 189, 186);
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0px 4px 8px rgb(134, 134, 134);
+            margin: 5px;
+            border-radius: 1%;
+            background-color: #34b234;
+        }
 
-        <div class="header">
-            <h1>PRESTAMOS</h1>
-        </div>
-        <div class="socios-content ">
+        .image-header {
+            margin-bottom: 20px;
+            background-color: #34b234;
+            width: 100%;
+            margin: auto;
+            text-align: center;
+            margin-bottom: 5px;
+            /* border-color: #0c0b0b;
+      border-radius: 2%;
+      box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+        }
+
+        h3 {
+            font-weight: bold;
+            color: white;
+        }
+
+        table {
+            margin-top: 20px;
+        }
+    </style>
+
+    <div class="content-menu">
+        <div class="socios-content">
             <div class="botones-sup">
-                <a href="/prestamo/guardar/"> <button class="add-socio-btn"> Agregar Prestamo</button></a>
-                <div style="display: flex; justify-content: center; width: min-content;">
-                    <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>  
-                    <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;" class="form-control mb-2" name="anio" id="select-anio"
-                        aria-placeholder="Asño" required>
-                        {% for anio in anos %}
-                        <option value="{{ anio }}">{{ anio }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="botones_arriba">
+                    <div class="header">
+                        <h3>PRESTAMOS</h3>
+                    </div>
+                    <a href="/prestamo/guardar/"> <button class="add-socio-btn"> Agregar Prestamo</button></a>
+                    <div style="display: flex; justify-content: center; width: min-content;">
+                        <label class="fw-bold" style="font-size: 16px; margin-top: 8px;">Periodo:</label>
+                        <select style="margin-left: 10px; width: min-content; height: min-content; font-size: 14px;"
+                            class="form-control mb-2" name="anio" id="select-anio" aria-placeholder="Asño" required hidden>
+                            {% for anio in anos %}
+                            <option value="{{ anio }}">{{ anio }}</option>
+                            {% endfor %}
+                        </select>
 
-                    <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;" class="form-control mb-2" name="periodo" id="select-periodo"
-                        aria-placeholder="Periodo" required>
-                        {% for periodo in periodos %}
-                        {% if periodo.anio == anos.0 %}
-                        <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
-                            {{ periodo.nombre }}
-                        </option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
+                        <select style="margin-left: 10px; width: min-content;  height: min-content; font-size: 14px;"
+                            class="form-control mb-2" name="periodo" id="select-periodo" aria-placeholder="Periodo"
+                            required>
+                            {% for periodo in periodos %}
+                            
+                            <option value="{{ periodo.id }}" {% if periodo.activo %}selected{% endif %}>
+                                {{ periodo.nombre }}
+                            </option>
+                            
+                            {% endfor %}
+                        </select>
+                        <a style="margin-left: 20px;" href="/actividades/"> <button class="add-socio-btn"> Atrás</button></a>
+                    </div>
+
+                    <div style="width: 100%;" id="lista-pagos">
+                        <table class="socios-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Tipo</th>
+                                    <th scope="col">Socio</th>
+                                    <th scope="col">Monto</th>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Plazo</th>
+                                    <th scope="col">Tasa</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Fecha ultimo pago</th>
+                                    <th scope="col">Estado</th>
+                                    <th scope="col">Evidencia</th>
+                                    <!-- <th scope="col">Accion</th> -->
+                                    <th scope="col">Detalles</th>
+                                    <th scope="col">Eliminar</th>
+                                    <th scope="col">Evidencia</th>
+                                    <!-- <th scope="col">Eliminar</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prestamo in prestamos %}
+                                <tr>
+                                    <td>
+                                        {% if prestamo.tipo %}
+                                        <strong>EMERGENTE</strong>
+                                        {% else %}
+                                        <strong>NORMAL</strong>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prestamo.socio.user.first_name }} {{ prestamo.socio.user.last_name }}</td>
+                                    <td>{{ prestamo.monto }}$</td>
+                                    <td>{{ prestamo.fecha_prestamo }}</td>
+                                    <td>{{ prestamo.plazo_meses }} meses</td>
+                                    <td>
+                                        {% if prestamo.tasa_interes %}
+                                        {{ prestamo.tasa_interes|floatformat:0 }}%
+                                        {% else %}
+                                        0%
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prestamo.total }}$</td>
+                                    <td>{{ prestamo.fecha_pago|date:"j - n - Y" }}</td>
+                                    <td>
+                                        {% if prestamo.cancelado %}
+                                        <button class="green-button">
+                                            Cancelado
+                                        </button>
+                                        {% else %}
+                                        <button class="red-button">
+                                            Pendiente
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+        
+                                        {% if prestamo.evidencia %}
+                                        <a href="{{ prestamo.evidencia.url }}" target="_blank">
+                                            <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                                        </a>
+                                        {% else %}
+                                        Sin evidencia
+                                        {% endif %}
+                
+                                    </td>
+                                    <!-- <td>
+                                        <button class="edit-btn"
+                                            onclick="confirmarPago('{{ prestamo.id }}','{{ prestamo.socio.user.first_name }}','{{ prestamo.cancelado }}')">
+                                            Registrar pago
+                                        </button>
+                                    </td> -->
+                                    <!-- <td>
+                                        <form action="{% url 'editar_prestamo' prestamo.id %}">
+                                            <button class="edit-btn">Editar</button>
+                                        </form>
+                                    </td> -->
+            
+                                    <td>
+                                        <form action="{% url 'mostrar_detalles_pago' prestamo.socio.id prestamo.id %}">
+                                            <button class="edit-btn">Detalles Pago</button>
+                                        </form>
+                                    </td>
+            
+                                    <td>
+                                        <button class="edit-btn" onclick="confirmarEliminacion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Eliminar</button>
+                                    </td>
+        
+                                    <td>
+                                        <button class="edit-btn" onclick="confirmarEdicion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Evidencia</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+            
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
-            <div  id="lista-pagos">
-                <table class="socios-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Socio</th>
-                            <th scope="col">Monto</th>
-                            <th scope="col">Fecha</th>
-                            <th scope="col">Plazo</th>
-                            <th scope="col">Tasa</th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Fecha ultimo pago</th>
-                            <th scope="col">Estado</th>
-                            <!-- <th scope="col">Accion</th> -->
-                            <th scope="col">Editar</th>
-                            <th scope="col">Detalles</th>
-                            <!-- <th scope="col">Eliminar</th> -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for prestamo in prestamos %}
-                        <tr>
-                            <td>{{ prestamo.socio.user.first_name }} {{ prestamo.socio.user.last_name }}</td>
-                            <td>{{ prestamo.monto }}$</td>
-                            <td>{{ prestamo.fecha_prestamo|date:"j - n - Y" }}</td>
-                            <td>{{ prestamo.plazo_meses }} meses</td>
-                            <td>{{ prestamo.tasa_interes|floatformat:0 }}%</td>
-                            <td>{{ prestamo.total }}$</td>
-                            <td>{{ prestamo.fecha_pago|date:"j - n - Y" }}</td>
-                            <td>
-                                {% if prestamo.cancelado %}
-                                <button class="green-button">
-                                    Cancelado
-                                </button>
-                                {% else %}
-                                <button class="red-button">
-                                    Pendiente
-                                </button>
-                                {% endif %}
-                            </td>
-                            <!-- <td>
-                                <button class="edit-btn"
-                                    onclick="confirmarPago('{{ prestamo.id }}','{{ prestamo.socio.user.first_name }}','{{ prestamo.cancelado }}')">
-                                    Registrar pago
-                                </button>
-                            </td> -->
-                            <!-- <td>
-                                <form action="{% url 'editar_prestamo' prestamo.id %}">
-                                    <button class="edit-btn">Editar</button>
-                                </form>
-                            </td> -->
-    
-                            <td>
-                                <form action="{% url 'mostrar_detalles_pago' prestamo.socio.id prestamo.id %}">
-                                    <button class="edit-btn">Detalles Pago</button>
-                                </form>
-                            </td>
-    
-                            <td>
-                                <button class="edit-btn" onclick="confirmarEliminacion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Eliminar</button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-    
-                    </tbody>
-                </table>
-            </div>
-         
 
             <div class="pagination-container">
                 <nav aria-label="...">
                     <ul class="pagination">
                         {% if prestamos.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ prestamos.previous_page_number }}">anterior</a>
-                            </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ prestamos.previous_page_number }}">anterior</a>
+                        </li>
                         {% endif %}
                         <li class="pagination-item active">
                             <span style="border-radius: 5px;" class="page-link">{{ prestamos.number }}</span>
                         </li>
                         {% if prestamos.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ prestamos.next_page_number }}">siguiente</a>
-                            </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ prestamos.next_page_number }}">siguiente</a>
+                        </li>
                         {% endif %}
                     </ul>
                 </nav>
             </div>
-
         </div>
-        <script>
-            $(document).ready(function () {
-                $("#select-periodo").on("click", function () {
-                    console.log('ENTRAR AL SELECT')
-                    var periodoid = $(this).val();
-                    $.ajax({
-                        url: '{% url "mostrar_prestamo" %}',
-                        type: "POST",
-                        data: {
-                            csrfmiddlewaretoken: '{{ csrf_token }}',
-                            periodoid: periodoid
-                        },
-                        success: function (data) {
-                            $("#lista-pagos").html(data.rendered_table);
-                        }
-                    });
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("#select-periodo").on("click", function () {
+                console.log('ENTRAR AL SELECT')
+                var periodoid = $(this).val();
+                $.ajax({
+                    url: '{% url "mostrar_prestamo" %}',
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        periodoid: periodoid
+                    },
+                    success: function (data) {
+                        $("#lista-pagos").html(data.rendered_table);
+                    }
                 });
             });
-        </script>
-        <script>
+        });
+    </script>
+    <script>
 
-            function confirmarPago(socioId, socioNombre, cancelado) {
-                var valor;
-    
-                if (cancelado == 'False') {
-                    valor = 0;
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: 'Registrar el pago de este prestamo al soci@ ' + socioNombre,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí',
-                        cancelButtonText: 'Cancelar',
-                        dangerMode: true,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // El usuario ha confirmado la edición, redirigir a la página de edición
-                            window.location.href = '/prestamo/aplicar_pago/' + socioId + '/' + valor + '/';
-                            print(valor)
-                        }
-                    });
-    
-                }
-            }
+        function confirmarPago(socioId, socioNombre, cancelado) {
+            var valor;
 
-            function confirmarEliminacion(prestamo_id, socioNombre) {
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: 'Deseas eliminar el prestamo del soci@ ' + socioNombre,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí',
-                        cancelButtonText: 'Cancelar',
-                        dangerMode: true,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // El usuario ha confirmado la edición, redirigir a la página de edición
-                            window.location.href = '/prestamo_eliminar/' + prestamo_id;
-                            print(valor)
-                        }
-                    });
+            if (cancelado == 'False') {
+                valor = 0;
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Registrar el pago de este prestamo al soci@ ' + socioNombre,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    cancelButtonText: 'Cancelar',
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // El usuario ha confirmado la edición, redirigir a la página de edición
+                        window.location.href = '/prestamo/aplicar_pago/' + socioId + '/' + valor + '/';
+                        print(valor)
+                    }
+                });
+
             }
-    
-        </script>
-    
-        {% endblock %}
+        }
+
+        function confirmarEliminacion(prestamo_id, socioNombre) {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Deseas eliminar el prestamo del soci@ ' + socioNombre,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    cancelButtonText: 'Cancelar',
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // El usuario ha confirmado la edición, redirigir a la página de edición
+                        window.location.href = '/prestamo_eliminar/' + prestamo_id;
+                        print(valor)
+                    }
+                });
+        }
+
+        function confirmarEdicion(prestamo_id, socioNombre) {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: 'Deseas editar evidencia del prestamo del soci@ ' + socioNombre,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí',
+                    cancelButtonText: 'Cancelar',
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // El usuario ha confirmado la edición, redirigir a la página de edición
+                        window.location.href = '/prestamo/editar_evidencia/' + prestamo_id;
+                        print(valor)
+                    }
+                });
+        }
+
+    </script>
+
+    {% endblock %}

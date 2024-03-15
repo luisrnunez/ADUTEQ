@@ -56,13 +56,13 @@
                     <textarea class="excluir" id="descripcion" name="descripcion" rows="4">{{ promoción.descripcion }}</textarea>
 
                     <!-- <script src="{% static 'tinymce/js/tinymce/tinymce.min.js' %}"></script> -->
-                    <script src="https://cdn.tiny.cloud/1/xu0fvfj54zsd7w4r0fwe2nipfqh5pj3c3dpvdpakunvhhlsj/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+                    <script src="https://cdn.tiny.cloud/1/jp403vnklcqoa35tqay3el1faog0fs85ff7kqy19ukei7v4c/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
                     <script>
                         tinymce.init({
                           selector: 'textarea#descripcion',
                           height: 300,
                           language: 'es',
-                          plugins: 'tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen advtable advcode powerpaste a11ychecker',
+                          plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
                           toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
                           autocompleter_data: {
                                 source: '/proveedores-autocomplete/',

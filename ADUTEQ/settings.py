@@ -27,13 +27,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dy*&if3fs0zfdk7qi#12z$xxs$@dfphf&u3%5v#pdjqhfc##(='
+SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['233a-190-15-134-2.ngrok-free.app','127.0.0.1']
+ALLOWED_HOSTS = []
+# RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+# if RENDER_EXTERNAL_HOSTNAME:
+#     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
+import dj_database_url
 
 # Application definition
 
@@ -67,7 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 ROOT_URLCONF = 'ADUTEQ.urls'
 
@@ -98,11 +102,19 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "dbaduteq",
         "USER": "postgres",
-        "PASSWORD": "123",
+        "PASSWORD": "root",
         "HOST": "127.0.0.1",
         "PORT":"5432",
     }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         # Feel free to alter this value to suit your needs.
+#         default='postgresql://postgres:root@localhost:5432/dbaduteq',
+#         conn_max_age=600
+#     )
+# }
  
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -131,29 +143,31 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'es-es'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'es-EC'
+TIME_ZONE = 'America/Guayaquil'
 USE_I18N = True
-
 USE_TZ = True
+# USE_L10N = True
+# USE_THOUSAND_SEPARATOR = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+if not DEBUG:
+    # Tell Django to copy statics to the `staticfiles` directory
+    # in your application directory on Render.
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Turn on WhiteNoise storage backend that takes care of compressing static files
+    # and creating unique names for each version so they can safely be cached forever.
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+    
 TINYMCE_JS_URL = os.path.join(STATIC_URL, "path/to/tiny_mce/tiny_mce.js")
 
-# Agregar estas líneas
-SELECT2_PATH = 'select2/'
-STATICFILES_DIRS = [
-    # ... otras rutas ...
-    os.path.join(BASE_DIR, "venv/Lib/site-packages/django_select2/static/django_select2"),
-]
-
-LOGIN_URL = '/login'
+LOGIN_URL = '/login' 
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'ADUTEQ/static')
@@ -168,6 +182,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'ADUTEQ/media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
 
 
 
@@ -186,13 +202,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.googlemail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'prctcorreo@gmail.com'
-EMAIL_HOST_PASSWORD = 'pnrriqutcefjsqnd'
+EMAIL_HOST_USER = 'notificacionesaduteq@gmail.com'
+EMAIL_HOST_PASSWORD = 'NSHV WWZA CDGF XTYI'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
 BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
 
 LOGOUT_REDIRECT_URL = 'login'
-
-

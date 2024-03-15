@@ -10,6 +10,8 @@ class Periodo(models.Model):
 
     def __str__(self):
         return self.nombre
+    class Meta:
+        ordering = ['-anio', '-fecha_inicio']
     
 
 class AjustesSistema(models.Model):
