@@ -1741,6 +1741,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(obtener_consumo_total_todos_func),
         migrations.RunPython(obtener_consumos_proveedores_func),
         migrations.RunPython(obtener_consumos_por_proveedor_detalle_cuotas),
+        migrations.RunPython(obtener_cuota_descuentos_total_func),
         migrations.RunPython(obtener_cuota_descuentos_func),
         migrations.RunPython(obtener_cuota_prestamos_func),
         migrations.RunPython(obtener_suma_ayudas_func),
