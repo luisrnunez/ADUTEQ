@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('proveedores', '0005_cuentabancaria'),
+        
     ]
 
     operations = [

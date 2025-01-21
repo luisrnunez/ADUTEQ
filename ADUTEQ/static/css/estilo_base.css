@@ -5,15 +5,18 @@ body {
     background-color: white;
     font-size: 14px !important;
 }
+
 .disable-underline {
-    text-decoration: none; /* Deshabilita el subrayado */
-    cursor: default; /* Cambia el cursor a un cursor predeterminado */
+    text-decoration: none;
+    /* Deshabilita el subrayado */
+    cursor: default;
+    /* Cambia el cursor a un cursor predeterminado */
     overflow: hidden;
     white-space: nowrap;
     list-style-type: none;
     z-index: 0;
-  }
-  
+}
+
 .header {
     background-color: #34b234;
     color: #fff;
@@ -147,11 +150,24 @@ body {
     margin-bottom: 5px;
 }
 
+.hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    .styled-table th,
+    .styled-table td {
+        padding: 5px;
+        font-size: 12px;
+    }
+}
+
 .upload-preview img {
     max-width: 200px;
     display: block;
     margin-top: 10px;
-    
+
 }
 
 .custom-file {
@@ -187,7 +203,7 @@ body {
 
 }
 
-.custom-file-label:hover{
+.custom-file-label:hover {
     background-color: white;
 }
 
@@ -217,10 +233,14 @@ body {
 }
 
 .rounded-image {
-    border-radius: 50%; /* Esto hará que la imagen sea redondeada */
-    width: 150px; /* Ajusta el tamaño de la imagen según lo necesites */
-    height: 150px; /* Ajusta el tamaño de la imagen según lo necesites */
-    object-fit: cover; /* Esto asegura que la imagen se ajuste dentro del contenedor redondeado */
+    border-radius: 50%;
+    /* Esto hará que la imagen sea redondeada */
+    width: 150px;
+    /* Ajusta el tamaño de la imagen según lo necesites */
+    height: 150px;
+    /* Ajusta el tamaño de la imagen según lo necesites */
+    object-fit: cover;
+    /* Esto asegura que la imagen se ajuste dentro del contenedor redondeado */
 }
 
 .socios-table {
@@ -228,6 +248,7 @@ body {
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
 }
 
 .socios-table th,
@@ -244,6 +265,7 @@ body {
 
 .socios-table tr:hover {
     background-color: #f5f5f5;
+
 }
 
 .socios-table td.actions {
@@ -252,7 +274,8 @@ body {
 }
 
 .socios-table .edit-btn,
-.socios-table .delete-btn, .cancel-btn,
+.socios-table .delete-btn,
+.cancel-btn,
 .add-socio-btn {
     padding: 5px 10px;
     background-color: #ECB932;
@@ -346,20 +369,60 @@ body {
 }
 
 .cancel-btn {
-    width: 100%; background-color: red;
+    width: 100%;
+    background-color: red;
 }
 
 
-.botones-sup{
-    display:flex;
+.botones-sup {
+    display: flex;
     margin-bottom: 10px;
     width: 100%;
-    justify-content: space-between; 
+    justify-content: space-between;
     border-width: 1px;
     border-color: #000000;
 }
+
 .pagination-container {
     display: flex;
     justify-content: center;
+    margin-top: 20px;
+}
+
+.botones_arriba {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 10px;
+    flex-flow: row wrap;
+    border: 1px solid rgb(187, 189, 186);
+    width: 100%;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgb(134, 134, 134);
+    margin: 5px;
+    border-radius: 1%;
+    background-color: #34b234;
+    overflow-x: auto;
+    transform: translate3d(0, 0, 0);
+}
+
+.image-header {
+    margin-bottom: 20px;
+    background-color: #34b234;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+    margin-bottom: 5px;
+    /* border-color: #0c0b0b;
+  border-radius: 2%;
+  box-shadow: 0px 4px 8px rgb(134, 134, 134); */
+}
+
+h3 {
+    font-weight: bold;
+    color: white;
+}
+
+table {
     margin-top: 20px;
 }

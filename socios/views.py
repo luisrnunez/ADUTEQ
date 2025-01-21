@@ -1,5 +1,6 @@
 import datetime
 from gettext import translation
+from ipaddress import summarize_address_range
 import re
 import datetime
 import re
@@ -12,7 +13,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from socios.models import Socios
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
 from django.views import View
 from socios.models import Socios, Aportaciones
 from django.utils import timezone
@@ -85,7 +86,8 @@ def Principal(request):
     except :
         messages.warning(request,'No se encuentra registrado un periodo porfavor vaya ajustes.') 
         periodo={}
-    return render(request, "base.html",{'periodo': periodo})
+    return redirect('/principal/resumen/')
+    # return render(request, "principal.html",{'periodo': periodo})
 
 
 @login_required
@@ -153,7 +155,7 @@ def guardar_socio(request):
                 dedicacion_academica = request.POST.get('dedicacion_academica')
                 titulo = request.POST.get('titulo')
                 aporte = request.POST.get('aporte')
-
+                genero = request.POST.get('genero')
 
                 if 'foto' in request.FILES:
                     foto = request.FILES['foto']
@@ -200,7 +202,7 @@ def guardar_socio(request):
                                     numero_telefonico=numero_telefonico,numero_convencional=numero_convencional, direccion_domiciliaria=direccion_domiciliaria,
                                     categoria=categoria,facultad=facultad,
                                     dedicacion_academica=dedicacion_academica,aporte=aporte,
-                                    titulo=titulo,foto=foto)
+                                    titulo=titulo,foto=foto, genero=genero)
             
             
                 socios.save()
@@ -252,6 +254,7 @@ def editar_socio(request, socio_id):
             socio.dedicacion_academica = request.POST.get(
                 'dedicacion_academica')
             socio.titulo = request.POST.get('titulo')
+            socio.genero = request.POST.get('genero')
             # socio.aporte = request.POST.get('aporte')
 
             # if User.objects.exclude(id=usuario.id).filter(username=usuario.username).exists():
@@ -362,22 +365,25 @@ def buscar_socios(request):
         if criterio:
             # Realiza las consultas según el criterio y el valor ingresados
             if criterio == 'nombres':
-                users = User.objects.filter(first_name__icontains=valor)
+                users = User.objects.filter(first_name__icontains=valor, is_active=True)
                 socios = Socios.objects.filter(user__in=users)
             elif criterio == 'apellidos':
-                users = User.objects.filter(last_name__icontains=valor)
+                users = User.objects.filter(last_name__icontains=valor, is_active=True)
                 socios = Socios.objects.filter(user__in=users)
             elif criterio == 'categoria':
-                socios = Socios.objects.filter(categoria__icontains=valor)
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(categoria__icontains=valor, user__in=users)
             elif criterio == 'facultad':
-                socios = Socios.objects.filter(facultad__icontains=valor)
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(facultad__icontains=valor, user__in=users)
             elif criterio == 'cedula':
-                socios = Socios.objects.filter(cedula__icontains=valor)
+                users = User.objects.filter(is_active=True)
+                socios = Socios.objects.filter(cedula__icontains=valor, user__in=users)
             elif criterio == '1':
                 users = User.objects.filter(is_active=True)
                 socios = Socios.objects.filter(user__in=users)
             elif criterio == '0':
-                users = User.objects.filter(is_active=False)
+                users = User.objects.filter(is_active=False) 
                 socios = Socios.objects.filter(user__in=users)
 
         items_por_pagina = 10  # Cambia esto según tus necesidades
@@ -406,7 +412,7 @@ def ListaSocios(request):
     usuarios_activos_ids = User.objects.filter(is_staff=False,is_active=True).values_list('id', flat=True)
     socios = Socios.objects.filter(user_id__in=usuarios_activos_ids).order_by('id')
     periodo={}
-    items_por_pagina = 10
+    items_por_pagina = 20
     paginator = Paginator(socios, items_por_pagina)
     numero_pagina = request.GET.get('page')
     
@@ -448,7 +454,7 @@ def cargar_categorias():
     }
     return response
 
-@csrf_exempt
+@csrf_exempt 
 def agregar_facultad_socios (request):
     nombre = request.POST.get('nom_facu')
     descripcion = request.POST.get('descripcion')
@@ -571,6 +577,8 @@ def eliminar_titulo (request):
 
 
 #----------------------APORTACIONES-----------------------------------------
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def registrar_aportaciones_mensuales(request):
     socios = Socios.objects.all()
 
@@ -600,6 +608,8 @@ def registrar_aportaciones_mensuales(request):
 
     return redirect('/socios/')
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def veraportaciones(request):
      aportaciones=Aportaciones.objects.all()
      items_por_pagina = 8
@@ -611,6 +621,8 @@ def veraportaciones(request):
           aport_paginadas=paginator.get_page(1)
      return render (request, "aportaciones.html" ,{'aportaciones': aport_paginadas})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def veraportacionesocio(request, socio_id):
     socio=Socios.objects.get(id=socio_id)
     aportaciones=Aportaciones.objects.filter(socio=socio)

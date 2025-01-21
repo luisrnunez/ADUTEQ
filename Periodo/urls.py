@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import mostrar_ajustes,agregar_periodo,cerrar_periodo,guardar_cierre_automatico
 
-urlpatterns = [
+urlpatterns = [ 
+  
     path('ajustes/', mostrar_ajustes, name='mostrar_ajustes'),
     path('guardar/periodo/', agregar_periodo, name='agregar_periodo'),
     path('cerrar/periodo/', cerrar_periodo, name='cerrar_periodo'),

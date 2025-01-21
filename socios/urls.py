@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 
 urlpatterns = [ 
 
-    path('', views.login_),
+    path('', views.login_), 
     path('principal/',user_passes_test(views.is_superuser_or_staff,login_url='/sin-acceso/')(views.Principal),name='principal'),
     path('sin-acceso/',SinAccesoView.as_view(), name='sin_acceso'),
     path('login/', views.Autenticacion_usuarios),

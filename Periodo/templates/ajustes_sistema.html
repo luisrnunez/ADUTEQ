@@ -72,7 +72,7 @@
                             <h3>Periodo Actual: {{periodo.nombre}}</h3>
                             <p>Fecha de Inicio: {{periodo.fecha_inicio|date:"d F Y"}} </p>
                             <p>Fecha de Fin: {{periodo.fecha_fin|date:"d F Y"}}</p>
-                            {% if periodo.activo == True %}
+                            {% if periodo.activo %}
                             <p style="color: green;">Período Activo</p>
                             {% else %}
                             <p style="color: red;">No Existe Período Actualmente</p>
@@ -106,7 +106,7 @@
                         <br>
                         <br>
                             <div style="display: inline-flex; ; width: 80%;">
-                                <h3 style="width: 44%">Dia de cierre:</h3> <br> <br>
+                                <h3 style="width: 44%; color: black;">Dia de cierre:</h3> <br> <br>
                                 <input type="text" id="numero_mes" name="numero_mes" 
                                 {% if ajustes.periodoAutomatico %}    
                                 value="{{ ajustes.dia_cierre }}" 
@@ -123,7 +123,7 @@
                             </script>
 
                             <div style="display: inline-flex; justify-content: space-between; width: 80%;">
-                                <h3 style="width: 80%;">Cierre Automático:</h3>
+                                <h3 style="width: 80%; color: black;">Cierre Automático:</h3>
                                 <select style="border-color: red;" name="cierre_automatico" id="cierre_automatico">
                                     <option value="no" {% if not ajustes.periodoAutomatico %}selected{% endif %}>No
                                     </option>
@@ -142,7 +142,7 @@
                                     title="Ingrese un año válido" required>
 
                                 <label for="Nombre">Nombre del periodo (mes):</label>
-                                <input type="text" id="Nombre" name="Nombre" disabled required>
+                                <input type="text" id="Nombre" name="Nombre" required>
 
                                 <label for="fecha-inicio">Fecha de Inicio:</label>
                                 <input type="date" id="fecha-inicio" name="fecha-inicio" required>
@@ -352,10 +352,10 @@
 
                 //poner el nombre al periodo
                 const opcionesNombre = { month: 'long' };
-                const nombreFin = fechaFin.toLocaleDateString('es-ES', opcionesNombre).toUpperCase();
+                const nombreFin = fechaInicio.toLocaleDateString('es-ES', opcionesNombre).toUpperCase();
 
 
-                document.getElementById('Nombre').value = `${nombreFin}`;
+                document.getElementById('Nombre').value = `${nombreFin}-${anio}`;
 
             });
             //FUNCION ELIMINADA

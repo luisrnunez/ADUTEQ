@@ -23,9 +23,12 @@ class Socios(models.Model):
     titulo = models.CharField(max_length=100)
     foto = models.ImageField(null=True, blank=True)
     aporte = models.DecimalField(max_digits=8,decimal_places=2)
+    genero = models.CharField(max_length=10)
 
     def __str__(self):
         return self.user.first_name
+    class Meta:
+        ordering = ['user__last_name']
     
 class Aportaciones(models.Model):
     TIPOS_APORTACION = (
@@ -37,6 +40,17 @@ class Aportaciones(models.Model):
     tipo_aportacion = models.CharField(max_length=2, choices=TIPOS_APORTACION)
     monto = models.DecimalField(max_digits=8, decimal_places=2)
     fecha = models.DateField(null=True)
+
+class Total_Ayuda_Permanente(models.Model):
+    tipo_aportacion = models.CharField(max_length=2, primary_key=True)
+    total_actual = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha_transaccion = models.DateField()
+
+class Total_Cuota_Ordinaria(models.Model):
+    tipo_aportacion = models.CharField(max_length=2, primary_key=True)
+    total_actual = models.DecimalField(max_digits=8, decimal_places=2)
+    fecha_transaccion = models.DateField()
+
 
 # @receiver(post_save, sender=Socios)
 # def agregar_aportaciones_nuevo_socio(sender, instance, created, **kwargs):
@@ -54,8 +68,8 @@ def obtener_datos_socioss(socio_id, mes, anio):
     
     if resultados:
         column_names = [
-            'nombre', 'cedula', 'cuota_prestamos', 'aportacion',
-            'descuento_proveedores', 'aportacion_ayudaseco', 'total'
+            'nombre', 'cedula', 'cuota_cuotas',
+            'cuota_prestamo', 'aportacion', 'descuento_proveedores', 'aportacion_ayudaseco', 'total'
         ]
         resultado_dict = dict(zip(column_names, resultados[0]))
         return resultado_dict
@@ -80,3 +94,10 @@ def datos_para_el_pdf(socio_id, mes, anio):
         consumo_total = cursor.fetchall()
 
     return consumos_proveedor, consumos_cuotas, aportaciones_socio, aportaciones_ayuda, consumo_total
+
+def pagos_pendientes(mes, anio, socio_id):
+    with connection.cursor() as cursor:
+        cursor.execute(f"SELECT * FROM total_des_pen({mes}, {anio}, {socio_id});")
+        pagos_pendientes = cursor.fetchall()
+
+    return pagos_pendientes

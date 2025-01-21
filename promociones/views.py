@@ -22,9 +22,11 @@ from email.mime.image import MIMEImage
 import smtplib
 from html import unescape
 from bs4 import BeautifulSoup
+from django.views.decorators.cache import cache_control
 
 # Create your views here.
-@login_required
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def ListaPromociones(request):
     promociones = models.Promocion.objects.all().order_by('estado')
 
@@ -40,7 +42,8 @@ def ListaPromociones(request):
         promociones_pag = paginator.get_page(1)
     return render(request, "promociones.html", {'promociones': promociones_pag})
 
-@login_required
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def habilitar_desabilitar_promocion(request, promo_id, valor):
     promocion = models.Promocion.objects.get(id=promo_id)
 
@@ -71,7 +74,8 @@ def formRegistro(request):
 
     return render(request,'agg_promocion.html', {'proveedores':proveedores})
 
-@login_required
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def aggPromo(request):
     if request.method == 'POST':
         tipo=request.POST.get('selectipo')
@@ -84,7 +88,7 @@ def aggPromo(request):
         if 'fecha_inicio' in request.POST:
             fecha_inicio = request.POST.get('fecha_inicio')
         else:
-            fecha_fin=None
+            fecha_inicio=None
 
         if 'fecha_fin'in request.POST:
             fecha_fin = request.POST.get('fecha_fin')
@@ -142,7 +146,8 @@ def userexist(titulo):
         return False
     
 
-@login_required
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editar_promo(request, promo_id):
     promocion = models.Promocion.objects.get(id=promo_id)
     promocion.descripcion=unescape(promocion.descripcion)
@@ -183,7 +188,9 @@ def editar_promo(request, promo_id):
             return JsonResponse(response)
     else:
         return render(request, 'edit_promocion.html', {'promocion':promocion, 'proveedores':proveedores})
-    
+
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)    
 def eliminarpromo(request, promo_id):
     promocion=models.Promocion.objects.get(id=promo_id)
     if request.method == 'POST':
@@ -258,6 +265,8 @@ def eliminarpromo(request, promo_id):
 
 #     return JsonResponse(respuesta)
 
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def enviar_promocion_a_todos(request, promo_id):
     socios = Socios.objects.filter(user__is_active=True)
     promocion = models.Promocion.objects.get(id=promo_id)
@@ -328,7 +337,8 @@ def enviar_promocion_a_todos(request, promo_id):
 
     return JsonResponse(respuesta)
 
-
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def buscar_promo(request):
     if request.method == "POST":
         criterio = request.POST.get('criterio')
@@ -346,7 +356,8 @@ def buscar_promo(request):
 
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
-
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def obtener_resultados(request):
     seleccion = request.GET.get('seleccion')
     page_number = request.GET.get('page', 1)
@@ -366,6 +377,8 @@ def obtener_resultados(request):
 
     return render(request, 'promociones.html', {'page': page, 'seleccion': seleccion})
 
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def buscar_proveedores(request):
     query = request.GET.get('query', '')  # Obtiene el texto de búsqueda
     proveedores_sugeridos = []
@@ -377,6 +390,8 @@ def buscar_proveedores(request):
     sugerencias = [{'id': proveedor.id, 'nombre': proveedor.nombre} for proveedor in proveedores_sugeridos]
     return JsonResponse({'sugerencias': sugerencias})
 
+# @login_required
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def contiene_tabla(descripcion):
     soup = BeautifulSoup(descripcion, 'html.parser')
     tablas = soup.find_all('table')

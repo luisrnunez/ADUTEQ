@@ -1,0 +1,118 @@
+<table class="socios-table">
+    <thead>
+        <tr>
+            <!-- <th scope="col">ID</th> -->
+            <th scope="col">Socio</th>
+            <!-- <th scope="col">Proveedor</th> -->
+            <th scope="col">Numero Cuotas</th>
+            <!-- <th scope="col">Cuota Actual</th> -->
+            <th scope="col">Consumo Total</th>
+            <!-- <th scope="col">Valor Cuota</th> -->
+            <th scope="col">Fecha Descuento</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Editar Descripción</th>
+            <th scope="col">Detalle</th>
+            {% if periodo_seleccionado.activo %}
+            <th scope="col">Eliminar</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for pago_cuota in pago_cuotas %}
+        <tr>
+            <!-- <td>{{pago_cuota.id}}</td> -->
+            <td>{{pago_cuota.socio.user.last_name }} {{pago_cuota.socio.user.first_name }}</td>
+            <!-- <td>{{pago_cuota.proveedor.nombre}}</td> -->
+            <td>{{pago_cuota.numero_cuotas}}</td>
+            <!-- <td>{{pago_cuota.cuota_actual}}</td> -->
+            <td>{{pago_cuota.consumo_total}}</td>
+            <!-- <td>{{pago_cuota.valor_cuota}}</td> -->
+            <td>{{pago_cuota.fecha_descuento|date:"j - n - Y" }}</td>
+            <td style="text-align: justify;" id="descripcion-cuota-{{ pago_cuota.id }}">{{pago_cuota.descripcion}}</td>
+            <td>
+                {% if pago_cuota.estado %}
+                <button class="green-button">
+                    Cancelado
+                </button>
+                {% else %}
+                <button class="red-button">
+                    Pendiente
+                </button>
+                {% endif %}
+            </td>
+            <td>
+                <button class="edit-btn btn-des" data-id="{{ pago_cuota.id }}">Editar</button>
+            </td>
+
+            <td>
+                <form action="{% url 'detalles_cuota_pendiente' pago_cuota.id %}">
+                    <button class="edit-btn">Detalle</button>
+                </form>
+            </td>
+            <!-- <td>
+                    <form action="{% url 'eliminar_pago_cuota' pago_cuota.id %}"> 
+                        <button class="edit-btn">Eliminar</button>
+                    </form>
+                </td> -->
+            {% if periodo_seleccionado.activo %}
+            <td>
+                <button class="edit-btn"
+                    onclick="confirmarEliminacion('{{pago_cuota.id}}','{{pago_cuota.socio.user.first_name}}')">Eliminar</button>
+            </td>
+            {% endif %}
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    $(document).ready(function () {
+        // Manejar el clic en el botón de editar
+        $(".btn-des").click(function () {
+            // Obtener el ID del pago por cuotas desde el atributo data
+            var idPagoCu = $(this).data("id");
+
+            // Obtener la descripción actual del pago por cuotas
+            var descripcionActual = $("#descripcion-cuota-" + idPagoCu).text();
+
+            // Asignar la descripción actual al textarea del modal
+            $("#descripcion-cuota").val(descripcionActual);
+
+            // Establecer el ID del pago por cuotas como valor de un atributo data en el botón guardar
+            $("#guardar-descripcion-btn").data("id-pago-cu", idPagoCu);
+
+            // Mostrar el modal de edición de descripción
+            $("#editar-descripcion-modal").modal("show");
+        });
+
+        // Agregar un manejador para el botón de guardar del modal
+        $("#guardar-descripcion-btn").click(function () {
+            // Obtener el ID del pago por cuotas desde el atributo data del botón
+            var idPagoCu = $(this).data("id-pago-cu");
+
+            // Obtener la nueva descripción desde el textarea del modal
+            var nuevaDescripcion = $("#descripcion-cuota").val();
+
+            // Realizar una solicitud AJAX para actualizar la descripción
+            $.ajax({
+                url: '/actualizar_descripcion_pendientes/' + idPagoCu + '/',
+                type: 'POST',
+                data: {
+                    'descripcion': nuevaDescripcion,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    // Si la actualización es exitosa, cerrar el modal
+                    $("#editar-descripcion-modal").modal("hide");
+                    // Puedes agregar aquí cualquier otra acción después de actualizar la descripción
+                    $("#descripcion-cuota-" + idPagoCu).text(nuevaDescripcion);
+                },
+                error: function (xhr, errmsg, err) {
+                    // Manejar errores si la actualización falla
+                    console.log(errmsg);
+                }
+            });
+        });
+    });
+</script>

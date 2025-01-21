@@ -1,6 +1,7 @@
 <table class="socios-table">
     <thead>
         <tr>
+            <th scope="col">Tipo</th>
             <th scope="col">Socio</th>
             <th scope="col">Monto</th>
             <th scope="col">Fecha</th>
@@ -9,12 +10,14 @@
             <th scope="col">Total</th>
             <th scope="col">Fecha ultimo pago</th>
             <th scope="col">Estado</th>
+            <th scope="col">Evidencia</th>
             <!-- <th scope="col">Accion</th> -->
             {% if periodo_seleccionado.activo == True %}
-            <th scope="col">Editar</th>
             <th scope="col">Detalles</th>
+            <th scope="col">Eliminar</th>
+            <th scope="col">Evidencia</th>
             {% else %}
-            <th scope="col">Detalles</th>
+            <th scope="col">Evidencia</th>
             {% endif %}
             <!-- <th scope="col">Eliminar</th> -->
         </tr>
@@ -22,6 +25,13 @@
     <tbody>
         {% for prestamo in prestamos %}
         <tr>
+            <td>
+                {% if prestamo.tipo %}
+                <strong>EMERGENTE</strong>
+                {% else %}
+                <strong>NORMAL</strong>
+                {% endif %}
+            </td>
             <td>{{ prestamo.socio.user.first_name }} {{ prestamo.socio.user.last_name }}</td>
             <td>{{ prestamo.monto }}$</td>
             <td>{{ prestamo.fecha_prestamo|date:"j - n - Y" }}</td>
@@ -39,6 +49,17 @@
                     Pendiente
                 </button>
                 {% endif %}
+            </td>
+            <td>
+
+                {% if prestamo.evidencia %}
+                <a href="{{ prestamo.evidencia.url }}" target="_blank">
+                    <i style="font-size: xx-large;" class="far fa-file-pdf"></i>
+                </a>
+                {% else %}
+                Sin evidencia
+                {% endif %}
+
             </td>
             <!-- <td>
                 <button class="edit-btn"
@@ -60,6 +81,9 @@
 
             <td>
                 <button class="edit-btn" onclick="confirmarEliminacion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Eliminar</button>
+            </td>
+            <td>
+                <button class="edit-btn" onclick="confirmarEdicion('{{prestamo.id}}','{{prestamo.socio.user.first_name}}')">Evidencia</button>
             </td>
             {% else %}
                 {% if prestamo.cancelado == False %}

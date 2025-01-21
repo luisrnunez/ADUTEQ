@@ -12,12 +12,22 @@ class Proveedor(models.Model):
     ruc=models.CharField(unique=True,max_length=13)
     direccion=models.CharField(max_length=500)
     comision=models.IntegerField()
-    cupo=models.DecimalField(max_digits = 8, decimal_places = 2)
+    cupo=models.DecimalField(max_digits = 8, decimal_places = 2) 
     estado=models.BooleanField(default=False)
-
+    def cambiar_comision(self, nueva_comision):
+        ComisionHistorica.objects.create(proveedor=self, comision_anterior=self.comision)
+        self.comision = nueva_comision
+        self.save()
 
     def __str__(self):
         return self.nombre
+    class Meta:
+        ordering = ['nombre']
+
+class ComisionHistorica(models.Model): 
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    comision_anterior = models.IntegerField()
+    fecha_registro = models.DateTimeField(auto_now_add=True) 
 
 class detallesCupos(models.Model):
     socio=models.ForeignKey(Socios, on_delete=models.CASCADE)
@@ -25,6 +35,8 @@ class detallesCupos(models.Model):
     cupo=models.DecimalField(max_digits = 8, decimal_places = 2)
     permanente=models.BooleanField(default=True)
     fechaccupo=models.DateField(null=True)
+    class Meta:
+        ordering = ['socio__user__last_name']
 
 #SE ACTIVA AL CREAR UN PROVEEDOR CON EL FIN DE ASIGNAR EL CUPO A CADA SOCIO YA EXISTENTE
 # @receiver(post_save, sender=Proveedor)

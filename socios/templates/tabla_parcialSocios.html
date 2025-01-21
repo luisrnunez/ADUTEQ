@@ -17,16 +17,17 @@
     <td>
         {% if socio.user.is_active %}
         <button class="green-button"
-            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
             <span class="visto-icon"></span>
             Activo
         </button>
         {% else %}
         <button class="red-button"
-            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}')">
+            onclick="confirmarEliminacion('{{ socio.id }}','{{ socio.user.first_name }}','{{ socio.user.last_name }}','{{ socio.user.is_active }}')">
             <span class="no-visto-icon"></span> Inactivo
         </button>
         {% endif %}
+
     </td>
     <td>
         <button class="edit-btn"
@@ -50,3 +51,4 @@
     <td colspan="9">No se encontraron resultados.</td>
 </tr>
 {% endfor %}
+

@@ -10,8 +10,11 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string
+from django.views.decorators.cache import cache_control
 # Create your views here.
 #metodo para mostrar todos los proveedores
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def proveedor(request):
     proveedores=Proveedor.objects.filter(estado=True).order_by('nombre')
     items_por_pagina = 10
@@ -31,6 +34,7 @@ def formRegistro(request):
 
 #metodo para agregar nuevos proveedores
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def aggProveedor(request):
     '''nombrep=request.POST.get['nombre']
     telefonop=request.POST.get['telefono']
@@ -108,12 +112,16 @@ def userexistl(telefono):
         return False  
 
 #metodos editar proveedores
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editProveedor(request, codigo):
     proveedor=Proveedor.objects.get(id=codigo)
     return render(request,'editProveedor.html',{
         'proveedor': proveedor
     })
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editarPro(request):
     nombrep=request.POST.get('nombre')
     telefonop=request.POST.get('telefono')
@@ -150,7 +158,7 @@ def editarPro(request):
         proveedor.telefono=telefonop
         proveedor.ruc=RUCp
         proveedor.direccion=direccionp
-        proveedor.comision=comisionp
+        proveedor.cambiar_comision(comisionp)
         proveedor.cupo=cupop
         proveedor.estado=estadop
         proveedor.save()
@@ -161,6 +169,8 @@ def editarPro(request):
     return JsonResponse(response)
 
 #metodo para eliminar a los proveedores
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def deleteProveedor(request, codigo, estado):
     #proveedor=Proveedor.objects.get(id=codigo)
     #proveedor.delete()
@@ -222,16 +232,21 @@ def busqueda(request):
     return JsonResponse({"error": "Método no permitido"}, status=400)
 
 
-def busqueda_detalles_cupos(request):
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def busqueda_detalles_cupos(request, proveedor_id):
     if request.method == "POST":
         criterio = request.POST.get('criterio')
         valor = request.POST.get('query')
         detalles_cupos = []
-
-        if criterio:
+        if criterio: 
             # Filtrar detalles de cupos según el criterio y el valor ingresados
             if criterio == 'nombres':
-                detalles_cupos = detallesCupos.objects.filter(socio__user__first_name__icontains=valor)
+                detalles_cupos = detallesCupos.objects.filter(
+                    socio__user__last_name__icontains=valor,  # Busca por nombre
+                    socio__user__is_active=True,
+                    proveedor_id=proveedor_id)
+                #detalles_cupos = detallesCupos.objects.filter(socio__user__first_name__icontains=valor)
             # elif criterio == 'telefono':
             #     detalles_cupos = detallesCupos.objects.filter(socio__telefono__icontains=valor)
             # elif criterio == 'ruc':
@@ -250,6 +265,8 @@ def prueba(request):
     return render(request,'prueba.html')
 
 #----------------------------------------------------------------------------------
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def presagregar_pdf(request, det_id): 
     registro_pago = detallesCupos.objects.get(id=det_id)
     if request.method == 'GET':
@@ -260,6 +277,8 @@ def presagregar_pdf(request, det_id):
         registro_pago.save()
         return redirect('/detallescupo/' + str(detallesCupos.proveedor.id))
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def verdetallescupos(request, proveedor_id):
     proveedor=Proveedor.objects.get(id=proveedor_id)
     cupos=detallesCupos.objects.filter(proveedor=proveedor)
@@ -272,12 +291,16 @@ def verdetallescupos(request, proveedor_id):
         cupos_paginados = paginator.get_page(1)
     return render(request,'detalles_cupos.html', {'cupos': cupos_paginados, 'proveedor':proveedor})
 
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editCupos(request, codigo):
     cupos=detallesCupos.objects.get(id=codigo)
     return render(request,'editarcupos.html',{
         'cupo': cupos
     })
+
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def editarcupos(request):
     detallecupo=get_object_or_404(detallesCupos, id=request.POST.get('id'))
     nuevocupo=request.POST.get('cupo')
@@ -310,6 +333,7 @@ def editarcupos(request):
     return JsonResponse(response)
 
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def agregarCuenta(request, codigo):
     try:
         proveedor = Proveedor.objects.get(id=codigo)
@@ -325,13 +349,17 @@ def agregarCuenta(request, codigo):
 
     return render(request, 'lista_cuentas_banco.html', context)
 
+
 @login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def agregarnuevacuenta(request,codigo):
 
 
     proveedor = get_object_or_404(Proveedor, id=codigo)
     return render(request, 'agregar_cuenta.html', {'proveedor': proveedor})
 
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def agregarnuevacuentabancaria(request,codigo):
     if request.method == 'POST':
         cuenta = CuentaBancaria(proveedor_id=codigo,banco=request.POST.get('banco')
@@ -355,7 +383,8 @@ def agregarnuevacuentabancaria(request,codigo):
         messages.success(request, 'Se ha agregado una nueva cuenta')
         return render(request, 'lista_cuentas_banco.html', context)
     
-
+@login_required
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def eliminarcuenta(request,codigo,prov):
     print(codigo)
     cuenta= get_object_or_404(CuentaBancaria, id=codigo)
