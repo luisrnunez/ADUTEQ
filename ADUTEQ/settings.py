@@ -16,6 +16,8 @@ from pathlib import Path
 import django
 from django.utils.encoding import smart_str
 django.utils.encoding.smart_text = smart_str
+from dotenv import load_dotenv
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,16 +99,49 @@ WSGI_APPLICATION = 'ADUTEQ.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "dbaduteq",
+#         "USER": "postgres",
+#         "PASSWORD": "root",
+#         "HOST": "127.0.0.1",
+#         "PORT":"5432",
+#     }
+# }
+
+load_dotenv()
+
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+
 DATABASES = {
     'default': {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "dbaduteq",
-        "USER": "postgres",
-        "PASSWORD": "root",
-        "HOST": "127.0.0.1",
-        "PORT":"5432",
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
     }
 }
+
+# from dotenv import load_dotenv
+# from urllib.parse import urlparse
+
+# load_dotenv()
+
+# tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': tmpPostgres.path.replace('/', ''),
+#         'USER': tmpPostgres.username,
+#         'PASSWORD': tmpPostgres.password,
+#         'HOST': tmpPostgres.hostname,
+#         'PORT': 5432,
+#     }
+# }
 
 # DATABASES = {
 #     'default': dj_database_url.config(
@@ -207,6 +242,6 @@ EMAIL_HOST_PASSWORD = 'NSHV WWZA CDGF XTYI'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
-BASE_URL = 'http://127.0.0.1:8000'  # Reemplaza esto con la URL base de tu sitio web
+BASE_URL = 'http://127.0.0.1:8000' 
 
 LOGOUT_REDIRECT_URL = 'login'
