@@ -1,2 +1,11 @@
 venv
+*.pyc
+*~
 __pycache__
+.DS_Store
+.env
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+static/
+*.sqlite3
